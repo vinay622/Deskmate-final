@@ -1,0 +1,43 @@
+---
+import Card from '../ui/Card.astro';
+
+interface Props {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  email: string;
+  phone: string;
+  room: string;
+  hours: string;
+  handles: string[];
+}
+
+const { name, role, department, email, phone, room, hours, handles } = Astro.props;
+---
+
+<Card isUnderline={true}>
+  <div class="p-6 bg-gray rounded-[45px]">
+    <div class="flex items-start justify-between">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs bg-dark text-green px-2 py-0.5 rounded-full">{department}</span>
+        </div>
+        <h3 class="font-medium text-dark text-base">{name}</h3>
+        <p class="text-sm text-[#666]">{role}</p>
+      </div>
+      <button data-action="delete-staff" class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-200 transition-colors shrink-0">Remove</button>
+    </div>
+    <div class="h-[1px] bg-[#ddd] my-3"></div>
+    <div class="flex flex-col gap-1 text-sm text-[#555]">
+      <span>{room} &middot; {hours}</span>
+      <a href={`mailto:${email}`} class="text-dark underline">{email}</a>
+      <span>{phone}</span>
+    </div>
+    <div class="mt-3 flex flex-wrap gap-1">
+      {handles.map((h) => (
+        <span class="text-xs bg-[#e8e8e8] text-[#444] px-2 py-0.5 rounded-full">{h}</span>
+      ))}
+    </div>
+  </div>
+</Card>

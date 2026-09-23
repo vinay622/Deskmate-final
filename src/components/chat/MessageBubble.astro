@@ -1,0 +1,75 @@
+---
+interface StaffContact {
+  name: string;
+  email: string;
+  phone: string;
+  room: string;
+  hours: string;
+}
+
+interface Props {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+  source?: string | null;
+  page?: number | null;
+  category?: string | null;
+  routeTo?: StaffContact | null;
+  confidence?: 'high' | 'low' | 'none';
+}
+
+const { role, content, timestamp, source, page, category, routeTo, confidence } = Astro.props;
+const isUser = role === 'user';
+---
+
+<div class={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 px-4`}>
+  <div class={`max-w-[75%] flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}>
+
+    <!-- Message bubble -->
+    <div class={`px-4 py-3 ${isUser
+      ? 'bg-green text-dark rounded-[20px] rounded-br-[4px]'
+      : 'bg-[#1e1f2e] text-gray border border-[#2d2e3a] rounded-[20px] rounded-bl-[4px]'
+    }`}>
+      <p class="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+    </div>
+
+    <!-- Citation badge (AI only, when source exists) -->
+    {!isUser && source && (
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="inline-flex items-center gap-1.5 bg-[#0f1019] border border-green text-green text-xs px-3 py-1 rounded-full">
+          <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor">
+            <path d="M1 0h8v12H1V0zm2 3h4v1H3V3zm0 2h4v1H3V5zm0 2h3v1H3V7z"/>
+          </svg>
+          {source} &middot; p.{page}
+        </span>
+        {category && (
+          <span class="text-xs text-[#666] px-2 py-0.5 bg-[#1e1f2e] rounded-full border border-[#2d2e3a]">
+            {category}
+          </span>
+        )}
+        {confidence === 'low' && (
+          <span class="text-xs px-2 py-0.5 bg-yellow-900 text-yellow-300 rounded-full">
+            Low confidence
+          </span>
+        )}
+      </div>
+    )}
+
+    <!-- Staff redirect card (AI only, when routeTo exists) -->
+    {!isUser && routeTo && (
+      <div class="bg-[#1e1f2e] border border-[#2d2e3a] rounded-[20px] p-4 w-full mt-1">
+        <p class="text-green text-xs font-medium mb-2 uppercase tracking-wider">Suggested Contact</p>
+        <p class="font-medium text-white">{routeTo.name}</p>
+        <div class="text-sm text-[#aaa] mt-1 flex flex-col gap-0.5">
+          <span>{routeTo.room}</span>
+          <span>{routeTo.hours}</span>
+          <a href={`mailto:${routeTo.email}`} class="text-green underline">{routeTo.email}</a>
+          <span>{routeTo.phone}</span>
+        </div>
+      </div>
+    )}
+
+    <!-- Timestamp -->
+    <span class="text-[10px] text-[#555] px-1">{timestamp}</span>
+  </div>
+</div>

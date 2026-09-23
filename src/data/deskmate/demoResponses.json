@@ -1,0 +1,118 @@
+[
+  {
+    "id": "fee-01",
+    "topic": "fees",
+    "keywords": ["fee", "fees", "tuition", "payment", "pay", "amount", "cost", "semester", "charges"],
+    "question": "What are the semester fees?",
+    "answer": "The semester fee for B.Tech is ₹85,000 per semester for general category students and ₹42,500 for SC/ST category. This includes tuition fee, lab fee, and library charges. It does not include hostel or mess charges. Last date to pay without fine is the 15th of the month following semester start.",
+    "source": "Fee Structure 2024-25.pdf",
+    "page": 3,
+    "category": "Finance",
+    "routeTo": null
+  },
+  {
+    "id": "fee-02",
+    "topic": "fees",
+    "keywords": ["fine", "late", "overdue", "penalty", "deadline"],
+    "question": "What is the late payment fine?",
+    "answer": "A fine of ₹500 per day is charged for fee payment after the due date. Maximum fine is ₹5,000. After 30 days of non-payment, the student's portal access is suspended until the dues are cleared.",
+    "source": "Fee Structure 2024-25.pdf",
+    "page": 4,
+    "category": "Finance",
+    "routeTo": null
+  },
+  {
+    "id": "hostel-01",
+    "topic": "hostel",
+    "keywords": ["hostel", "accommodation", "room", "dormitory", "dorm", "stay", "residence", "hall"],
+    "question": "How do I apply for hostel?",
+    "answer": "Hostel applications open every May via the student portal. You must fill the hostel application form, submit a medical fitness certificate, and pay a refundable deposit of ₹10,000. Allotment is based on merit and distance from hometown. Results are announced in July.",
+    "source": "Hostel Regulations 2024.pdf",
+    "page": 1,
+    "category": "Accommodation",
+    "routeTo": null
+  },
+  {
+    "id": "hostel-02",
+    "topic": "hostel",
+    "keywords": ["mess", "food", "canteen", "meal", "dining", "eat"],
+    "question": "What are the mess charges?",
+    "answer": "Monthly mess charges are ₹3,200 for the standard meal plan (3 meals/day). A vegetarian-only plan is available at ₹2,800/month. Mess charges are paid separately from tuition via the messbill portal. Students can opt out with a 30-day notice.",
+    "source": "Hostel Regulations 2024.pdf",
+    "page": 6,
+    "category": "Accommodation",
+    "routeTo": null
+  },
+  {
+    "id": "exam-01",
+    "topic": "exams",
+    "keywords": ["exam", "examination", "schedule", "timetable", "date", "when", "test"],
+    "question": "When are the semester exams?",
+    "answer": "End semester examinations for Semester 5 and 6 are scheduled from November 18 to December 6, 2024. Practical exams run November 11–15. Hall tickets will be available on the student portal 10 days before the exam. Carry your original ID card to the exam hall.",
+    "source": "Academic Calendar 2024-25.pdf",
+    "page": 8,
+    "category": "Academics",
+    "routeTo": null
+  },
+  {
+    "id": "exam-02",
+    "topic": "exams",
+    "keywords": ["revaluation", "recheck", "marks", "result", "grade", "gpa", "cgpa", "score"],
+    "question": "How do I apply for revaluation?",
+    "answer": "Revaluation applications must be submitted within 15 days of result declaration. The fee is ₹500 per subject. Apply via the student portal under Examinations > Revaluation Request. Results for revaluation are typically announced within 45 days. Revalued marks are final.",
+    "source": "Examination Rules 2024.pdf",
+    "page": 12,
+    "category": "Academics",
+    "routeTo": null
+  },
+  {
+    "id": "leave-01",
+    "topic": "leave",
+    "keywords": ["leave", "absent", "attendance", "absence", "medical", "sick"],
+    "question": "How do I apply for leave?",
+    "answer": "Leave applications must be submitted at least 2 days in advance through the student portal under Applications > Leave Request. For medical leave, attach a doctor's certificate. Maximum 15 days of casual leave per semester is allowed. Leave beyond this requires HoD approval and will affect attendance percentage.",
+    "source": "Student Handbook 2024.pdf",
+    "page": 22,
+    "category": "Academics",
+    "routeTo": null
+  },
+  {
+    "id": "scholarship-01",
+    "topic": "scholarship",
+    "keywords": ["scholarship", "financial", "aid", "stipend", "merit", "concession", "discount", "free"],
+    "question": "What scholarships are available?",
+    "answer": "The college offers: (1) Merit Scholarship — top 5% of each class get 25% fee waiver. (2) State Government SC/ST/BC scholarships — apply via AP/TS Jagruthi portal. (3) National Scholarship Portal (NSP) for central government schemes. Deadline for NSP is typically October 31. Contact the Scholarship Cell, Admin Block Room 105.",
+    "source": "Scholarship Guidelines 2024.pdf",
+    "page": 2,
+    "category": "Finance",
+    "routeTo": null
+  },
+  {
+    "id": "library-01",
+    "topic": "library",
+    "keywords": ["library", "book", "borrow", "issue", "due", "return", "catalog", "journal"],
+    "question": "How many books can I borrow?",
+    "answer": "B.Tech students can borrow up to 3 books at a time for a period of 14 days. M.Tech and PhD students may borrow 5 books for 30 days. A fine of ₹2 per day per book applies after the due date. Books can be renewed online once if not reserved by another student.",
+    "source": "Library Rules 2024.pdf",
+    "page": 1,
+    "category": "Resources",
+    "routeTo": null
+  },
+  {
+    "id": "fallback",
+    "topic": "unknown",
+    "keywords": [],
+    "question": null,
+    "answer": "I couldn't find a direct answer to your question in the official documents. Please contact the relevant department directly. Mention your question, roll number, and preferred contact method.",
+    "source": null,
+    "page": null,
+    "category": null,
+    "routeTo": {
+      "name": "Student Helpdesk",
+      "email": "helpdesk@college.edu.in",
+      "phone": "+91-40-12345678",
+      "room": "Admin Block, Room 102",
+      "hours": "Mon–Fri, 9:00 AM – 5:00 PM"
+    }
+  }
+]

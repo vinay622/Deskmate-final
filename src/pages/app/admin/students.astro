@@ -1,0 +1,623 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+const { request, cookies, locals } = Astro;
+
+if (!locals.user || locals.userRole !== "admin") {
+  return Astro.redirect("/login");
+}
+
+const supabase = createSupabaseServerClient(request, cookies);
+const { data: students } = await supabase
+  .from("profiles")
+  .select("id, full_name, email, college_name, degree_program, department, year, hosteller, approval_status, created_at")
+  .eq("college_name", locals.collegeName)
+  .eq("role", "student")
+  .order("created_at", { ascending: false })
+  .limit(300);
+
+const rows = students ?? [];
+const pending = rows.filter((s) => s.approval_status === "pending");
+const approved = rows.filter((s) => s.approval_status === "approved");
+const rejected = rows.filter((s) => s.approval_status === "rejected");
+
+const fmtDate = (d: string) =>
+  new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+const fmtDateTime = (d: string) =>
+  new Date(d).toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const formatYear = (y: number | null) => {
+  if (!y) return "Not specified";
+  if (y === 1) return "1st Year";
+  if (y === 2) return "2nd Year";
+  if (y === 3) return "3rd Year";
+  return `${y}th Year`;
+};
+
+const formatHostel = (h: boolean | null) => {
+  if (h === true) return "Hostel Resident";
+  if (h === false) return "Day Scholar";
+  return "Not specified";
+};
+---
+
+<AdminLayout
+  title="Students — DeskMate Admin"
+  description="Manage and approve student access requests for your college."
+  active="students"
+  pageTitle="Students"
+  eyebrow="Access Control"
+>
+  <!-- Summary Header Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+    <div class="app-card p-4">
+      <p class="text-xs text-[#9aa0a6] font-medium">Total Registered</p>
+      <p class="text-2xl font-medium text-dark mt-1">{rows.length}</p>
+    </div>
+    <div class="app-card p-4 border-amber-200 bg-amber-50/40">
+      <p class="text-xs text-amber-800 font-medium">Awaiting Approval</p>
+      <p class="text-2xl font-medium text-amber-900 mt-1">{pending.length}</p>
+    </div>
+    <div class="app-card p-4 border-emerald-200 bg-emerald-50/40">
+      <p class="text-xs text-emerald-800 font-medium">Approved Students</p>
+      <p class="text-2xl font-medium text-emerald-900 mt-1">{approved.length}</p>
+    </div>
+    <div class="app-card p-4">
+      <p class="text-xs text-[#9aa0a6] font-medium">Rejected Requests</p>
+      <p class="text-2xl font-medium text-dark mt-1">{rejected.length}</p>
+    </div>
+  </div>
+
+  <!-- ═══ Pending Approvals Section ═══ -->
+  <div class="flex items-center justify-between mb-3.5">
+    <div class="flex items-center gap-2">
+      <h2 class="text-base font-medium text-dark">Pending Access Requests</h2>
+      {pending.length > 0 && (
+        <span class="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full">
+          {pending.length} new
+        </span>
+      )}
+    </div>
+    <span class="text-xs text-[#9aa0a6]">Review student details before approving</span>
+  </div>
+
+  {pending.length > 0 ? (
+    <div class="flex flex-col gap-3 mb-10" id="pending-list">
+      {pending.map((s) => {
+        const studentJson = JSON.stringify({
+          id: s.id,
+          name: s.full_name || "Unnamed Student",
+          email: s.email || "No email recorded",
+          college: s.college_name || locals.collegeName || "Your College",
+          degree: s.degree_program || "Not specified",
+          department: s.department || "Not specified",
+          year: formatYear(s.year),
+          hostel: formatHostel(s.hosteller),
+          rawHostel: s.hosteller,
+          status: s.approval_status,
+          date: fmtDateTime(s.created_at),
+        });
+
+        return (
+          <div
+            class="app-card p-5 border-l-4 border-l-amber-400 hover:shadow-md transition-all duration-200"
+            data-student-id={s.id}
+            data-student-data={studentJson}
+          >
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <!-- Student Primary Info -->
+              <div class="flex items-start gap-3.5 min-w-0">
+                <div class="w-11 h-11 rounded-[14px] bg-dark flex items-center justify-center shrink-0 mt-0.5">
+                  <span class="text-green text-sm font-semibold">
+                    {(s.full_name || "S").charAt(0).toUpperCase()}
+                  </span>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <p class="text-base font-semibold text-dark truncate">
+                      {s.full_name || "Unnamed Student"}
+                    </p>
+                    <span class="px-2 py-0.5 text-[11px] font-medium bg-amber-100 text-amber-800 rounded-md">
+                      Pending Approval
+                    </span>
+                  </div>
+
+                  <!-- Email with icon -->
+                  <div class="flex items-center gap-1.5 text-xs text-[#555] mb-2.5">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#888] shrink-0">
+                      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    <span class="font-medium text-dark">{s.email || "No email recorded"}</span>
+                  </div>
+
+                  <!-- Metadata Chips -->
+                  <div class="flex items-center gap-2 flex-wrap text-xs">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#f3f4f6] text-[#444] rounded-md font-medium">
+                      🎓 {s.degree_program || "Degree"}{s.department ? ` · ${s.department}` : ""}
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#f3f4f6] text-[#444] rounded-md font-medium">
+                      📅 {formatYear(s.year)}
+                    </span>
+                    <span class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium ${
+                      s.hosteller === true ? "bg-emerald-50 text-emerald-800" : "bg-[#f3f4f6] text-[#555]"
+                    }`}>
+                      🏠 {formatHostel(s.hosteller)}
+                    </span>
+                    <span class="text-[11px] text-[#9aa0a6] ml-1">
+                      Signed up {fmtDate(s.created_at)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#f0f1f3]">
+                <button
+                  type="button"
+                  data-action="view-details"
+                  class="px-3.5 py-2 rounded-[12px] bg-white border border-[#d5d7da] text-dark text-xs font-medium hover:bg-[#f9fafb] hover:border-dark transition-all flex items-center gap-1.5 shadow-sm"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  View Details
+                </button>
+
+                <button
+                  type="button"
+                  data-action="approve-student"
+                  class="px-4 py-2 rounded-[12px] bg-dark text-white text-xs font-medium hover:bg-black transition-all flex items-center gap-1.5 shadow-sm"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Approve
+                </button>
+
+                <button
+                  type="button"
+                  data-action="reject-student"
+                  class="px-3.5 py-2 rounded-[12px] bg-white border border-[#e0e0e0] text-[#666] text-xs font-medium hover:border-red-400 hover:text-red-600 transition-all"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  ) : (
+    <div class="app-card px-5 py-10 text-center mb-10 bg-[#fafbfc]">
+      <div class="w-12 h-12 rounded-[16px] bg-[#f0f6ee] flex items-center justify-center mx-auto mb-3">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7cae52" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <p class="text-sm font-semibold text-dark">All pending requests resolved</p>
+      <p class="text-xs text-[#9aa0a6] mt-1 max-w-sm mx-auto">
+        When new students register with your college's official email domain, they will appear here for review.
+      </p>
+    </div>
+  )}
+
+  <!-- ═══ Student Directory Section (All Students) ═══ -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    <div>
+      <h2 class="text-base font-medium text-dark">Student Directory</h2>
+      <p class="text-xs text-[#9aa0a6]">All registered student accounts for {locals.collegeName || "your college"}</p>
+    </div>
+
+    <!-- Search input -->
+    <div class="relative w-full sm:w-72">
+      <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#aaa]">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </span>
+      <input
+        type="text"
+        id="student-search-input"
+        placeholder="Search by name, email, department..."
+        class="w-full pl-9 pr-3.5 py-2 text-xs border border-[#e0e0e0] rounded-[12px] bg-white outline-none focus:border-dark transition-all"
+      />
+    </div>
+  </div>
+
+  {rows.length > 0 ? (
+    <div class="app-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full" id="students-table">
+          <thead>
+            <tr class="text-left border-b border-[#f0f1f3] bg-[#fafbfc]">
+              <th class="px-5 py-3 text-[11px] font-semibold text-[#888] uppercase tracking-wider">Student Name & Email</th>
+              <th class="px-5 py-3 text-[11px] font-semibold text-[#888] uppercase tracking-wider hidden md:table-cell">Program & Dept</th>
+              <th class="px-5 py-3 text-[11px] font-semibold text-[#888] uppercase tracking-wider hidden sm:table-cell">Year</th>
+              <th class="px-5 py-3 text-[11px] font-semibold text-[#888] uppercase tracking-wider hidden lg:table-cell">Accommodation</th>
+              <th class="px-5 py-3 text-[11px] font-semibold text-[#888] uppercase tracking-wider hidden xl:table-cell">Registered</th>
+              <th class="px-5 py-3 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-center">Status</th>
+              <th class="px-5 py-3 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#f0f1f3]">
+            {rows.map((s) => {
+              const studentJson = JSON.stringify({
+                id: s.id,
+                name: s.full_name || "Unnamed Student",
+                email: s.email || "No email recorded",
+                college: s.college_name || locals.collegeName || "Your College",
+                degree: s.degree_program || "Not specified",
+                department: s.department || "Not specified",
+                year: formatYear(s.year),
+                hostel: formatHostel(s.hosteller),
+                rawHostel: s.hosteller,
+                status: s.approval_status,
+                date: fmtDateTime(s.created_at),
+              });
+
+              return (
+                <tr
+                  class="hover:bg-[#fafbfc] transition-colors student-row"
+                  data-student-id={s.id}
+                  data-student-data={studentJson}
+                  data-search-text={`${s.full_name || ""} ${s.email || ""} ${s.department || ""} ${s.degree_program || ""}`.toLowerCase()}
+                >
+                  <!-- Student name + email -->
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-dark flex items-center justify-center shrink-0">
+                        <span class="text-green text-xs font-semibold">
+                          {(s.full_name || "S").charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-dark truncate">{s.full_name || "Unnamed Student"}</p>
+                        <p class="text-xs text-[#777] truncate">{s.email || "No email"}</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Degree & Dept -->
+                  <td class="px-5 py-3.5 text-xs text-dark hidden md:table-cell">
+                    <span class="font-medium">{s.degree_program || "—"}</span>
+                    {s.department && <span class="text-[#888]"> · {s.department}</span>}
+                  </td>
+
+                  <!-- Year -->
+                  <td class="px-5 py-3.5 text-xs text-[#555] hidden sm:table-cell">
+                    {formatYear(s.year)}
+                  </td>
+
+                  <!-- Hostel -->
+                  <td class="px-5 py-3.5 text-xs hidden lg:table-cell">
+                    {s.hosteller === true ? (
+                      <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium text-[11px]">Hosteller</span>
+                    ) : s.hosteller === false ? (
+                      <span class="px-2 py-0.5 rounded-md bg-[#f3f4f6] text-[#666] font-medium text-[11px]">Day Scholar</span>
+                    ) : (
+                      <span class="text-[#aaa] text-xs">—</span>
+                    )}
+                  </td>
+
+                  <!-- Registered Date -->
+                  <td class="px-5 py-3.5 text-xs text-[#888] hidden xl:table-cell">
+                    {fmtDate(s.created_at)}
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-5 py-3.5 text-center">
+                    {s.approval_status === "approved" ? (
+                      <span class="chip chip-lime">Approved</span>
+                    ) : s.approval_status === "pending" ? (
+                      <span class="chip chip-amber">Pending</span>
+                    ) : (
+                      <span class="chip chip-danger">Rejected</span>
+                    )}
+                  </td>
+
+                  <!-- Action -->
+                  <td class="px-5 py-3.5 text-right">
+                    <button
+                      type="button"
+                      data-action="view-details"
+                      class="px-3 py-1.5 rounded-[10px] bg-[#f8f9fb] hover:bg-dark hover:text-white border border-[#e0e0e0] text-xs font-medium text-dark transition-all inline-flex items-center gap-1"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ) : (
+    <div class="app-card px-5 py-12 text-center">
+      <p class="text-sm text-[#9aa0a6]">No students registered yet for this college.</p>
+    </div>
+  )}
+
+  <!-- ═══ Student Details Modal ═══ -->
+  <div
+    id="student-details-modal"
+    class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4"
+  >
+    <div
+      class="bg-white rounded-[24px] border border-[#e8eaed] w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+    >
+      <!-- Modal Header -->
+      <div class="px-6 pt-6 pb-5 border-b border-[#f0f1f3] flex items-start justify-between">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-[16px] bg-dark flex items-center justify-center shrink-0">
+            <span id="modal-avatar-letter" class="text-green text-base font-bold">S</span>
+          </div>
+          <div>
+            <h3 id="modal-student-name" class="text-lg font-bold text-dark">Student Name</h3>
+            <p id="modal-student-status-badge" class="mt-0.5"></p>
+          </div>
+        </div>
+        <button
+          type="button"
+          id="close-modal-btn"
+          class="w-8 h-8 rounded-full bg-[#f3f4f6] hover:bg-[#e5e7eb] flex items-center justify-center text-[#666] transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Body (Detailed Cards) -->
+      <div class="p-6 max-h-[70vh] overflow-y-auto space-y-4">
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- College Email -->
+          <div class="p-3.5 bg-[#f8f9fb] border border-[#eaedf0] rounded-[16px]">
+            <p class="text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              College Email
+            </p>
+            <p id="modal-student-email" class="text-xs font-semibold text-dark break-all">—</p>
+          </div>
+
+          <!-- Institution -->
+          <div class="p-3.5 bg-[#f8f9fb] border border-[#eaedf0] rounded-[16px]">
+            <p class="text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              College / Campus
+            </p>
+            <p id="modal-student-college" class="text-xs font-semibold text-dark truncate">—</p>
+          </div>
+
+          <!-- Degree Program -->
+          <div class="p-3.5 bg-[#f8f9fb] border border-[#eaedf0] rounded-[16px]">
+            <p class="text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              Degree Program
+            </p>
+            <p id="modal-student-degree" class="text-xs font-semibold text-dark">—</p>
+          </div>
+
+          <!-- Department / Branch -->
+          <div class="p-3.5 bg-[#f8f9fb] border border-[#eaedf0] rounded-[16px]">
+            <p class="text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              Department / Branch
+            </p>
+            <p id="modal-student-department" class="text-xs font-semibold text-dark">—</p>
+          </div>
+
+          <!-- Year of Study -->
+          <div class="p-3.5 bg-[#f8f9fb] border border-[#eaedf0] rounded-[16px]">
+            <p class="text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Current Academic Year
+            </p>
+            <p id="modal-student-year" class="text-xs font-semibold text-dark">—</p>
+          </div>
+
+          <!-- Hostel / Residence -->
+          <div class="p-3.5 bg-[#f8f9fb] border border-[#eaedf0] rounded-[16px]">
+            <p class="text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Accommodation
+            </p>
+            <p id="modal-student-hostel" class="text-xs font-semibold text-dark">—</p>
+          </div>
+        </div>
+
+        <!-- Registration Time and ID -->
+        <div class="p-4 bg-[#f8f9fb] border border-[#eaedf0] rounded-[16px] space-y-2 text-xs">
+          <div class="flex items-center justify-between text-[#777]">
+            <span>Registration Timestamp:</span>
+            <span id="modal-student-registered" class="font-medium text-dark">—</span>
+          </div>
+          <div class="flex items-center justify-between text-[#777] pt-2 border-t border-[#eaedf0]">
+            <span>Student Reference ID:</span>
+            <code id="modal-student-id" class="text-[11px] font-mono bg-white px-2 py-0.5 rounded border border-[#ddd] text-dark">—</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer Action Bar -->
+      <div class="px-6 py-4 bg-[#fafbfc] border-t border-[#f0f1f3] flex items-center justify-between gap-3">
+        <button
+          type="button"
+          id="modal-cancel-btn"
+          class="px-4 py-2 rounded-[12px] bg-white border border-[#d5d7da] text-dark text-xs font-medium hover:bg-[#f3f4f6] transition-colors"
+        >
+          Close
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="modal-reject-btn"
+            class="px-4 py-2 rounded-[12px] bg-white border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 transition-colors"
+          >
+            Reject Request
+          </button>
+
+          <button
+            type="button"
+            id="modal-approve-btn"
+            class="px-5 py-2 rounded-[12px] bg-dark text-white text-xs font-medium hover:bg-black transition-all flex items-center gap-1.5 shadow-sm"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Approve Access
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script is:inline>
+  var activeModalStudentId = null;
+
+  // Search filter
+  var searchInput = document.getElementById("student-search-input");
+  if (searchInput) {
+    searchInput.addEventListener("input", function (e) {
+      var query = e.target.value.toLowerCase().trim();
+      var rows = document.querySelectorAll(".student-row");
+      rows.forEach(function (row) {
+        var text = row.getAttribute("data-search-text") || "";
+        if (!query || text.includes(query)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+  }
+
+  // Modal open function
+  function openDetailsModal(studentData) {
+    if (!studentData) return;
+    activeModalStudentId = studentData.id;
+
+    document.getElementById("modal-avatar-letter").textContent = (studentData.name || "S").charAt(0).toUpperCase();
+    document.getElementById("modal-student-name").textContent = studentData.name || "Unnamed Student";
+    document.getElementById("modal-student-email").textContent = studentData.email || "No email recorded";
+    document.getElementById("modal-student-college").textContent = studentData.college || "Your College";
+    document.getElementById("modal-student-degree").textContent = studentData.degree || "Not specified";
+    document.getElementById("modal-student-department").textContent = studentData.department || "Not specified";
+    document.getElementById("modal-student-year").textContent = studentData.year || "Not specified";
+    document.getElementById("modal-student-hostel").textContent = studentData.hostel || "Not specified";
+    document.getElementById("modal-student-registered").textContent = studentData.date || "—";
+    document.getElementById("modal-student-id").textContent = studentData.id || "—";
+
+    var badgeEl = document.getElementById("modal-student-status-badge");
+    if (studentData.status === "approved") {
+      badgeEl.innerHTML = '<span class="chip chip-lime text-[10px]">Approved Access</span>';
+    } else if (studentData.status === "rejected") {
+      badgeEl.innerHTML = '<span class="chip chip-danger text-[10px]">Rejected Request</span>';
+    } else {
+      badgeEl.innerHTML = '<span class="chip chip-amber text-[10px]">Pending Approval</span>';
+    }
+
+    var modal = document.getElementById("student-details-modal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  function closeDetailsModal() {
+    var modal = document.getElementById("student-details-modal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    activeModalStudentId = null;
+  }
+
+  document.getElementById("close-modal-btn")?.addEventListener("click", closeDetailsModal);
+  document.getElementById("modal-cancel-btn")?.addEventListener("click", closeDetailsModal);
+
+  // Close modal on backdrop click or ESC
+  document.getElementById("student-details-modal")?.addEventListener("click", function (e) {
+    if (e.target === this) closeDetailsModal();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeDetailsModal();
+  });
+
+  // Handle Approve/Reject status updates
+  async function updateStudentStatus(id, status, triggerBtn) {
+    if (!id) return;
+    if (status === "rejected" && !confirm("Reject this student's access request?")) return;
+
+    if (triggerBtn) {
+      triggerBtn.disabled = true;
+      triggerBtn.textContent = "Updating...";
+    }
+
+    try {
+      var res = await fetch("/api/admin/students/" + id, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: status }),
+      });
+      var data = await res.json();
+      if (data.ok) {
+        window.location.reload();
+      } else {
+        alert("Failed: " + (data.error || "unknown error"));
+        if (triggerBtn) triggerBtn.disabled = false;
+      }
+    } catch (err) {
+      alert("Network error.");
+      if (triggerBtn) triggerBtn.disabled = false;
+    }
+  }
+
+  // Modal Approve / Reject buttons
+  document.getElementById("modal-approve-btn")?.addEventListener("click", function () {
+    updateStudentStatus(activeModalStudentId, "approved", this);
+  });
+
+  document.getElementById("modal-reject-btn")?.addEventListener("click", function () {
+    updateStudentStatus(activeModalStudentId, "rejected", this);
+  });
+
+  // Global click delegator for card buttons
+  document.addEventListener("click", function (e) {
+    var viewBtn = e.target.closest('[data-action="view-details"]');
+    if (viewBtn) {
+      var wrapper = viewBtn.closest("[data-student-data]");
+      if (wrapper) {
+        try {
+          var data = JSON.parse(wrapper.getAttribute("data-student-data"));
+          openDetailsModal(data);
+        } catch (err) {
+          console.error("Could not parse student data", err);
+        }
+      }
+      return;
+    }
+
+    var approveBtn = e.target.closest('[data-action="approve-student"]');
+    var rejectBtn = e.target.closest('[data-action="reject-student"]');
+    var btn = approveBtn || rejectBtn;
+    if (!btn) return;
+
+    var wrapper = btn.closest("[data-student-id]");
+    if (!wrapper) return;
+    var id = wrapper.dataset.studentId;
+    var status = approveBtn ? "approved" : "rejected";
+
+    updateStudentStatus(id, status, btn);
+  });
+</script>
+

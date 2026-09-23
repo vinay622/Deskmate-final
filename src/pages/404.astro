@@ -1,0 +1,62 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout
+  title="404 — Page Not Found | DeskMate"
+  description="The page you're looking for doesn't exist."
+>
+  <section class="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center">
+
+    <!-- Big 404 -->
+    <div class="relative mb-8 select-none">
+      <span class="text-[160px] sm:text-[200px] font-medium leading-none text-[#f0f0f0]">404</span>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="w-20 h-20 rounded-[22px] bg-dark flex items-center justify-center shadow-lg">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="text-3xl sm:text-4xl font-medium text-dark mb-4">
+      This page doesn't exist
+    </h1>
+    <p class="text-[#777] max-w-md leading-relaxed mb-10">
+      Looks like you wandered off the map. DeskMate only knows what's in the official documents — and this URL isn't one of them.
+    </p>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap justify-center gap-4 mb-16">
+      <a href="/" class="btn-primary px-8 py-4 rounded-2xl text-sm">
+        Back to Home
+      </a>
+      <a href="/app/chat" class="btn-secondary px-8 py-4 rounded-2xl text-sm">
+        Open DeskMate
+      </a>
+    </div>
+
+    <!-- Quick links -->
+    <div class="border-t border-[#e8e8e8] pt-10 w-full max-w-md">
+      <p class="text-xs text-[#aaa] uppercase tracking-widest mb-5">Quick links</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        {[
+          { label: 'Features', href: '/#features' },
+          { label: 'How It Works', href: '/#how-it-works' },
+          { label: 'About', href: '/about' },
+          { label: 'Contact', href: '/contact' },
+          { label: 'Sign In', href: '/login' },
+        ].map((link) => (
+          <a
+            href={link.href}
+            class="text-sm text-[#555] hover:text-dark border border-[#e0e0e0] hover:border-dark rounded-full px-4 py-1.5 transition-all"
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </div>
+
+  </section>
+</MainLayout>

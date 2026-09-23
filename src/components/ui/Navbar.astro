@@ -1,0 +1,188 @@
+---
+import { Astronav } from "astro-navbar";
+
+const menuitems = [
+  { href: '/', label: 'Home' },
+  { href: '/#features', label: 'Features' },
+  { href: '/#how-it-works', label: 'How It Works' },
+  { href: '/about', label: 'About' },
+];
+
+const isAppPage = Astro.url.pathname.startsWith('/app');
+const pathname = Astro.url.pathname;
+
+const user = Astro.locals.user;
+const userRole = Astro.locals.userRole;
+const isAdmin = userRole === 'admin';
+const fullName = Astro.locals.userName ?? '';
+const firstName = fullName.split(' ')[0] || 'You';
+
+// Active only for real page routes, not anchor-only scrolls
+function isActive(href: string) {
+  if (href.startsWith('/#')) return false;
+  if (href === '/') return pathname === '/';
+  return pathname === href;
+}
+---
+
+<div class="h-20">
+  <nav class={`w-full top-0 left-0 z-50 fixed border-b backdrop-blur-md ${isAppPage ? 'bg-dark/[0.92] border-[#2d2e3a]' : 'bg-white/[0.86] border-[#e5e7eb]'}`}>
+    <header class="flex flex-col lg:flex-row justify-between items-center my-3 px-6 md:px-16 xl:px-24">
+      <Astronav>
+        <div class="flex w-full lg:w-auto items-center justify-between">
+          <a href="/" class="flex items-center gap-2.5">
+            <span class={`size-8 rounded-[10px] flex items-center justify-center ${isAppPage ? 'bg-green text-dark' : 'bg-dark text-green'}`} aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            <span class={`text-lg font-medium ${isAppPage ? 'text-white' : 'text-dark'}`}>
+              Desk<span class={isAppPage ? 'text-green' : 'greenhead'}>Mate</span>
+            </span>
+          </a>
+          <div class="block lg:hidden">
+            <div id="menu-icon" class={`w-8 h-8 cursor-pointer ${isAppPage ? 'text-white' : 'text-black'}`}>
+              <!-- Open (hamburger) icon -->
+              <svg id="open-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+              <!-- Close (X) icon -->
+              <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-8 h-8 hidden">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <nav class="hidden w-full lg:w-auto mt-2 lg:flex lg:mt-0" id="menu-items">
+          <ul class="font-medium flex flex-col p-4 lg:p-0 mt-4 border rounded-xl lg:flex-row lg:gap-7 lg:mt-0 lg:border-0">
+            {menuitems.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class={`mobile-nav-link block py-2 px-3 rounded lg:bg-transparent lg:p-0 transition-colors ${
+                    isAppPage
+                      ? 'text-gray hover:text-green'
+                      : isActive(item.href)
+                        ? 'text-dark font-medium border-b-2 border-[#b9ff66] pb-0.5'
+                        : 'text-[#666] hover:text-dark'
+                  }`}
+                  data-close-menu="true"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+            <div class="lg:hidden flex items-center justify-center mt-3 gap-3 flex-wrap">
+              {user ? (
+                isAdmin ? (
+                  <>
+                    <a
+                      class="mobile-nav-link px-6 py-3 rounded-2xl border border-zinc-900 text-black hover:bg-black hover:text-white inline-flex text-base"
+                      href="/app/chat"
+                      data-close-menu="true"
+                    >
+                      Open App
+                    </a>
+                    <a
+                      class="mobile-nav-link px-6 py-3 rounded-2xl bg-green border border-zinc-900 text-dark hover:bg-black hover:text-white inline-flex text-base"
+                      href="/app/admin"
+                      data-close-menu="true"
+                    >
+                      Admin Dashboard
+                    </a>
+                  </>
+                ) : (
+                  <a
+                    class="mobile-nav-link px-6 py-3 rounded-2xl bg-green border border-zinc-900 text-dark hover:bg-black hover:text-white inline-flex text-base"
+                    href="/app/chat"
+                    data-close-menu="true"
+                  >
+                    Open App
+                  </a>
+                )
+              ) : (
+                <>
+                  <a
+                    class="mobile-nav-link px-6 py-3 rounded-2xl border border-zinc-900 text-black hover:bg-black hover:text-white inline-flex text-base"
+                    href="/login"
+                    data-close-menu="true"
+                  >
+                    Sign In
+                  </a>
+                  <a
+                    class="mobile-nav-link px-6 py-3 rounded-2xl bg-green border border-zinc-900 text-dark hover:bg-black hover:text-white inline-flex text-base"
+                    href="/signup"
+                    data-close-menu="true"
+                  >
+                    Sign Up
+                  </a>
+                </>
+              )}
+            </div>
+          </ul>
+        </nav>
+      </Astronav>
+
+      <div>
+        {isAppPage ? (
+          <!-- App pages: "Admin Dashboard" for admins + "Open Chat" -->
+          <div class="hidden lg:flex items-center gap-3">
+            {isAdmin && (
+              <a href="/app/admin" class="px-7 py-3.5 rounded-2xl border border-[#b9ff66] text-white hover:bg-[#b9ff66] hover:text-dark text-sm font-medium transition-all">
+                Admin Dashboard
+              </a>
+            )}
+            <a href="/app/chat" class="px-7 py-3.5 rounded-2xl bg-green hover:bg-dark text-dark hover:text-white border border-dark text-sm font-medium transition-all">
+              Open Chat
+            </a>
+          </div>
+        ) : user ? (
+          <!-- Logged-in on public pages: greet + admin dashboard (admin) or open app (student) -->
+          <div class="hidden lg:flex items-center gap-3">
+            <span class="text-sm text-[#555]">Hi, <span class="font-medium text-dark">{firstName}</span></span>
+            {isAdmin ? (
+              <a href="/app/admin" class="px-7 py-3.5 rounded-2xl bg-green border border-dark text-dark hover:bg-dark hover:text-white text-sm font-medium transition-all">
+                Admin Dashboard
+              </a>
+            ) : (
+              <a href="/app/chat" class="px-7 py-3.5 rounded-2xl bg-green border border-dark text-dark hover:bg-dark hover:text-white text-sm font-medium transition-all">
+                Open App
+              </a>
+            )}
+          </div>
+        ) : (
+          <!-- Not logged in: Sign In + Sign Up -->
+          <div class="hidden lg:flex items-center gap-3">
+            <a href="/login" class="px-7 py-3.5 rounded-2xl border border-dark text-dark hover:bg-dark hover:text-white text-sm font-medium transition-all">
+              Sign In
+            </a>
+            <a href="/signup" class="px-7 py-3.5 rounded-2xl bg-green border border-dark text-dark hover:bg-dark hover:text-white text-sm font-medium transition-all">
+              Sign Up Free
+            </a>
+          </div>
+        )}
+      </div>
+    </header>
+  </nav>
+</div>
+
+<script is:inline>
+  const menuIcon = document.getElementById('menu-icon');
+  const openIcon = document.getElementById('open-icon');
+  const closeIcon = document.getElementById('close-icon');
+  const menuItems = document.getElementById('menu-items');
+  const closeMenuItems = document.querySelectorAll('[data-close-menu="true"]');
+
+  menuIcon.addEventListener('click', () => {
+    menuItems.classList.toggle('hidden');
+    openIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+  });
+
+  closeMenuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      menuItems.classList.add('hidden');
+      openIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    });
+  });
+</script>

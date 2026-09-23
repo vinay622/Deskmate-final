@@ -1,0 +1,225 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+// Server-side auth check
+const { request, cookies, locals } = Astro;
+
+if (!locals.user || locals.userRole !== "admin") {
+  return Astro.redirect("/login");
+}
+
+const supabase = createSupabaseServerClient(request, cookies);
+const collegeName = locals.collegeName ?? "";
+const firstName = (locals.userName ?? "").split(" ")[0] || "Admin";
+
+const [
+  { count: docCount },
+  { count: staffCount },
+  { count: readyCount },
+  { count: pendingStudents },
+  { data: recentDocs },
+] = await Promise.all([
+  supabase.from("documents").select("*", { count: "exact", head: true }).eq("college_name", collegeName),
+  supabase.from("staff_members").select("*", { count: "exact", head: true }).eq("college_name", collegeName),
+  supabase.from("documents").select("*", { count: "exact", head: true }).eq("college_name", collegeName).eq("processing_status", "ready"),
+  supabase.from("profiles").select("*", { count: "exact", head: true }).eq("college_name", collegeName).eq("role", "student").eq("approval_status", "pending"),
+  supabase
+    .from("documents")
+    .select("id, name, category, created_at, status")
+    .eq("college_name", collegeName)
+    .order("created_at", { ascending: false })
+    .limit(5),
+]);
+
+const docs = recentDocs ?? [];
+
+const statusChip = (status: string) =>
+  status === "active" ? "chip-lime" : status === "expiring" ? "chip-amber" : "chip-danger";
+const statusLabel = (status: string) =>
+  status === "active" ? "Active" : status === "expiring" ? "Expiring" : "Expired";
+---
+
+<AdminLayout
+  title="Dashboard — DeskMate Admin"
+  description="Manage DeskMate documents and staff directory."
+  active="dashboard"
+  pageTitle="Dashboard"
+  eyebrow="Overview"
+>
+  <a slot="action" href="/app/chat" class="btn-app-secondary">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Open Chat
+  </a>
+
+  <!-- Greeting -->
+  <div class="mb-7">
+    <h2 class="text-2xl font-medium text-dark">Welcome back, {firstName}.</h2>
+    <p class="text-sm text-[#6b6f76] mt-1">
+      Here's the current state of {collegeName || "your college"}'s knowledge base.
+    </p>
+  </div>
+
+  <!-- Stat tiles -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-9">
+    <!-- Hero stat (dark) -->
+    <div class="col-span-2 lg:col-span-1 rounded-[20px] bg-dark p-6 flex flex-col justify-between min-h-[132px]">
+      <div class="flex items-center justify-between">
+        <p class="eyebrow">Documents</p>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div>
+        <p class="text-[44px] leading-none font-medium text-green">{docCount ?? 0}</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">Total in knowledge base</p>
+      </div>
+    </div>
+
+    <!-- Staff -->
+    <div class="app-card p-6 flex flex-col justify-between min-h-[132px]">
+      <div class="flex items-center justify-between">
+        <p class="eyebrow">Staff</p>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c9cf" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <p class="text-[44px] leading-none font-medium text-dark">{staffCount ?? 0}</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">In routing directory</p>
+      </div>
+    </div>
+
+    <!-- Indexed -->
+    <div class="app-card p-6 flex flex-col justify-between min-h-[132px]">
+      <div class="flex items-center justify-between">
+        <p class="eyebrow">Indexed</p>
+        <span class="flex items-center gap-1.5 text-[11px] text-[#6b6f76]">
+          <span class="w-1.5 h-1.5 rounded-full bg-green"></span> Live
+        </span>
+      </div>
+      <div>
+        <p class="text-[44px] leading-none font-medium text-dark">{readyCount ?? 0}</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">Ready for answers</p>
+      </div>
+    </div>
+
+    <!-- Awaiting approval -->
+    <a href="/app/admin/students" class={`app-card p-6 flex flex-col justify-between min-h-[132px] transition-colors ${(pendingStudents ?? 0) > 0 ? "border-[#e8b74a] hover:border-dark" : "hover:border-[#d5d8dd]"}`}>
+      <div class="flex items-center justify-between">
+        <p class="eyebrow">Approvals</p>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c9cf" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <div>
+        <p class="text-[44px] leading-none font-medium text-dark">{pendingStudents ?? 0}</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">Students awaiting approval</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Quick actions -->
+  <p class="eyebrow mb-3 !text-[#9aa0a6]">Manage</p>
+  <div class="grid sm:grid-cols-2 gap-4 mb-9">
+    <a href="/app/admin/documents" class="app-card p-5 flex items-center gap-4 group hover:border-dark transition-colors">
+      <div class="w-11 h-11 rounded-[14px] bg-[#f0f1f3] group-hover:bg-green flex items-center justify-center shrink-0 transition-colors">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#191a23" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-dark">Manage Documents</p>
+        <p class="text-xs text-[#9aa0a6] mt-0.5">Upload, categorize, and index files</p>
+      </div>
+      <svg class="text-[#c4c9cf] group-hover:text-dark group-hover:translate-x-0.5 transition-all" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a href="/app/admin/staff" class="app-card p-5 flex items-center gap-4 group hover:border-dark transition-colors">
+      <div class="w-11 h-11 rounded-[14px] bg-[#f0f1f3] group-hover:bg-green flex items-center justify-center shrink-0 transition-colors">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#191a23" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-dark">Manage Staff</p>
+        <p class="text-xs text-[#9aa0a6] mt-0.5">Directory for smart query routing</p>
+      </div>
+      <svg class="text-[#c4c9cf] group-hover:text-dark group-hover:translate-x-0.5 transition-all" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a href="/app/admin/tickets" class="app-card p-5 flex items-center gap-4 group hover:border-dark transition-colors">
+      <div class="w-11 h-11 rounded-[14px] bg-[#f0f1f3] group-hover:bg-green flex items-center justify-center shrink-0 transition-colors">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#191a23" stroke-width="2"><path d="M4 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2z"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-dark">Tickets</p>
+        <p class="text-xs text-[#9aa0a6] mt-0.5">Track and resolve escalations</p>
+      </div>
+      <svg class="text-[#c4c9cf] group-hover:text-dark group-hover:translate-x-0.5 transition-all" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a href="/app/admin/announcements" class="app-card p-5 flex items-center gap-4 group hover:border-dark transition-colors">
+      <div class="w-11 h-11 rounded-[14px] bg-[#f0f1f3] group-hover:bg-green flex items-center justify-center shrink-0 transition-colors">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#191a23" stroke-width="2"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-dark">Announcements</p>
+        <p class="text-xs text-[#9aa0a6] mt-0.5">Post notices for students</p>
+      </div>
+      <svg class="text-[#c4c9cf] group-hover:text-dark group-hover:translate-x-0.5 transition-all" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a href="/app/admin/analytics" class="app-card p-5 flex items-center gap-4 group hover:border-dark transition-colors">
+      <div class="w-11 h-11 rounded-[14px] bg-[#f0f1f3] group-hover:bg-green flex items-center justify-center shrink-0 transition-colors">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#191a23" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="5"/><rect x="12" y="8" width="3" height="9"/><rect x="17" y="5" width="3" height="12"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-dark">Analytics</p>
+        <p class="text-xs text-[#9aa0a6] mt-0.5">Query trends and knowledge gaps</p>
+      </div>
+      <svg class="text-[#c4c9cf] group-hover:text-dark group-hover:translate-x-0.5 transition-all" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+
+  <!-- Recent documents -->
+  <div class="app-card overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#e8eaed]">
+      <p class="text-sm font-medium text-dark">Recent documents</p>
+      {docs.length > 0 && (
+        <a href="/app/admin/documents" class="text-xs font-medium text-[#6b6f76] hover:text-dark transition-colors inline-flex items-center gap-1">
+          View all
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      )}
+    </div>
+
+    {docs.length > 0 ? (
+      <table class="w-full">
+        <thead>
+          <tr class="text-left">
+            <th class="px-5 py-2.5 eyebrow font-medium">Document</th>
+            <th class="px-5 py-2.5 eyebrow font-medium hidden md:table-cell">Category</th>
+            <th class="px-5 py-2.5 eyebrow font-medium hidden lg:table-cell">Added</th>
+            <th class="px-5 py-2.5 eyebrow font-medium text-right">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {docs.map((doc) => (
+            <tr class="border-t border-[#f0f1f3] hover:bg-[#fafbfc] transition-colors">
+              <td class="px-5 py-3.5 text-sm font-medium text-dark">{doc.name}</td>
+              <td class="px-5 py-3.5 hidden md:table-cell">
+                <span class="chip chip-neutral">{doc.category}</span>
+              </td>
+              <td class="px-5 py-3.5 text-sm text-[#9aa0a6] hidden lg:table-cell">
+                {new Date(doc.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+              </td>
+              <td class="px-5 py-3.5 text-right">
+                <span class={`chip ${statusChip(doc.status)}`}>{statusLabel(doc.status)}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <div class="px-5 py-14 text-center">
+        <div class="w-12 h-12 rounded-[16px] bg-[#f0f1f3] flex items-center justify-center mx-auto mb-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <p class="text-sm text-dark font-medium">No documents yet</p>
+        <p class="text-xs text-[#9aa0a6] mt-1 mb-4">Upload your first file to start answering questions.</p>
+        <a href="/app/admin/documents" class="btn-app-primary">Add a document</a>
+      </div>
+    )}
+  </div>
+</AdminLayout>

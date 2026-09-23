@@ -1,0 +1,62 @@
+[
+  {
+    "id": "staff-01",
+    "name": "Dr. Ramesh Kumar",
+    "role": "Academic Coordinator",
+    "department": "Academics",
+    "email": "ramesh.kumar@college.edu.in",
+    "phone": "+91-40-11111111",
+    "room": "Academic Block, Room 201",
+    "hours": "Mon–Fri, 10:00 AM – 4:00 PM",
+    "handles": ["exam schedules", "attendance", "grade issues", "academic calendar"],
+    "avatar": null
+  },
+  {
+    "id": "staff-02",
+    "name": "Mrs. Priya Nair",
+    "role": "Fee Collection Officer",
+    "department": "Finance",
+    "email": "fees@college.edu.in",
+    "phone": "+91-40-22222222",
+    "room": "Admin Block, Room 104",
+    "hours": "Mon–Sat, 9:00 AM – 2:00 PM",
+    "handles": ["fee payment", "fee receipts", "late fine waiver", "fee concession"],
+    "avatar": null
+  },
+  {
+    "id": "staff-03",
+    "name": "Mr. Venkat Rao",
+    "role": "Hostel Warden",
+    "department": "Accommodation",
+    "email": "hostel@college.edu.in",
+    "phone": "+91-40-33333333",
+    "room": "Hostel Office, Block A",
+    "hours": "Daily, 8:00 AM – 8:00 PM",
+    "handles": ["hostel allotment", "room transfer", "mess complaints", "hostel rules"],
+    "avatar": null
+  },
+  {
+    "id": "staff-04",
+    "name": "Ms. Deepa Sharma",
+    "role": "Scholarship Coordinator",
+    "department": "Finance",
+    "email": "scholarships@college.edu.in",
+    "phone": "+91-40-44444444",
+    "room": "Admin Block, Room 105",
+    "hours": "Mon–Fri, 10:00 AM – 3:00 PM",
+    "handles": ["merit scholarship", "government scholarships", "NSP portal", "financial aid"],
+    "avatar": null
+  },
+  {
+    "id": "staff-05",
+    "name": "Mr. Suresh Babu",
+    "role": "Student Helpdesk",
+    "department": "Administration",
+    "email": "helpdesk@college.edu.in",
+    "phone": "+91-40-12345678",
+    "room": "Admin Block, Room 102",
+    "hours": "Mon–Fri, 9:00 AM – 5:00 PM",
+    "handles": ["general queries", "document verification", "ID cards", "certificates"],
+    "avatar": null
+  }
+]

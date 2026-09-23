@@ -1,0 +1,434 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import DocumentCard from "../../../components/admin/DocumentCard.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+const { request, cookies, locals } = Astro;
+
+if (!locals.user || locals.userRole !== "admin") {
+  return Astro.redirect("/login");
+}
+
+const supabase = createSupabaseServerClient(request, cookies);
+const collegeName = locals.collegeName ?? "";
+const { data: documents } = await supabase
+  .from("documents")
+  .select("id, name, category, description, uploaded_by_name, expiry_date, status, file_type, processing_status, created_at")
+  .eq("college_name", collegeName)
+  .order("created_at", { ascending: false });
+
+const docs = documents ?? [];
+
+const filters = ["Finance", "Academics", "Accommodation", "Resources", "General"];
+---
+
+<AdminLayout
+  title="Documents — DeskMate Admin"
+  description="Upload and manage college documents for DeskMate."
+  active="documents"
+  pageTitle="Documents"
+  eyebrow="Knowledge base"
+>
+  <button slot="action" id="open-upload-modal" class="btn-app-primary">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    Add Document
+  </button>
+
+  <!-- Filter bar -->
+  <div class="flex gap-2 mb-6 flex-wrap items-center">
+    <button class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-full border transition-colors bg-dark text-white border-dark" data-filter="all">
+      All <span class="opacity-60">·</span> <span id="doc-total">{docs.length}</span>
+    </button>
+    {filters.map((f) => (
+      <button class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-full border transition-colors bg-white text-[#6b6f76] border-[#e8eaed]" data-filter={f}>
+        {f}
+      </button>
+    ))}
+  </div>
+
+  <!-- Documents grid / empty state -->
+  <div class="grid lg:grid-cols-2 gap-4" id="doc-grid">
+    {docs.length === 0 && (
+      <div id="empty-state" class="lg:col-span-2 app-card px-5 py-16 text-center">
+        <div class="w-12 h-12 rounded-[16px] bg-[#f0f1f3] flex items-center justify-center mx-auto mb-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <p class="text-sm font-medium text-dark">No documents yet</p>
+        <p class="text-xs text-[#9aa0a6] mt-1">Click <strong class="text-dark font-medium">Add Document</strong> to get started.</p>
+      </div>
+    )}
+    {docs.map((doc) => (
+      <div class="doc-item" data-category={doc.category} data-doc-id={doc.id}>
+        <DocumentCard
+          id={doc.id}
+          name={doc.name}
+          category={doc.category}
+          uploadedByName={doc.uploaded_by_name ?? ""}
+          createdAt={doc.created_at}
+          expiryDate={doc.expiry_date ?? null}
+          status={doc.status as "active" | "expiring" | "expired"}
+          description={doc.description ?? ""}
+          fileType={doc.file_type ?? null}
+          processingStatus={doc.processing_status ?? "pending"}
+        />
+      </div>
+    ))}
+  </div>
+</AdminLayout>
+
+<!-- Add Document Modal -->
+<div id="upload-modal" class="fixed inset-0 bg-[#000000]/[0.5] backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+  <div class="bg-white rounded-[20px] shadow-[0_24px_60px_rgba(0,0,0,0.25)] border border-[#e8eaed] max-w-lg w-full max-h-[90vh] overflow-y-auto app-scroll">
+    <div class="flex justify-between items-center px-7 pt-6 pb-5 border-b border-[#e8eaed] sticky top-0 bg-white">
+      <div>
+        <p class="eyebrow">New file</p>
+        <h2 class="text-lg font-medium text-dark mt-1">Add Document</h2>
+      </div>
+      <button id="close-modal" class="p-1.5 rounded-lg text-[#9aa0a6] hover:text-dark hover:bg-[#f0f1f3] transition-colors">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="upload-form" class="flex flex-col gap-4 px-7 py-6">
+      <div id="upload-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-[12px] px-4 py-3"></div>
+
+      <!-- Add Tabs -->
+      <div class="flex gap-4 border-b border-[#e8eaed] pb-2 mb-2">
+        <button type="button" id="tab-upload" class="text-sm font-medium text-dark border-b-2 border-dark px-1 py-1 -mb-[9px]">Upload File</button>
+        <button type="button" id="tab-sync" class="text-sm font-medium text-[#9aa0a6] border-b-2 border-transparent hover:text-dark px-1 py-1 -mb-[9px]">Sync URL</button>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-dark mb-1.5">Document Name</label>
+        <input id="doc-name" type="text" placeholder="e.g. Fee Structure 2024-25" class="app-input" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-dark mb-1.5">Category</label>
+          <select id="doc-category" class="app-input">
+            <option>Finance</option>
+            <option>Academics</option>
+            <option>Accommodation</option>
+            <option>Resources</option>
+            <option>General</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-dark mb-1.5">Expiry <span class="font-normal text-[#aab0b6]">(optional)</span></label>
+          <input id="doc-expiry" type="date" class="app-input" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-dark mb-1.5">Description <span class="font-normal text-[#aab0b6]">(optional)</span></label>
+        <textarea id="doc-description" class="app-input resize-none" rows="2"></textarea>
+      </div>
+
+      <div id="upload-zone">
+        <label class="block text-xs font-medium text-dark mb-1.5">Document File</label>
+        <div id="drop-zone" class="border-2 border-dashed border-[#d5d8dd] rounded-[14px] px-6 py-8 text-center cursor-pointer hover:border-dark hover:bg-[#fafbfc] transition-colors">
+          <div class="w-10 h-10 rounded-[12px] bg-[#f0f1f3] flex items-center justify-center mx-auto mb-2.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6f76" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <p class="text-sm text-dark font-medium">Click or drag a file here</p>
+          <p class="text-xs text-[#9aa0a6] mt-1">PDF, DOCX, TXT, or Image · max 10MB</p>
+          <p id="file-name-display" class="text-xs text-dark font-medium mt-2 hidden"></p>
+          <input id="doc-file" type="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.webp" class="hidden" />
+        </div>
+      </div>
+
+      <div id="sync-zone" class="hidden">
+        <label class="block text-xs font-medium text-dark mb-1.5">Website URL</label>
+        <input id="doc-url" type="url" placeholder="https://college.edu/admissions" class="app-input" />
+        <p class="text-xs text-[#9aa0a6] mt-1.5">We will scrape this page and extract all readable text using Firecrawl.</p>
+      </div>
+
+      <button type="button" id="submit-upload-btn" class="btn-app-primary w-full py-3 mt-1">
+        Add Document
+      </button>
+      <button type="button" id="submit-sync-btn" class="btn-app-primary w-full py-3 mt-1 hidden">
+        Sync URL
+      </button>
+    </form>
+  </div>
+</div>
+
+<script is:inline>
+  // ─── Modal helpers ───
+  function openModal() {
+    var m = document.getElementById("upload-modal");
+    m.classList.remove("hidden"); m.classList.add("flex");
+  }
+  function closeModal() {
+    var m = document.getElementById("upload-modal");
+    m.classList.add("hidden"); m.classList.remove("flex");
+    document.getElementById("upload-form").reset();
+    document.getElementById("upload-error").classList.add("hidden");
+    var fn = document.getElementById("file-name-display");
+    fn.classList.add("hidden"); fn.textContent = "";
+  }
+  document.getElementById("open-upload-modal").addEventListener("click", openModal);
+  document.getElementById("close-modal").addEventListener("click", closeModal);
+  document.getElementById("upload-modal").addEventListener("click", function (e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ─── Tabs ───
+  var tabUpload = document.getElementById("tab-upload");
+  var tabSync = document.getElementById("tab-sync");
+  var zoneUpload = document.getElementById("upload-zone");
+  var zoneSync = document.getElementById("sync-zone");
+  var btnUpload = document.getElementById("submit-upload-btn");
+  var btnSync = document.getElementById("submit-sync-btn");
+
+  tabUpload.addEventListener("click", function () {
+    tabUpload.className = "text-sm font-medium text-dark border-b-2 border-dark px-1 py-1 -mb-[9px]";
+    tabSync.className = "text-sm font-medium text-[#9aa0a6] border-b-2 border-transparent hover:text-dark px-1 py-1 -mb-[9px]";
+    zoneUpload.classList.remove("hidden");
+    zoneSync.classList.add("hidden");
+    btnUpload.classList.remove("hidden");
+    btnSync.classList.add("hidden");
+  });
+
+  tabSync.addEventListener("click", function () {
+    tabSync.className = "text-sm font-medium text-dark border-b-2 border-dark px-1 py-1 -mb-[9px]";
+    tabUpload.className = "text-sm font-medium text-[#9aa0a6] border-b-2 border-transparent hover:text-dark px-1 py-1 -mb-[9px]";
+    zoneSync.classList.remove("hidden");
+    zoneUpload.classList.add("hidden");
+    btnSync.classList.remove("hidden");
+    btnUpload.classList.add("hidden");
+  });
+
+  // ─── Prefill from analytics deep-link (?open=upload&topic=…&sample=…) ───
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("open") !== "upload") return;
+
+    var topic = (params.get("topic") || "").trim();
+    var sample = (params.get("sample") || "").trim();
+
+    var CATEGORY_BY_TOPIC = {
+      fees: "Finance", fee: "Finance", scholarship: "Finance", refund: "Finance",
+      hostel: "Accommodation",
+      exam: "Academics", admission: "Academics", timetable: "Academics",
+      result: "Academics", attendance: "Academics", certificate: "Academics",
+      library: "Resources", placement: "Resources"
+    };
+
+    if (topic) {
+      var label = topic.charAt(0).toUpperCase() + topic.slice(1);
+      document.getElementById("doc-name").value = label + " Information";
+      var cat = CATEGORY_BY_TOPIC[topic.toLowerCase()];
+      if (cat) document.getElementById("doc-category").value = cat;
+      if (sample) {
+        document.getElementById("doc-description").value = 'Students asked: "' + sample + '"';
+      }
+    }
+
+    openModal();
+    // Strip params so a refresh doesn't re-open the modal
+    window.history.replaceState({}, "", "/app/admin/documents");
+  })();
+
+  // ─── File input / drop zone ───
+  var dropZone = document.getElementById("drop-zone");
+  var fileInput = document.getElementById("doc-file");
+  var fileNameDisplay = document.getElementById("file-name-display");
+
+  dropZone.addEventListener("click", function () { fileInput.click(); });
+  fileInput.addEventListener("change", function () {
+    if (fileInput.files[0]) {
+      fileNameDisplay.textContent = fileInput.files[0].name;
+      fileNameDisplay.classList.remove("hidden");
+    }
+  });
+  dropZone.addEventListener("dragover", function (e) { e.preventDefault(); dropZone.style.borderColor = "#191a23"; });
+  dropZone.addEventListener("dragleave", function () { dropZone.style.borderColor = ""; });
+  dropZone.addEventListener("drop", function (e) {
+    e.preventDefault();
+    dropZone.style.borderColor = "";
+    if (e.dataTransfer.files[0]) {
+      fileInput.files = e.dataTransfer.files;
+      fileNameDisplay.textContent = e.dataTransfer.files[0].name;
+      fileNameDisplay.classList.remove("hidden");
+    }
+  });
+
+  // ─── Submit ───
+  document.getElementById("submit-upload-btn").addEventListener("click", async function () {
+    var btn = this;
+    var name = document.getElementById("doc-name").value.trim();
+    var category = document.getElementById("doc-category").value;
+    var expiry = document.getElementById("doc-expiry").value;
+    var description = document.getElementById("doc-description").value.trim();
+    var file = document.getElementById("doc-file").files[0];
+    var errEl = document.getElementById("upload-error");
+
+    if (!name) {
+      errEl.textContent = "Document name is required.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    if (!file) {
+      errEl.textContent = "Please select a file to upload.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      errEl.textContent = "File must be under 10MB.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Uploading & Processing…";
+
+    var formData = new FormData();
+    formData.append("name", name);
+    formData.append("category", category);
+    formData.append("expiry_date", expiry || "");
+    formData.append("description", description);
+    formData.append("file", file);
+
+    try {
+      var res = await fetch("/api/admin/documents", { method: "POST", body: formData });
+      var data = await res.json();
+      if (data.ok) {
+        if (data.warning) { alert("Document uploaded with warning: " + data.warning); }
+        closeModal();
+        window.location.reload();
+      } else {
+        errEl.textContent = data.error || "Failed to upload.";
+        errEl.classList.remove("hidden");
+      }
+    } catch (e) {
+      errEl.textContent = "Network error. Please try again.";
+      errEl.classList.remove("hidden");
+    }
+    btn.disabled = false;
+    btn.textContent = "Add Document";
+  });
+
+  // ─── Submit Sync URL ───
+  document.getElementById("submit-sync-btn").addEventListener("click", async function () {
+    var btn = this;
+    var name = document.getElementById("doc-name").value.trim();
+    var category = document.getElementById("doc-category").value;
+    var expiry = document.getElementById("doc-expiry").value;
+    var description = document.getElementById("doc-description").value.trim();
+    var url = document.getElementById("doc-url").value.trim();
+    var errEl = document.getElementById("upload-error");
+
+    if (!name) {
+      errEl.textContent = "Document name is required.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    if (!url) {
+      errEl.textContent = "Please enter a URL to sync.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Scraping URL & Processing…";
+
+    try {
+      var res = await fetch("/api/admin/documents/scrape", { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, category: category, expiry_date: expiry, description: description, url: url }) 
+      });
+      var data = await res.json();
+      if (data.ok) {
+        if (data.warning) { alert("URL synced with warning: " + data.warning); }
+        closeModal();
+        window.location.reload();
+      } else {
+        errEl.textContent = data.error || "Failed to sync URL.";
+        errEl.classList.remove("hidden");
+      }
+    } catch (e) {
+      errEl.textContent = "Network error. Please try again.";
+      errEl.classList.remove("hidden");
+    }
+    btn.disabled = false;
+    btn.textContent = "Sync URL";
+  });
+
+  // ─── Reprocess failed document ───
+  document.addEventListener("click", async function (e) {
+    var btn = e.target.closest('[data-action="reprocess-doc"]');
+    if (!btn) return;
+    var wrapper = btn.closest("[data-doc-id]");
+    if (!wrapper) return;
+    var docId = wrapper.dataset.docId;
+
+    // Swap the Failed chip for a Processing chip while we work
+    var chips = wrapper.querySelectorAll(".chip");
+    var failedChip = null;
+    chips.forEach(function (c) {
+      if (c.textContent.trim() === "Failed") { failedChip = c; }
+    });
+    if (failedChip) {
+      failedChip.textContent = "Reprocessing…";
+      failedChip.classList.remove("chip-danger");
+      failedChip.classList.add("chip-amber");
+    }
+    btn.disabled = true;
+    btn.style.opacity = "0.4";
+
+    try {
+      var res = await fetch("/api/admin/documents/" + docId + "/reprocess", { method: "POST" });
+      var data = await res.json();
+      if (data.ok) {
+        window.location.reload();
+      } else {
+        alert("Reprocess failed: " + (data.error || "unknown error"));
+        window.location.reload();
+      }
+    } catch (e) {
+      alert("Network error during reprocess.");
+      window.location.reload();
+    }
+  });
+
+  // ─── Delete ───
+  document.addEventListener("click", async function (e) {
+    var btn = e.target.closest('[data-action="delete-doc"]');
+    if (!btn) return;
+    var wrapper = btn.closest("[data-doc-id]");
+    if (!wrapper) return;
+    if (!confirm("Remove this document?")) return;
+    btn.disabled = true;
+    try {
+      var res = await fetch("/api/admin/documents/" + wrapper.dataset.docId, { method: "DELETE" });
+      var data = await res.json();
+      if (data.ok) {
+        wrapper.remove();
+        var t = document.getElementById("doc-total");
+        if (t) t.textContent = String(parseInt(t.textContent) - 1);
+      } else {
+        alert("Delete failed: " + (data.error || "unknown error"));
+        btn.disabled = false;
+      }
+    } catch (e) { alert("Network error."); btn.disabled = false; }
+  });
+
+  // ─── Filter ───
+  document.querySelectorAll(".filter-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var filter = btn.dataset.filter;
+      document.querySelectorAll(".filter-btn").forEach(function (b) {
+        b.classList.remove("bg-dark", "text-white", "border-dark");
+        b.classList.add("bg-white", "text-[#6b6f76]", "border-[#e8eaed]");
+      });
+      btn.classList.add("bg-dark", "text-white", "border-dark");
+      btn.classList.remove("bg-white", "text-[#6b6f76]", "border-[#e8eaed]");
+      document.querySelectorAll(".doc-item").forEach(function (item) {
+        item.style.display = (filter === "all" || item.dataset.category === filter) ? "" : "none";
+      });
+    });
+  });
+</script>

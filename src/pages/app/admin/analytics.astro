@@ -1,0 +1,394 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+const { request, cookies, locals } = Astro;
+
+if (!locals.user || locals.userRole !== "admin") {
+  return Astro.redirect("/login");
+}
+
+const supabase = createSupabaseServerClient(request, cookies);
+const collegeName = locals.collegeName ?? "";
+
+// Pull recent logs for aggregation (cap to keep the page fast)
+const { data: logs } = await supabase
+  .from("query_logs")
+  .select("id, query, category, had_context, escalated, top_similarity, feedback, reviewed, language, created_at")
+  .eq("college_name", collegeName)
+  .order("created_at", { ascending: false })
+  .limit(1000);
+
+const rows = logs ?? [];
+const total = rows.length;
+const escalated = rows.filter((r) => r.escalated).length;
+const noContext = rows.filter((r) => !r.had_context).length;
+const thumbsDown = rows.filter((r) => r.feedback === "down").length;
+
+const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
+
+// Top categories
+const catMap = new Map<string, number>();
+for (const r of rows) {
+  const c = r.category || "uncategorized";
+  catMap.set(c, (catMap.get(c) ?? 0) + 1);
+}
+const topCategories = [...catMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+const maxCat = topCategories[0]?.[1] ?? 1;
+
+// Language breakdown — hidden when everything is English
+const langMap = new Map<string, number>();
+for (const r of rows) {
+  const lang = r.language || "english";
+  langMap.set(lang, (langMap.get(lang) ?? 0) + 1);
+}
+const hasNonEnglish = [...langMap.keys()].some((l) => l !== "english");
+const langBreakdown = hasNonEnglish
+  ? [...langMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6)
+  : [];
+const maxLang = langBreakdown[0]?.[1] ?? 1;
+
+// Knowledge gaps: unanswered (no context) or thumbs-down, not yet reviewed
+const gaps = rows
+  .filter((r) => (!r.had_context || r.feedback === "down") && !r.reviewed)
+  .slice(0, 50);
+
+// Document-need suggestions: cluster gap queries by keyword/category
+const KNOWN_KEYWORDS = [
+  "fees", "hostel", "scholarship", "exam", "admission", "library",
+  "timetable", "result", "certificate", "placement", "attendance", "refund",
+];
+
+const gapRows = rows.filter((r) => !r.had_context || r.feedback === "down");
+
+type Suggestion = { topic: string; count: number; samples: string[] };
+const topicMap = new Map<string, Suggestion>();
+
+for (const r of gapRows) {
+  const q = (r.query || "").toLowerCase();
+  let topic: string | null = KNOWN_KEYWORDS.find((k) => q.includes(k)) ?? null;
+  if (!topic) {
+    const cat = r.category;
+    if (cat && cat !== "uncategorized") {
+      topic = cat;
+    }
+  }
+  if (!topic) continue;
+
+  const existing = topicMap.get(topic);
+  if (existing) {
+    existing.count += 1;
+    if (existing.samples.length < 2 && r.query) {
+      existing.samples.push(r.query.trim());
+    }
+  } else {
+    topicMap.set(topic, { topic, count: 1, samples: r.query ? [r.query.trim()] : [] });
+  }
+}
+
+const suggestions = [...topicMap.values()]
+  .filter((s) => s.count >= 2)
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 6);
+
+// ─── Trending questions: this week vs last week ───
+// Clusters recent queries by their dominant keyword and compares volume
+// against the previous 7 days so admins see what's spiking right now.
+const DAY_MS = 24 * 60 * 60 * 1000;
+const nowMs = Date.now();
+const weekCutoff = nowMs - 7 * DAY_MS;
+const prevWeekCutoff = nowMs - 14 * DAY_MS;
+
+const STOPWORDS = new Set([
+  "the", "a", "an", "is", "are", "was", "were", "do", "does", "did", "what",
+  "when", "where", "how", "who", "why", "can", "i", "my", "me", "for", "to",
+  "of", "in", "on", "at", "and", "or", "it", "this", "that", "be", "will",
+  "there", "any", "about", "with", "please", "tell", "give", "get", "have",
+  "has", "we", "you", "your", "our", "us", "if", "from", "by", "should",
+]);
+
+function extractTopic(query: string): string | null {
+  const words = (query || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+  // Prefer a known domain keyword if present, else the first meaningful word
+  const known = words.find((w) => KNOWN_KEYWORDS.some((k) => w.includes(k) || k.includes(w)));
+  return known ?? words[0] ?? null;
+}
+
+type Trend = {
+  topic: string;
+  recentCount: number;
+  prevCount: number;
+  sample: string;
+};
+
+const trendMap = new Map<string, Trend>();
+for (const r of rows) {
+  const created = new Date(r.created_at).getTime();
+  const isRecent = created >= weekCutoff;
+  const isPrev = created < weekCutoff && created >= prevWeekCutoff;
+  if (!isRecent && !isPrev) continue;
+
+  const topic = extractTopic(r.query);
+  if (!topic) continue;
+
+  const t = trendMap.get(topic) ?? { topic, recentCount: 0, prevCount: 0, sample: "" };
+  if (isRecent) {
+    t.recentCount += 1;
+    if (!t.sample && r.query) t.sample = r.query.trim();
+  } else {
+    t.prevCount += 1;
+  }
+  trendMap.set(topic, t);
+}
+
+const trending = [...trendMap.values()]
+  .filter((t) => t.recentCount >= 3)
+  .sort((a, b) => b.recentCount - a.recentCount)
+  .slice(0, 8)
+  .map((t) => ({
+    ...t,
+    isNew: t.prevCount === 0,
+    changePct: t.prevCount === 0 ? 100 : Math.round(((t.recentCount - t.prevCount) / t.prevCount) * 100),
+  }));
+const maxTrend = trending[0]?.recentCount ?? 1;
+---
+
+<AdminLayout
+  title="Analytics — DeskMate Admin"
+  description="See what students ask and where the knowledge base falls short."
+  active="analytics"
+  pageTitle="Analytics"
+  eyebrow="Insights"
+>
+  <!-- Stat tiles -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-9">
+    <div class="rounded-[20px] bg-dark p-6 flex flex-col justify-between min-h-[120px]">
+      <p class="eyebrow">Queries</p>
+      <div>
+        <p class="text-[40px] leading-none font-medium text-green">{total}</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">Last {total} logged</p>
+      </div>
+    </div>
+    <div class="app-card p-6 flex flex-col justify-between min-h-[120px]">
+      <p class="eyebrow">Answered</p>
+      <div>
+        <p class="text-[40px] leading-none font-medium text-dark">{pct(total - noContext)}%</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">Had knowledge context</p>
+      </div>
+    </div>
+    <div class="app-card p-6 flex flex-col justify-between min-h-[120px]">
+      <p class="eyebrow">Escalated</p>
+      <div>
+        <p class="text-[40px] leading-none font-medium text-dark">{pct(escalated)}%</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">{escalated} routed to staff</p>
+      </div>
+    </div>
+    <div class="app-card p-6 flex flex-col justify-between min-h-[120px]">
+      <p class="eyebrow">Negative</p>
+      <div>
+        <p class="text-[40px] leading-none font-medium text-dark">{thumbsDown}</p>
+        <p class="text-xs text-[#9aa0a6] mt-2">Thumbs-down replies</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trending questions this week -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <p class="eyebrow !text-[#9aa0a6]">Trending this week</p>
+      <span class="text-xs text-[#9aa0a6]">vs previous 7 days</span>
+    </div>
+    {trending.length > 0 ? (
+      <div class="app-card p-5">
+        <div class="flex flex-col gap-4">
+          {trending.map((t) => (
+            <div>
+              <div class="flex items-center justify-between gap-3 text-xs mb-1.5">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="font-medium text-dark capitalize truncate">{t.topic}</span>
+                  {t.isNew && <span class="chip chip-lime shrink-0">New</span>}
+                  {!t.isNew && t.changePct > 0 && (
+                    <span class="chip chip-amber shrink-0">↑ {t.changePct}%</span>
+                  )}
+                  {!t.isNew && t.changePct <= 0 && (
+                    <span class="chip chip-neutral shrink-0">↓ {Math.abs(t.changePct)}%</span>
+                  )}
+                </div>
+                <span class="text-[#9aa0a6] shrink-0">{t.recentCount} asks</span>
+              </div>
+              <div class="h-1.5 rounded-full bg-[#f0f1f3] overflow-hidden">
+                <div class="h-full rounded-full bg-green" style={`width: ${Math.round((t.recentCount / maxTrend) * 100)}%`}></div>
+              </div>
+              {t.sample && (
+                <p class="text-xs text-[#9aa0a6] mt-1.5 leading-snug truncate">“{t.sample}”</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <div class="app-card px-5 py-8 text-center">
+        <p class="text-sm text-[#9aa0a6]">Not enough recent activity yet — trending topics appear once a topic gets 3+ asks this week.</p>
+      </div>
+    )}
+  </div>
+
+  <!-- Suggested documents to upload -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <p class="eyebrow !text-[#9aa0a6]">Suggested documents to upload</p>
+      {suggestions.length > 0 && <span class="text-xs text-[#9aa0a6]">{suggestions.length} topics</span>}
+    </div>
+    {suggestions.length > 0 ? (
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {suggestions.map((s) => (
+          <div class="app-card p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-medium text-dark capitalize">{s.topic}</span>
+                <span class="chip chip-amber shrink-0">{s.count} students asked</span>
+              </div>
+              <div class="mt-2 flex flex-col gap-1">
+                {s.samples.map((q) => (
+                  <p class="text-xs text-[#9aa0a6] leading-snug truncate">“{q}”</p>
+                ))}
+              </div>
+            </div>
+            <a
+              href={`/app/admin/documents?open=upload&topic=${encodeURIComponent(s.topic)}&sample=${encodeURIComponent(s.samples[0] ?? "")}`}
+              class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-green hover:underline"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload doc
+            </a>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="app-card px-5 py-10 text-center">
+        <p class="text-sm text-[#9aa0a6]">No recurring gaps yet — suggestions appear once several students ask about the same topic.</p>
+      </div>
+    )}
+  </div>
+
+  <div class="grid lg:grid-cols-5 gap-6">
+    <!-- Top categories -->
+    <div class="lg:col-span-2">
+      <p class="eyebrow mb-3 !text-[#9aa0a6]">Top categories</p>
+      <div class="app-card p-5">
+        {topCategories.length > 0 ? (
+          <div class="flex flex-col gap-3.5">
+            {topCategories.map(([cat, count]) => (
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="font-medium text-dark capitalize">{cat}</span>
+                  <span class="text-[#9aa0a6]">{count}</span>
+                </div>
+                <div class="h-1.5 rounded-full bg-[#f0f1f3] overflow-hidden">
+                  <div class="h-full rounded-full bg-green" style={`width: ${Math.round((count / maxCat) * 100)}%`}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="text-sm text-[#9aa0a6] py-6 text-center">No data yet.</p>
+        )}
+      </div>
+
+      {langBreakdown.length > 0 && (
+        <div class="mt-6">
+          <p class="eyebrow mb-3 !text-[#9aa0a6]">Languages</p>
+          <div class="app-card p-5">
+            <div class="flex flex-col gap-3.5">
+              {langBreakdown.map(([lang, count]) => (
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="font-medium text-dark capitalize">{lang}</span>
+                    <span class="text-[#9aa0a6]">{count}</span>
+                  </div>
+                  <div class="h-1.5 rounded-full bg-[#f0f1f3] overflow-hidden">
+                    <div class="h-full rounded-full bg-green" style={`width: ${Math.round((count / maxLang) * 100)}%`}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <!-- Knowledge gaps -->
+    <div class="lg:col-span-3">
+      <div class="flex items-center justify-between mb-3">
+        <p class="eyebrow !text-[#9aa0a6]">Knowledge gaps</p>
+        <span class="text-xs text-[#9aa0a6]">{gaps.length} to review</span>
+      </div>
+      {gaps.length > 0 ? (
+        <div class="flex flex-col gap-2.5" id="gap-list">
+          {gaps.map((g) => (
+            <div class="app-card p-4" data-gap-id={g.id}>
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm text-dark leading-snug">{g.query}</p>
+                  <div class="flex items-center gap-2 mt-2 flex-wrap">
+                    {!g.had_context && <span class="chip chip-amber">No context</span>}
+                    {g.feedback === "down" && <span class="chip chip-danger">Thumbs down</span>}
+                    {g.category && <span class="chip chip-neutral capitalize">{g.category}</span>}
+                    <span class="text-xs text-[#9aa0a6]">
+                      {new Date(g.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </span>
+                  </div>
+                </div>
+                <button data-action="review-gap" title="Mark reviewed" class="shrink-0 p-1.5 rounded-lg text-[#c4c9cf] hover:text-green hover:bg-[#f0f6ee] transition-colors">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="app-card px-5 py-14 text-center">
+          <div class="w-12 h-12 rounded-[16px] bg-[#f0f6ee] flex items-center justify-center mx-auto mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7cae52" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <p class="text-sm font-medium text-dark">No gaps to review</p>
+          <p class="text-xs text-[#9aa0a6] mt-1">Unanswered or downvoted queries will show up here.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>
+
+<script is:inline>
+  document.addEventListener("click", async function (e) {
+    var btn = e.target.closest('[data-action="review-gap"]');
+    if (!btn) return;
+    var card = btn.closest("[data-gap-id]");
+    if (!card) return;
+    var id = card.dataset.gapId;
+    btn.disabled = true;
+    try {
+      var res = await fetch("/api/admin/analytics/" + id, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewed: true }),
+      });
+      var data = await res.json();
+      if (data.ok) {
+        card.style.transition = "opacity 0.2s";
+        card.style.opacity = "0";
+        setTimeout(function () { card.remove(); }, 200);
+      } else {
+        alert("Failed: " + (data.error || "unknown error"));
+        btn.disabled = false;
+      }
+    } catch (err) {
+      alert("Network error.");
+      btn.disabled = false;
+    }
+  });
+</script>

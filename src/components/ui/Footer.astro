@@ -1,0 +1,46 @@
+---
+
+const links = [
+  { name: "Home", href: "/" },
+  { name: "Features", href: "/#features" },
+  { name: "How It Works", href: "/#how-it-works" },
+  { name: "About", href: "/about" },
+  { name: "Open App", href: "/app/chat" },
+];
+---
+
+<section class="sm:px-5 mt-10">
+  <div class="w-full max-w-[1240px] mx-auto">
+    <div class="px-6 bg-dark text-gray py-10 lg:px-[60px] sm:rounded-t-[32px]">
+      <div>
+        <div class="flex flex-col lg:flex-row gap-7 items-center justify-between">
+          <a href="/" class="flex items-center">
+            <span class="text-2xl font-medium text-white">
+              Desk<span class="text-green">Mate</span>
+            </span>
+          </a>
+          <ul class="flex flex-col sm:flex-row gap-5 text-sm text-[#c5c8ce]">
+            {links.map((link) => (
+              <li class="text-center">
+                <a class="hover:text-green transition-colors" href={link.href}>{link.name}</a>
+              </li>
+            ))}
+          </ul>
+          <div class="flex gap-4 items-center">
+          </div>
+        </div>
+      </div>
+
+      <div class="h-px bg-[#2d2e3a] my-7"></div>
+      <div class="flex flex-col lg:flex-row gap-2 justify-center text-center md:justify-between md:text-left text-sm">
+        <span>
+          &copy; 2024 DeskMate &mdash; Built with
+          <a class="underline" target="_blank" href="https://astro.build">Astro</a>
+        </span>
+        <span class="text-[#666] text-sm mt-2 lg:mt-0">
+          AI-powered college assistant &mdash; No hallucinations, always cited.
+        </span>
+      </div>
+    </div>
+  </div>
+</section>

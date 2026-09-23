@@ -1,0 +1,743 @@
+================================================================================
+                      DESKMATE 2.0 — COMPLETE PROJECT OVERVIEW
+================================================================================
+
+Project Name  : DeskMate 2.0
+Project Type  : AI-Powered Student Helpdesk Web Application
+Deployment    : Vercel (Serverless Edge Functions)
+Source Control: Git
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+  1. What Is DeskMate?
+  2. The Problem It Solves
+  3. Complete Technology Stack
+  4. Project Architecture (How Everything Connects)
+  5. Database Design (All Tables Explained)
+  6. User Roles & Authentication
+  7. Feature Breakdown (Detailed Working Principles)
+     7A. The RAG (Retrieval-Augmented Generation) Engine
+     7B. Intelligent Query Intent Analysis
+     7C. Semantic LLM Caching
+     7D. Agentic Function Calling (AI Agent with Tools)
+     7E. Multi-Source Document Ingestion
+     7F. Firecrawl Web Scraping & Auto-Sync
+     7G. Real-Time Streaming Chat Interface
+     7H. Speech-to-Text Voice Input
+     7I. Student Profile Personalization
+     7J. Escalation & Smart Staff Routing
+     7K. Admin Analytics Dashboard
+     7L. Admin Document Management
+     7M. Admin Staff Directory Management
+     7N. Announcements System
+     7O. Escalation Ticket Management
+     7P. Student Management
+  8. Security Measures
+  9. API Endpoints (Full List)
+ 10. Summary
+
+================================================================================
+1. WHAT IS DESKMATE?
+================================================================================
+DeskMate 2.0 is a full-stack, production-ready web application that serves as an
+AI-powered helpdesk assistant for college students. Think of it as a ChatGPT that
+has been trained exclusively on YOUR college's data — policies, fee structures,
+exam schedules, hostel rules, faculty directories, and any other institutional
+document an admin uploads.
+
+When a student types a question like "What is the hostel fee for second-year
+students?", DeskMate doesn't guess. It searches through the college's own
+uploaded documents, finds the exact paragraph that contains the answer, and
+generates a precise, cited response using Google's Gemini AI model.
+
+DeskMate is NOT a simple chatbot. It is a full AI Agent that can:
+  - Understand the student's intent (greeting vs. real question vs. off-topic).
+  - Search a vector database for relevant knowledge.
+  - Personalize answers based on the student's degree, department, and year.
+  - Automatically create support tickets when it cannot help.
+  - Cache answers semantically so repeated questions are answered instantly.
+  - Support voice input for accessibility.
+  - Provide admins with a complete dashboard to manage documents, staff, 
+    announcements, tickets, students, and view analytics.
+
+================================================================================
+2. THE PROBLEM IT SOLVES
+================================================================================
+In most colleges, students waste hours trying to find basic information:
+  - Calling busy office phones that nobody picks up.
+  - Walking to the wrong department because they don't know who handles what.
+  - Searching through outdated websites for fee structures or exam dates.
+  - Waiting days for email replies from administration.
+
+DeskMate eliminates all of this by providing instant, accurate, 24/7 answers
+that are grounded in the college's own official documents. It reduces the
+workload on administrative staff and ensures students always get the right
+information at the right time.
+
+================================================================================
+3. COMPLETE TECHNOLOGY STACK
+================================================================================
+
+CATEGORY              TECHNOLOGY              PURPOSE
+─────────────────────────────────────────────────────────────────────────────────
+Frontend Framework    Astro 5 (SSR Mode)      Server-Side Rendered pages for
+                                              fast initial loads and SEO. Astro
+                                              compiles pages to minimal HTML/JS
+                                              and runs server logic at the edge.
+
+Styling               TailwindCSS 3.4         Utility-first CSS framework used
+                                              for all UI styling across the
+                                              student chat interface and admin
+                                              dashboard.
+
+Language              TypeScript 5.4          All server-side logic, API routes,
+                                              and library code is written in
+                                              strict TypeScript for type safety.
+
+Database & Auth       Supabase                An open-source Firebase
+                      (PostgreSQL + Auth)     alternative. Provides:
+                                              - PostgreSQL database (all tables)
+                                              - Row Level Security (RLS) policies
+                                              - User authentication (email/pass)
+                                              - File storage (uploaded documents)
+                                              - Real-time capabilities
+
+Vector Database       Pinecone                A purpose-built vector database
+                                              that stores document chunks as
+                                              high-dimensional embeddings. Used
+                                              for semantic similarity search
+                                              (finding relevant context) and
+                                              semantic caching of LLM responses.
+
+Embedding Model       Pinecone Inference      The "multilingual-e5-large" model
+                      (multilingual-e5-large) hosted by Pinecone converts text
+                                              into 1024-dimensional vectors.
+                                              No external embedding API needed.
+
+LLM (AI Brain)        Google Gemini API       The large language model that
+                      (gemini-2.0-flash)      generates natural language answers.
+                                              It receives the student's question
+                                              plus relevant document context and
+                                              produces a human-like response.
+                                              Also handles function calling.
+
+Web Scraping          Firecrawl API           A cloud-based web scraping service.
+                                              Admins provide a URL, Firecrawl
+                                              navigates to it, extracts all
+                                              readable content, and returns
+                                              clean Markdown text.
+
+Document Parsing      mammoth (npm)           Converts .docx (Microsoft Word)
+                                              files into plain text for
+                                              processing into the RAG pipeline.
+
+Deployment Platform   Vercel                  Hosts the application as serverless
+                                              edge functions. Provides automatic
+                                              SSL, CDN, and global distribution.
+                                              Runs on Node.js 22 runtime.
+
+Smooth Scrolling      Lenis                   A lightweight library for buttery-
+                                              smooth scroll animations on the
+                                              public-facing landing pages.
+
+Carousel/Slider       Swiper 11               Touch-friendly slider component
+                                              used on the landing page for
+                                              testimonials and feature showcases.
+
+Dev Tooling           cross-env               Ensures environment variables work
+                                              consistently across Windows, macOS,
+                                              and Linux during development.
+
+NPM DEPENDENCIES (package.json):
+  @astrojs/check        — Astro's built-in TypeScript type checker
+  @astrojs/tailwind     — Astro integration for TailwindCSS
+  @astrojs/vercel       — Astro adapter for deploying to Vercel
+  @google/genai         — Official Google Generative AI SDK (Gemini)
+  @pinecone-database/pinecone — Official Pinecone SDK for vector operations
+  @supabase/ssr         — Supabase server-side rendering helpers
+  @supabase/supabase-js — Official Supabase JavaScript client
+  astro                 — The Astro web framework core
+  astro-navbar          — Responsive navbar component for Astro
+  lenis                 — Smooth scroll library
+  mammoth               — DOCX-to-text converter
+  swiper                — Touch slider library
+  tailwindcss           — Utility-first CSS framework
+  typescript            — TypeScript compiler
+  cross-env (dev)       — Cross-platform environment variable setter
+
+ENVIRONMENT VARIABLES (.env):
+  PUBLIC_SUPABASE_URL       — The URL of your Supabase project instance
+  PUBLIC_SUPABASE_ANON_KEY  — The public (anonymous) API key for Supabase
+  GEMINI_API_KEY            — Your Google Gemini API key for LLM access
+  PINECONE_API_KEY          — Your Pinecone API key for vector database access
+  PINECONE_INDEX            — The name of your Pinecone index (e.g., "deskmate-2")
+  FIRECRAWL_API_KEY         — Your Firecrawl API key for web scraping
+
+================================================================================
+4. PROJECT ARCHITECTURE (HOW EVERYTHING CONNECTS)
+================================================================================
+The application follows a clean four-layer architecture:
+
+LAYER 1: CLIENT (Browser)
+  The student or admin interacts with the UI rendered by Astro. The chat
+  interface uses vanilla JavaScript for real-time message streaming, voice
+  input, and dynamic UI updates without requiring a heavy JS framework.
+
+LAYER 2: ASTRO EDGE FUNCTIONS (Server)
+  All business logic runs in Astro's server-side API routes. These are
+  TypeScript files inside src/pages/api/ that execute as serverless functions
+  on Vercel. They handle authentication, rate limiting, orchestration of the
+  RAG pipeline, and database operations.
+
+LAYER 3: DATA STORAGE
+  - Supabase PostgreSQL: Stores all structured data (user profiles, chat
+    sessions, chat messages, documents metadata, staff members, query logs,
+    escalation tickets, announcements, admin access codes).
+  - Supabase Storage: Stores the actual uploaded PDF, DOCX, and image files.
+  - Pinecone (main namespace): Stores document chunk embeddings for semantic
+    search during the RAG pipeline.
+  - Pinecone ("semantic_cache" namespace): Stores query-answer pairs for
+    instant retrieval of previously generated responses.
+
+LAYER 4: EXTERNAL AI & PROCESSING APIs
+  - Google Gemini: Receives prompts and returns generated text (streamed).
+  - Firecrawl: Receives a URL and returns scraped Markdown content.
+  - Pinecone Inference: Converts text into vector embeddings.
+
+DATA FLOW (Student asks a question):
+  Browser → POST /api/chat/generate → Rate Limit Check (Supabase) →
+  Intent Analysis (Gemini) → Embed Query (Pinecone Inference) →
+  Check Semantic Cache (Pinecone) → [if miss] Search Document Chunks
+  (Pinecone) → Filter Expired Documents (Supabase) → Generate Answer
+  (Gemini Stream) → Stream Response to Browser → Background: Save to
+  Semantic Cache (Pinecone)
+
+DATA FLOW (Admin uploads a document):
+  Browser → POST /api/admin/documents → Save Metadata (Supabase) →
+  Upload File (Supabase Storage) → Extract Text (mammoth/native) →
+  Chunk Text (1000 chars, 200 overlap) → Generate Embeddings (Pinecone
+  Inference, batched 10 at a time) → Upsert Vectors (Pinecone, batched
+  100 at a time) → Mark Document as "ready" (Supabase)
+
+DATA FLOW (Admin syncs a URL):
+  Browser → POST /api/admin/documents/scrape → Save Metadata (Supabase) →
+  Scrape URL (Firecrawl API, returns Markdown) → Chunk Text → Generate
+  Embeddings → Upsert Vectors (Pinecone) → Mark as "ready"
+
+================================================================================
+5. DATABASE DESIGN (ALL TABLES EXPLAINED)
+================================================================================
+All tables live in Supabase PostgreSQL with Row Level Security (RLS) enabled.
+
+TABLE: profiles
+  Purpose: Stores user identity and role information.
+  Columns: id (UUID, linked to auth.users), role (student/admin), full_name,
+           college_name, degree_program, department, year, hosteller (boolean),
+           created_at, updated_at.
+  RLS: Users can only read/update their own profile.
+  Note: A database trigger automatically creates a profile row when a new
+        user registers via Supabase Auth.
+
+TABLE: admin_access_codes
+  Purpose: One-time-use codes that verify admin registration. Each code is
+           tied to a specific college name. When an admin signs up, they
+           enter a code, and the system validates it and marks it as used.
+  Columns: id, code (unique), college_name, is_used, used_by, created_at.
+
+TABLE: chat_sessions
+  Purpose: Groups chat messages into conversations. Each student can have
+           multiple chat sessions (like separate threads in ChatGPT).
+  Columns: id, user_id, title, created_at.
+  RLS: Users can only access their own sessions.
+
+TABLE: chat_messages
+  Purpose: Stores every individual message in a chat session (both the
+           student's questions and the AI's responses).
+  Columns: id, session_id, role (user/assistant), content, meta (JSONB for
+           extra data like sources and citations), created_at.
+  RLS: Users can only access messages in their own sessions.
+
+TABLE: documents
+  Purpose: Tracks all uploaded documents and their processing state.
+  Columns: id, name, category, description, uploaded_by_name, expiry_date,
+           status (active/expiring/expired), file_type, file_url,
+           processing_status (processing/ready/failed), college_name,
+           created_at.
+  RLS: All authenticated users can read (needed for AI answers). Only admins
+       can create, update, or delete.
+
+TABLE: staff_members
+  Purpose: Directory of college staff with contact details and departmental
+           assignments. Used by the AI to route escalation queries.
+  Columns: id, name, role, department, email, phone, room, hours, handles
+           (text array of topics they handle), college_name, created_at.
+  RLS: All authenticated users can read. Only admins can manage.
+
+TABLE: query_logs
+  Purpose: The analytics backbone. Every single student query is logged here
+           with rich metadata for the admin analytics dashboard.
+  Columns: id, college_name, user_id, session_id, query, rewritten_query,
+           agent, language, had_context (boolean), top_similarity (float),
+           escalated (boolean), escalation_reason, category, feedback
+           (up/down), feedback_reason, reviewed (boolean), created_at.
+  RLS: Students can insert/read/update their own logs. Admins can read/update
+       all logs for their college.
+
+TABLE: escalation_tickets
+  Purpose: When the AI cannot answer a question or the student demands human
+           help, a ticket is automatically created here.
+  Columns: id, college_name, student_id, student_name, query, category,
+           staff_name, status (open/in_progress/resolved), resolution_note,
+           created_at, updated_at.
+  RLS: Students can create and read their own tickets. Admins can manage all
+       tickets for their college.
+
+TABLE: announcements
+  Purpose: Admin-posted notices visible to all students at the same college.
+  Columns: id, college_name, title, body, category, pinned (boolean),
+           expires_at, created_by_name, created_at.
+  RLS: All authenticated users at the same college can read. Only admins can
+       create, update, or delete.
+
+TABLE: contact_messages
+  Purpose: Stores messages submitted through the public contact form on the
+           landing page.
+
+TABLE: announcement_notifications
+  Purpose: Tracks which students have seen/dismissed which announcements,
+           enabling "unread" badge counts.
+
+================================================================================
+6. USER ROLES & AUTHENTICATION
+================================================================================
+DeskMate has two user roles:
+
+STUDENT ROLE:
+  - Signs up with email, password, full name, and college name.
+  - Optionally provides degree program, department, year, and hosteller status
+    (these are used to personalize AI answers).
+  - Email verification is required before access is granted.
+  - Can access: Chat interface, personal ticket history, announcements.
+  - Cannot access: Admin dashboard, document management, staff management,
+    analytics, or any other admin-only pages.
+
+ADMIN ROLE:
+  - Signs up with email, password, full name, and a one-time admin access code.
+  - The access code is pre-seeded in the database and ties the admin to a
+    specific college. Once used, it cannot be reused.
+  - Can access: Full admin dashboard including document management, staff
+    directory, student management, announcements, analytics, and ticket
+    management.
+  - Can also use the chat interface to test the AI's responses.
+
+AUTHENTICATION FLOW:
+  1. User fills out the signup form (student or admin).
+  2. Supabase Auth creates the user and sends a confirmation email.
+  3. A PostgreSQL trigger (handle_new_user) automatically creates a profile
+     row with the user's metadata.
+  4. User clicks the confirmation link in their email.
+  5. On login, an Astro middleware reads the session cookie, fetches the
+     user's profile from Supabase, and injects their role, name, and
+     college name into the request context (locals).
+  6. Every API route checks locals.user and locals.userRole before proceeding.
+
+================================================================================
+7. FEATURE BREAKDOWN (DETAILED WORKING PRINCIPLES)
+================================================================================
+
+─── 7A. THE RAG (RETRIEVAL-AUGMENTED GENERATION) ENGINE ────────────────────────
+
+This is the heart of DeskMate. RAG is a technique where, instead of relying
+solely on the AI's pre-trained knowledge (which can hallucinate), we first
+RETRIEVE relevant real documents from a database and then AUGMENT the AI's
+prompt with that context before GENERATING a response.
+
+Step-by-step process:
+  1. RECEIVE: The student submits a query via the chat interface.
+  2. ANALYZE: The system determines the "intent" of the query (see 7B below).
+  3. EMBED: The query text is converted into a 1024-dimensional vector using
+     Pinecone's multilingual-e5-large embedding model.
+  4. CACHE CHECK: Before doing any expensive work, the system checks the
+     semantic cache (see 7C below) for a near-identical past query.
+  5. SEARCH: If no cache hit, the embedding is used to search the Pinecone
+     vector database for the top 30 most similar document chunks.
+  6. FILTER: The 30 chunks are filtered against the Supabase documents table
+     to remove any chunks from expired or failed documents. Only the top 5
+     surviving chunks are kept.
+  7. PROMPT CONSTRUCTION: A detailed system prompt is built that includes:
+     - The AI's persona and behavioral rules.
+     - The student's profile (degree, department, year, hosteller status).
+     - The 5 relevant document chunks as "context".
+     - The student's conversation history (last 10 messages).
+     - The student's actual question.
+  8. GENERATE: The prompt is sent to Google Gemini, which streams back the
+     response token by token.
+  9. STREAM: Each token is immediately forwarded to the browser via a
+     ReadableStream, giving the student a real-time typing effect.
+ 10. CACHE SAVE: After the full response is generated, a background process
+     saves the query embedding + full answer to the semantic cache.
+ 11. LOG: The query, its metadata, and the AI's confidence score are saved
+     to the query_logs table for admin analytics.
+
+Core file: src/lib/rag.ts (1,395 lines of TypeScript)
+
+─── 7B. INTELLIGENT QUERY INTENT ANALYSIS ─────────────────────────────────────
+
+Before searching for documents, DeskMate first classifies what the student
+actually wants. This prevents unnecessary API calls and ensures appropriate
+responses for non-academic queries.
+
+Intent categories:
+  - GREETING_INTRODUCTION: "Hi", "Hello", "Who are you?"
+    → The AI responds with a warm, personalized greeting and feature overview.
+       No vector search is performed. No Gemini tokens are wasted on RAG.
+  - CONVERSATIONAL_COURTESY: "Thanks", "Bye", "Okay got it"
+    → The AI responds with a brief, friendly acknowledgment.
+  - OFF_TOPIC: "Write me a Python script", "Who is the president?"
+    → The AI politely declines and redirects the student to college topics.
+  - EXPLICIT_ESCALATION: "I want to talk to someone", "Connect me to staff"
+    → The AI triggers the escalation flow and creates a support ticket.
+  - COLLEGE_QUERY: Any genuine academic/administrative question.
+    → Full RAG pipeline is activated.
+
+Detection method: A two-tier system:
+  1. Fast regex patterns catch obvious greetings, courtesies, and off-topic
+     queries without any API calls (zero latency, zero cost).
+  2. For ambiguous queries, Gemini itself is asked to classify the intent
+     and rewrite the query for better semantic search performance.
+
+The system also detects the LANGUAGE of the query (English, Hindi, Telugu,
+Tamil, etc.) and instructs Gemini to respond in that same language.
+
+─── 7C. SEMANTIC LLM CACHING ──────────────────────────────────────────────────
+
+Problem: If 50 students ask "What is the hostel fee?", calling Gemini 50 times
+is wasteful (slow and expensive). Traditional caching (exact string match)
+won't help because students phrase things differently ("hostel charges",
+"how much for hostel", "hostel fee structure").
+
+Solution: Semantic caching using vector similarity.
+
+How it works:
+  1. When a query comes in, its embedding vector is computed.
+  2. This vector is compared against the "semantic_cache" namespace in
+     Pinecone (separate from the document chunks namespace).
+  3. If a past query has a cosine similarity of 98% or higher (0.98),
+     the system considers it semantically identical.
+  4. The previously generated answer is returned INSTANTLY — no Gemini
+     call, no document search, no processing. Response time drops from
+     ~3 seconds to ~200 milliseconds.
+  5. If it's a cache miss, the full RAG pipeline runs, and after the
+     response is generated, the query+answer pair is saved to the cache
+     in the background (fire-and-forget, non-blocking).
+
+The 98% threshold is intentionally very high to avoid returning incorrect
+cached answers for questions that seem similar but are actually different.
+
+─── 7D. AGENTIC FUNCTION CALLING (AI AGENT WITH TOOLS) ────────────────────────
+
+DeskMate is not a passive chatbot — it is an AI Agent. This means Gemini has
+access to "tools" (functions) that it can autonomously decide to invoke based
+on the conversation context.
+
+Currently implemented tool:
+  Tool Name: create_escalation_ticket
+  Parameters: student_name, query, category, urgency
+  What it does: Inserts a new row into the escalation_tickets table in
+                Supabase with status "open".
+
+How it works:
+  1. The AGENT_TOOLS schema is defined in src/lib/gemini.ts and passed to
+     Gemini's generateContentStream API via the "tools" configuration.
+  2. During response generation, if Gemini determines the student needs
+     human help (e.g., "I need to talk to someone about my fee dispute"),
+     it emits a "functionCall" instead of regular text.
+  3. The server-side stream loop in src/lib/rag.ts intercepts this
+     functionCall, extracts the arguments, and executes the corresponding
+     Supabase insert operation.
+  4. A confirmation message is yielded back to the student's chat stream.
+  5. The admin can then see and manage this ticket from the Tickets page.
+
+This architecture is extensible — new tools can be added to the schema
+(e.g., "book_appointment", "check_fee_status") without changing the core
+streaming logic.
+
+─── 7E. MULTI-SOURCE DOCUMENT INGESTION ────────────────────────────────────────
+
+Admins can upload PDF, DOCX, TXT, and image files through the dashboard.
+
+Processing pipeline:
+  1. UPLOAD: The file is uploaded to Supabase Storage.
+  2. EXTRACT: Text is extracted from the file:
+     - PDF: Parsed using built-in text extraction.
+     - DOCX: Converted to text using the mammoth npm library.
+     - TXT: Read directly.
+     - Images: OCR-based text extraction.
+  3. CHUNK: The extracted text is split into overlapping chunks of ~1000
+     characters each, with a 200-character overlap between consecutive
+     chunks. The overlap ensures that sentences split across chunk
+     boundaries are still captured in at least one chunk.
+  4. EMBED: Each chunk is converted to a 1024-dimensional vector using
+     Pinecone Inference's multilingual-e5-large model. Embedding is
+     done in batches of 10 to avoid API rate limits.
+  5. UPSERT: The vectors (with metadata including document ID, name,
+     category, college name, and the raw text content) are upserted
+     into Pinecone in batches of 100.
+  6. STATUS: The document's processing_status in Supabase is updated
+     from "processing" to "ready" (or "failed" if any step errors).
+
+─── 7F. FIRECRAWL WEB SCRAPING & AUTO-SYNC ────────────────────────────────────
+
+Instead of manually downloading web pages and uploading them, admins can
+simply paste a URL and DeskMate will automatically scrape it.
+
+How it works:
+  1. The admin clicks the "Sync URL" tab in the Add Document modal.
+  2. They enter a URL (e.g., https://college.edu/admissions/fee-structure).
+  3. The frontend sends a POST request to /api/admin/documents/scrape.
+  4. The server calls the Firecrawl REST API (https://api.firecrawl.dev/v1/scrape)
+     with the URL and requests "markdown" format output.
+  5. Firecrawl navigates to the page (handling JavaScript rendering, popups,
+     cookie banners, etc.), extracts all readable content, and returns clean
+     Markdown text.
+  6. This Markdown text then enters the exact same pipeline as uploaded files:
+     chunk → embed → upsert to Pinecone.
+  7. The document is stored in Supabase with file_type="url" and the
+     original URL is saved as the file_url for reference.
+
+─── 7G. REAL-TIME STREAMING CHAT INTERFACE ─────────────────────────────────────
+
+The chat UI provides a modern, real-time messaging experience:
+  - Messages appear token-by-token as Gemini generates them (like ChatGPT).
+  - Markdown rendering: The AI's responses support bold, italics, bullet
+    lists, numbered lists, headings, code blocks, and tables.
+  - Citation badges: When the AI uses information from specific documents,
+    clickable source badges appear below the response showing the document
+    name, with a link to download the original file.
+  - Feedback buttons: Each AI response has thumbs-up and thumbs-down buttons
+    that update the query_logs table for admin analytics.
+  - Chat sessions: Students can create multiple chat sessions (threads) and
+    switch between them. All messages are persisted server-side in Supabase.
+  - Agent selector: Students can switch between specialized AI agents
+    (General, Academics, Fees, Hostel, etc.) that adjust the AI's focus.
+  - Auto-resize textarea that grows as the student types.
+  - Keyboard shortcuts (Enter to send, Shift+Enter for new line).
+
+─── 7H. SPEECH-TO-TEXT VOICE INPUT ─────────────────────────────────────────────
+
+For accessibility, students can speak their questions instead of typing.
+
+How it works:
+  1. The chat interface checks if the browser supports the Web Speech API
+     (window.SpeechRecognition or window.webkitSpeechRecognition).
+  2. If supported, a microphone button is revealed in the chat input area.
+  3. When clicked, the browser requests microphone permission and starts
+     listening.
+  4. As the student speaks, interim transcription results are shown in
+     real-time in the text input field.
+  5. When the student stops speaking (or clicks the mic button again),
+     the final transcription is placed in the input field, ready to send.
+  6. The recognition language is set to "en-IN" (English-India) by default.
+
+─── 7I. STUDENT PROFILE PERSONALIZATION ────────────────────────────────────────
+
+DeskMate doesn't give generic answers — it personalizes responses based on
+who is asking.
+
+During signup, students optionally provide:
+  - Degree program (e.g., B.Tech, MBA, B.Sc)
+  - Department (e.g., Computer Science, Mechanical Engineering)
+  - Year of study (1, 2, 3, or 4)
+  - Hosteller status (yes/no)
+
+How personalization works:
+  1. When a student asks a question, their profile is fetched from Supabase.
+  2. Profile terms (e.g., "B.Tech Computer Science year 2 hostel") are
+     appended to the query embedding, biasing the vector search toward
+     documents relevant to that specific student.
+  3. The student's profile is also included in the Gemini system prompt,
+     so the AI can say things like "As a second-year B.Tech CS student,
+     your lab fee is ₹15,000 per semester" instead of listing all fees.
+
+─── 7J. ESCALATION & SMART STAFF ROUTING ──────────────────────────────────────
+
+When DeskMate cannot answer a question (no relevant documents found, or the
+query is too sensitive/personal), it escalates to human staff.
+
+Escalation triggers:
+  - The student explicitly asks to talk to someone.
+  - The query matches sensitive keywords (complaint, refund, grievance).
+  - Zero relevant document chunks are found after vector search.
+  - The AI's confidence score (top similarity) is below threshold.
+
+When escalation is triggered:
+  1. The system queries the staff_members table for staff in the relevant
+     department/category.
+  2. Staff contact details (name, email, phone, office hours, room number)
+     are presented to the student in a formatted card.
+  3. If the AI is configured with agentic tools, it can also automatically
+     create an escalation ticket in the database.
+
+─── 7K. ADMIN ANALYTICS DASHBOARD ─────────────────────────────────────────────
+
+The analytics page (src/pages/app/admin/analytics.astro) gives admins a
+bird's-eye view of how students are using DeskMate.
+
+Dashboard sections:
+  1. STAT TILES: Total queries, % answered with context, % escalated,
+     number of thumbs-down responses.
+  2. TRENDING TOPICS: Shows which topics are spiking this week compared
+     to the previous week. Topics with 3+ queries are shown with
+     percentage change indicators (↑ 45%, "New", ↓ 12%).
+  3. SUGGESTED DOCUMENTS: Clusters unanswered queries by topic keyword
+     and tells admins exactly which documents to upload. Includes a
+     direct "Upload doc" link that pre-fills the upload form.
+  4. TOP CATEGORIES: Bar chart showing query distribution across academic
+     categories (admissions, fees, hostel, exams, etc.).
+  5. LANGUAGE BREAKDOWN: Shows which languages students are querying in
+     (only appears when non-English queries exist).
+  6. KNOWLEDGE GAPS: A reviewable list of individual queries that had no
+     context or received thumbs-down feedback. Admins can mark each gap
+     as "reviewed" to dismiss it.
+
+─── 7L. ADMIN DOCUMENT MANAGEMENT ─────────────────────────────────────────────
+
+The documents page (src/pages/app/admin/documents.astro) allows admins to:
+  - View all uploaded documents with their processing status, category,
+    expiry date, and upload date.
+  - Upload new documents (PDF, DOCX, TXT, images) via drag-and-drop.
+  - Sync URLs using the Firecrawl integration (separate "Sync URL" tab).
+  - Delete documents (which also removes their vectors from Pinecone).
+  - Reprocess failed documents.
+  - Filter and search documents by name or category.
+
+─── 7M. ADMIN STAFF DIRECTORY MANAGEMENT ───────────────────────────────────────
+
+Admins can manage the college staff directory that the AI uses for routing
+escalation queries. Each staff member has: name, role/title, department,
+email, phone, room number, office hours, and a list of topics they handle.
+
+─── 7N. ANNOUNCEMENTS SYSTEM ──────────────────────────────────────────────────
+
+Admins can post announcements that are visible to all students at their
+college. Announcements can be pinned (shown at the top) and can have
+expiration dates. Students see unread notification badges.
+
+─── 7O. ESCALATION TICKET MANAGEMENT ──────────────────────────────────────────
+
+Admins can view all escalation tickets created by the AI agent or by
+students. Tickets have statuses (open/in_progress/resolved) and can be
+updated with resolution notes. Students can also view their own tickets.
+
+─── 7P. STUDENT MANAGEMENT ────────────────────────────────────────────────────
+
+Admins can view all registered students at their college, see their
+profiles, and manage their accounts from the students dashboard page.
+
+================================================================================
+8. SECURITY MEASURES
+================================================================================
+
+a) ROW LEVEL SECURITY (RLS):
+   Every single table in the database has RLS enabled. This means even if
+   someone bypasses the application code and directly queries the Supabase
+   API, they can only access data they are authorized to see. Students
+   cannot see other students' chats. Admins at College A cannot see
+   College B's data.
+
+b) SERVER-SIDE RATE LIMITING:
+   Rate limiting is enforced by counting recent query_logs entries in
+   Supabase (not in-memory). This means rate limits persist across server
+   restarts and cannot be bypassed by reconnecting. Maximum: 20 queries
+   per user per minute.
+
+c) FAIL-CLOSED AUTHORIZATION:
+   When checking if document chunks should be included in AI context, if
+   the authorization query to Supabase fails (network error, timeout),
+   the system returns a 500 error rather than silently including
+   potentially unauthorized data. This is the "fail-closed" security
+   pattern — when in doubt, deny access.
+
+d) DOCUMENT EXPIRATION ENFORCEMENT:
+   Expired documents are automatically excluded from AI responses. Even
+   if the vectors still exist in Pinecone, the post-search filter checks
+   each document's expiry_date against today's date and removes stale
+   chunks before they reach the AI.
+
+e) ADMIN ACCESS CODES:
+   Admin registration requires a pre-generated, one-time-use access code.
+   This prevents unauthorized users from gaining admin access.
+
+f) SESSION-BASED AUTHENTICATION:
+   Supabase Auth manages session tokens via HTTP-only cookies. The Astro
+   middleware validates the session on every request.
+
+g) COLLEGE-SCOPED DATA ISOLATION:
+   All data queries include a college_name filter. Students at "JNTU
+   Hyderabad" will never see documents, staff, or announcements from
+   "VIT Vellore" — even if they share the same Supabase instance.
+
+================================================================================
+9. API ENDPOINTS (FULL LIST)
+================================================================================
+
+AUTHENTICATION:
+  POST /api/auth/login      — Authenticate with email/password
+  POST /api/auth/signup     — Register a new student or admin account
+  POST /api/auth/logout     — End the user's session
+
+CHAT:
+  POST /api/chat/generate   — Submit a query and receive a streamed AI response
+  GET/POST /api/chat/sessions       — List or create chat sessions
+  GET/POST /api/chat/sessions/[id]  — Get or update a specific session
+  GET/POST /api/chat/messages       — List or save chat messages
+
+ADMIN - DOCUMENTS:
+  POST /api/admin/documents        — Upload a new document (file)
+  POST /api/admin/documents/scrape — Sync a URL via Firecrawl
+
+ADMIN - STAFF:
+  GET/POST /api/admin/staff   — List or create staff members
+
+ADMIN - ANNOUNCEMENTS:
+  GET/POST /api/admin/announcements — List or create announcements
+
+ADMIN - TICKETS:
+  GET/POST /api/admin/tickets — List or update escalation tickets
+
+ADMIN - ANALYTICS:
+  POST /api/admin/analytics/[id] — Mark a knowledge gap as reviewed
+
+ADMIN - STUDENTS:
+  GET /api/admin/students — List all students for the college
+
+PUBLIC:
+  POST /api/contact       — Submit a contact form message
+  GET/POST /api/profile   — View or update user profile
+  GET /api/announcements  — Fetch announcements for the user's college
+  GET /api/tickets        — Fetch the student's own escalation tickets
+  GET /api/documents/[id] — Download/proxy a document file
+
+================================================================================
+10. SUMMARY
+================================================================================
+
+DeskMate 2.0 is a comprehensive, enterprise-grade AI helpdesk that combines:
+  - Retrieval-Augmented Generation for accurate, grounded answers.
+  - Semantic caching for instant responses to common questions.
+  - Agentic function calling for automated ticket creation.
+  - Multi-source ingestion (files + web scraping) for flexible knowledge.
+  - A full admin suite for managing documents, staff, students, and analytics.
+  - Robust security with RLS, rate limiting, and fail-closed patterns.
+  - Multilingual support with automatic language detection.
+  - Personalized responses based on student profiles.
+  - Voice input for accessibility.
+
+The entire application is built with TypeScript, runs on Astro 5 with
+server-side rendering, is deployed on Vercel's edge network, and uses
+Supabase, Pinecone, Google Gemini, and Firecrawl as its core services.
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

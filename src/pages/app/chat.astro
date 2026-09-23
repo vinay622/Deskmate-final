@@ -1,0 +1,38 @@
+---
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import ChatInterface from "../../components/chat/ChatInterface.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+const user = Astro.locals.user;
+
+// Fetch full_name from profiles table for display
+let displayName = "Student";
+let displayEmail = "";
+
+if (user) {
+  displayEmail = user.email ?? "";
+  const supabase = createSupabaseServerClient(Astro.request, Astro.cookies);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", user.id)
+    .single();
+
+  displayName =
+    profile?.full_name ??
+    user.user_metadata?.full_name ??
+    displayEmail.split("@")[0] ??
+    "Student";
+}
+---
+
+<AuthLayout
+  title="DeskMate — Chat"
+  description="Ask DeskMate anything about your college. Instant answers with document citations."
+>
+  <ChatInterface
+    userName={displayName}
+    userEmail={displayEmail}
+    userRole={Astro.locals.userRole}
+  />
+</AuthLayout>

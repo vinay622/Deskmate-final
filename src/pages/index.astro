@@ -1,0 +1,250 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import Section from "../components/sections/Section.astro";
+import SectionTitle from "../components/ui/SectionTitle.astro";
+import AccordionItem from "../components/ui/AccordionItem.astro";
+import Testimonials from "../components/sections/Testimonials.astro";
+import Card from "../components/ui/Card.astro";
+
+const user = Astro.locals.user;
+const fullName = Astro.locals.userName ?? '';
+const firstName = fullName.split(' ')[0] || '';
+
+const features = [
+  {
+    title: "Document-Grounded Answers",
+    description: "AI only answers from officially uploaded PDFs — no external knowledge, no hallucinations. Every answer traces back to a real document.",
+    bg: "bg-gray",
+  },
+  {
+    title: "Exact Citations",
+    description: "Every answer includes the source document name and page number. Students can verify information directly in the original circular.",
+    bg: "bg-green",
+  },
+  {
+    title: "3 Languages",
+    description: "Students can ask questions in English, Hindi, or Telugu. DeskMate understands and responds accurately in all three languages.",
+    bg: "bg-dark text-gray",
+  },
+  {
+    title: "Smart Staff Routing",
+    description: "When AI cannot answer, it doesn't say 'I don't know'. It routes the student to the exact staff member who can help.",
+    bg: "bg-gray",
+  },
+  {
+    title: "Simple Admin Upload",
+    description: "IT staff upload PDFs via a drag-and-drop interface. Set category, expiry date, and the system indexes the document automatically.",
+    bg: "bg-green",
+  },
+  {
+    title: "Always Up-to-Date",
+    description: "When admins update documents, answers update instantly. Expired documents stop appearing in responses automatically.",
+    bg: "bg-dark text-gray",
+  },
+];
+
+const howItWorks = [
+  {
+    index: 1,
+    title: "Student Asks a Question",
+    description: "A student opens DeskMate and types a question in plain language — in English, Hindi, or Telugu. 'When is the fee deadline?' or 'How do I apply for hostel?' No navigation, no PDFs, no forms.",
+  },
+  {
+    index: 2,
+    title: "DeskMate Searches Official Documents",
+    description: "DeskMate instantly searches through all officially uploaded college documents. It uses keyword and semantic matching to find the most relevant content from PDFs, circulars, and handbooks.",
+  },
+  {
+    index: 3,
+    title: "Answer with Document Citation",
+    description: "Within seconds, DeskMate responds with the accurate answer AND the exact document name and page number it came from. Students can verify the information directly in the source document.",
+  },
+  {
+    index: 4,
+    title: "Staff Routing for Complex Cases",
+    description: "If a query is too specific or not covered in any document, DeskMate doesn't guess. It identifies the correct staff member — accounts office, examination cell, hostel warden — and provides their contact details.",
+  },
+];
+---
+
+<MainLayout
+  title="DeskMate — College AI Assistant"
+  description="DeskMate is your college AI assistant. Get instant answers from official documents in English, Hindi, and Telugu — with exact citations, 24/7."
+>
+  <!-- Hero -->
+  <Section id="hero">
+    <div class="page-grid relative mt-8 lg:mt-12 mb-20 lg:mb-28 rounded-[32px] border border-[#e5e7eb] px-6 py-12 sm:px-10 lg:px-14 lg:py-16">
+      <div class="absolute inset-x-0 top-0 h-1 bg-green rounded-t-[32px]"></div>
+      <div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-14 items-center relative">
+
+        <!-- Left: copy -->
+        <div class="text-center lg:text-left">
+          <div class="mb-6 inline-flex">
+            {user && firstName ? (
+              <span class="greenhead text-xs sm:text-sm uppercase tracking-widest">Welcome back, {firstName}</span>
+            ) : (
+              <span class="greenhead text-xs sm:text-sm uppercase tracking-widest">College AI Assistant</span>
+            )}
+          </div>
+          <h1 class="text-4xl sm:text-5xl lg:text-[4rem] font-medium leading-[0.98] tracking-[-0.055em] mb-7 hero-enter hero-enter-2">
+            Your college <span class="greenhead">knowledge base</span>, answered in seconds.
+          </h1>
+          <p class="text-lg text-[#555] mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            DeskMate reads every official circular, handbook, and policy — and answers student questions instantly with exact citations. No hallucinations. No waiting.
+          </p>
+          <div class="flex flex-wrap justify-center lg:justify-start gap-3 mb-8 hero-enter hero-enter-4">
+            <a href="/app/chat" class="btn-primary px-8 py-4 rounded-2xl text-base">
+              Open DeskMate
+            </a>
+            <a href="#how-it-works" class="btn-secondary px-8 py-4 rounded-2xl text-base">
+              How It Works
+            </a>
+          </div>
+          <!-- Stat pills -->
+          <div class="flex flex-wrap justify-center lg:justify-start gap-2.5 hero-enter hero-enter-5">
+            <span class="font-utility text-[10px] uppercase tracking-wider border border-dark rounded-full px-3 py-1.5">24/7 Available</span>
+            <span class="font-utility text-[10px] uppercase tracking-wider bg-dark text-white rounded-full px-3 py-1.5">3 Languages</span>
+            <span class="font-utility text-[10px] uppercase tracking-wider bg-green rounded-full px-3 py-1.5">Cited Answers</span>
+          </div>
+        </div>
+
+        <!-- Right: live answer card -->
+        <div class="relative mx-auto w-full max-w-md lg:max-w-none">
+          <div class="absolute -inset-4 bg-[#b9ff66]/[0.4] rounded-[44px] blur-3xl -z-10 hidden lg:block"></div>
+          <div class="hero-card bg-dark rounded-[26px] p-5 sm:p-6 shadow-[0_24px_60px_rgba(25,26,35,0.22)] border border-[#30313d]">
+            <!-- Card header -->
+            <div class="flex items-center gap-2 mb-5 pb-4 border-b border-[#2d2e3a]">
+              <div class="w-2 h-2 rounded-full bg-green animate-pulse"></div>
+              <span class="text-[#8a8f98] text-xs">DeskMate AI · answering now</span>
+              <span class="ml-auto text-[10px] text-[#8a8f98] border border-[#2d2e3a] rounded-full px-2 py-0.5">Official docs only</span>
+            </div>
+            <!-- Question -->
+            <div class="flex justify-end mb-3">
+              <div class="bg-green text-dark rounded-[14px] rounded-br-[4px] px-3.5 py-2 text-sm max-w-[80%] font-medium">
+                When is the last date to pay fees?
+              </div>
+            </div>
+            <!-- Answer -->
+            <div class="flex justify-start mb-3">
+              <div class="bg-[#1e1f2e] text-[#d3d6dc] border border-[#2d2e3a] rounded-[14px] rounded-bl-[4px] px-3.5 py-2.5 text-sm max-w-[88%] leading-relaxed">
+                The last date to pay fees without a late fine is the <strong class="text-white">15th of the month</strong> following semester start.
+              </div>
+            </div>
+            <!-- Citation -->
+            <div class="flex justify-start">
+              <span class="inline-flex items-center gap-1.5 bg-dark border border-green text-green text-[11px] px-2.5 py-1 rounded-full">
+                <svg width="8" height="10" viewBox="0 0 10 12" fill="currentColor"><path d="M1 0h8v12H1V0zm2 3h4v1H3V3zm0 2h4v1H3V5zm0 2h3v1H3V7z"/></svg>
+                Fee Structure 2024-25.pdf · p.3
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </Section>
+
+  <!-- Features -->
+  <Section id="features">
+    <div class="mb-[80px]">
+      <SectionTitle
+        sectionTitle="Why DeskMate"
+        description="Built specifically for Indian colleges. No generic AI — every answer is sourced from your institution's own documents."
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {features.map((f) => (
+          <Card isUnderline={true}>
+            <div class={`p-7 rounded-[27px] h-full ${f.bg}`}>
+              <div class="flex items-center justify-between mb-9">
+                <span class="font-utility text-[10px] uppercase tracking-widest opacity-60">DeskMate / 0{features.indexOf(f) + 1}</span>
+                <span class="size-2 rounded-full bg-current opacity-60"></span>
+              </div>
+              <h3 class="text-xl font-medium mb-3 leading-tight">{f.title}</h3>
+              <p class="text-sm leading-relaxed opacity-80">{f.description}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  </Section>
+
+  <!-- How It Works -->
+  <Section id="how-it-works">
+    <div class="mb-[80px]">
+      <SectionTitle
+        sectionTitle="How It Works"
+        description="From question to verified answer in under four seconds — here's what happens behind the scenes."
+      />
+      <div>
+        {howItWorks.map((item) => (
+          <AccordionItem
+            index={item.index}
+            title={item.title}
+            description={item.description}
+          />
+        ))}
+      </div>
+    </div>
+  </Section>
+
+  <!-- Stats Bar -->
+  <Section id="stats">
+    <div class="mb-[80px]">
+      <div class="bg-dark rounded-[30px] py-14 px-8 border border-dark shadow-[0px_5px_0px_#191a23]">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-10 text-center text-gray">
+          <div>
+            <div class="text-5xl font-medium text-green mb-2">10,000+</div>
+            <p class="text-[#aaa]">Queries Answered</p>
+          </div>
+          <div class="sm:border-x border-[#2d2e3a]">
+            <div class="text-5xl font-medium text-green mb-2">50+</div>
+            <p class="text-[#aaa]">Documents Indexed</p>
+          </div>
+          <div>
+            <div class="text-5xl font-medium text-green mb-2">3</div>
+            <p class="text-[#aaa]">Languages Supported</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- Testimonials (reuse existing component, data from clientData.json) -->
+  <Testimonials />
+
+  <!-- CTA Banner -->
+  <Section id="cta">
+    <div class="mb-[140px]">
+      <div class="bg-dark rounded-[30px] py-14 px-8 md:px-14 flex flex-col md:flex-row items-center justify-between gap-8 border border-dark shadow-[0px_5px_0px_#191a23]">
+        <div class="text-gray">
+          <h2 class="text-3xl md:text-4xl font-medium mb-3">
+            Ready to answer every<br />
+            <span class="text-green">student question instantly?</span>
+          </h2>
+          <p class="text-[#aaa]">Try DeskMate with demo data — no signup required.</p>
+        </div>
+        <a href="/app/chat" class="btn-tertiary px-10 py-5 rounded-2xl text-lg font-medium whitespace-nowrap">
+          Start Asking
+        </a>
+      </div>
+    </div>
+  </Section>
+</MainLayout>
+
+<style>
+  .hero-card {
+    animation: floatCard 6s ease-in-out infinite;
+  }
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-card { animation: none; }
+  }
+  .hero-enter { animation: heroEnter 650ms both cubic-bezier(.2,.8,.2,1); }
+  .hero-enter-2 { animation-delay: 120ms; }
+  .hero-enter-4 { animation-delay: 240ms; }
+  .hero-enter-5 { animation-delay: 300ms; }
+  @keyframes heroEnter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+</style>

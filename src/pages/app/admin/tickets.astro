@@ -1,0 +1,194 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+const { request, cookies, locals } = Astro;
+
+if (!locals.user || locals.userRole !== "admin") {
+  return Astro.redirect("/login");
+}
+
+const supabase = createSupabaseServerClient(request, cookies);
+const { data: tickets } = await supabase
+  .from("escalation_tickets")
+  .select("id, student_name, query, category, staff_name, status, resolution_note, created_at, updated_at")
+  .eq("college_name", locals.collegeName)
+  .order("created_at", { ascending: false });
+
+const rows = tickets ?? [];
+
+const counts = {
+  open: rows.filter((t) => t.status === "open").length,
+  in_progress: rows.filter((t) => t.status === "in_progress").length,
+  resolved: rows.filter((t) => t.status === "resolved").length,
+};
+
+const statusChip = (status: string) =>
+  status === "open" ? "chip-amber" : status === "in_progress" ? "chip-neutral" : "chip-lime";
+const statusLabel = (status: string) =>
+  status === "open" ? "Open" : status === "in_progress" ? "In progress" : "Resolved";
+---
+
+<AdminLayout
+  title="Tickets — DeskMate Admin"
+  description="Track and resolve student escalations."
+  active="tickets"
+  pageTitle="Tickets"
+  eyebrow="Escalations"
+>
+  <!-- Stat tiles -->
+  <div class="grid grid-cols-3 gap-4 mb-7">
+    <div class="app-card p-5">
+      <p class="eyebrow">Open</p>
+      <p class="text-[32px] leading-none font-medium text-dark mt-2">{counts.open}</p>
+    </div>
+    <div class="app-card p-5">
+      <p class="eyebrow">In progress</p>
+      <p class="text-[32px] leading-none font-medium text-dark mt-2">{counts.in_progress}</p>
+    </div>
+    <div class="app-card p-5">
+      <p class="eyebrow">Resolved</p>
+      <p class="text-[32px] leading-none font-medium text-dark mt-2">{counts.resolved}</p>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="flex items-center gap-1.5 mb-5" id="ticket-filters">
+    <button data-filter="all" class="ticket-tab ticket-tab-active">All</button>
+    <button data-filter="open" class="ticket-tab">Open</button>
+    <button data-filter="in_progress" class="ticket-tab">In progress</button>
+    <button data-filter="resolved" class="ticket-tab">Resolved</button>
+  </div>
+
+  {rows.length > 0 ? (
+    <div class="flex flex-col gap-3" id="ticket-list">
+      {rows.map((t) => (
+        <div class="app-card p-5" data-ticket-id={t.id} data-status={t.status}>
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-mono text-[#9aa0a6]">#{t.id.slice(0, 8).toUpperCase()}</span>
+                <span class={`chip ${statusChip(t.status)}`} data-status-chip>{statusLabel(t.status)}</span>
+                {t.category && <span class="chip chip-neutral capitalize">{t.category}</span>}
+              </div>
+              <p class="text-[15px] text-dark mt-2 leading-snug">{t.query}</p>
+              <div class="flex items-center gap-3 mt-2.5 text-xs text-[#9aa0a6] flex-wrap">
+                <span class="font-medium text-[#6b6f76]">{t.student_name || "Student"}</span>
+                {t.staff_name && <span>→ routed to {t.staff_name}</span>}
+                <span>
+                  {new Date(t.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+              </div>
+              {t.resolution_note && (
+                <div class="mt-3 text-xs text-[#555] bg-[#f8f9fb] border border-[#e8eaed] rounded-[10px] px-3 py-2" data-resolution>
+                  <span class="font-medium text-dark">Resolution:</span> {t.resolution_note}
+                </div>
+              )}
+            </div>
+
+            <div class="shrink-0">
+              <select data-action="ticket-status" class="app-input !py-1.5 !text-xs !w-auto">
+                <option value="open" selected={t.status === "open"}>Open</option>
+                <option value="in_progress" selected={t.status === "in_progress"}>In progress</option>
+                <option value="resolved" selected={t.status === "resolved"}>Resolved</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div class="app-card px-5 py-16 text-center">
+      <div class="w-12 h-12 rounded-[16px] bg-[#f0f1f3] flex items-center justify-center mx-auto mb-3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><path d="M4 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2z"/></svg>
+      </div>
+      <p class="text-sm font-medium text-dark">No tickets yet</p>
+      <p class="text-xs text-[#9aa0a6] mt-1">Escalations from the chat assistant will appear here.</p>
+    </div>
+  )}
+</AdminLayout>
+
+<style>
+  .ticket-tab {
+    @apply px-3.5 py-1.5 rounded-full text-xs font-medium text-[#6b6f76] bg-white border border-[#e8eaed] transition-colors;
+  }
+  .ticket-tab:hover { @apply text-dark border-[#d5d8dd]; }
+  .ticket-tab-active { @apply bg-dark text-white border-dark; }
+</style>
+
+<script is:inline>
+  // ─── Filter tabs ───
+  (function () {
+    var tabs = document.querySelectorAll("#ticket-filters .ticket-tab");
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        tabs.forEach(function (t) { t.classList.remove("ticket-tab-active"); });
+        tab.classList.add("ticket-tab-active");
+        var filter = tab.dataset.filter;
+        document.querySelectorAll("#ticket-list [data-ticket-id]").forEach(function (card) {
+          var show = filter === "all" || card.dataset.status === filter;
+          card.style.display = show ? "" : "none";
+        });
+      });
+    });
+  })();
+
+  // ─── Status update ───
+  var CHIP = {
+    open: { label: "Open", cls: "chip-amber" },
+    in_progress: { label: "In progress", cls: "chip-neutral" },
+    resolved: { label: "Resolved", cls: "chip-lime" },
+  };
+
+  document.addEventListener("change", async function (e) {
+    var select = e.target.closest('[data-action="ticket-status"]');
+    if (!select) return;
+    var card = select.closest("[data-ticket-id]");
+    if (!card) return;
+    var id = card.dataset.ticketId;
+    var newStatus = select.value;
+    var prevStatus = card.dataset.status;
+
+    var note = null;
+    if (newStatus === "resolved") {
+      note = prompt("Add a resolution note (optional):", "") || "";
+    }
+
+    select.disabled = true;
+    try {
+      var res = await fetch("/api/admin/tickets/" + id, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus, resolution_note: note }),
+      });
+      var data = await res.json();
+      if (data.ok) {
+        card.dataset.status = newStatus;
+        var chip = card.querySelector("[data-status-chip]");
+        if (chip) {
+          chip.className = "chip " + CHIP[newStatus].cls;
+          chip.textContent = CHIP[newStatus].label;
+        }
+        if (note) {
+          var existing = card.querySelector("[data-resolution]");
+          if (existing) {
+            existing.innerHTML = '<span class="font-medium text-dark">Resolution:</span> ' + note;
+          } else {
+            var box = document.createElement("div");
+            box.setAttribute("data-resolution", "");
+            box.className = "mt-3 text-xs text-[#555] bg-[#f8f9fb] border border-[#e8eaed] rounded-[10px] px-3 py-2";
+            box.innerHTML = '<span class="font-medium text-dark">Resolution:</span> ' + note;
+            card.querySelector(".min-w-0").appendChild(box);
+          }
+        }
+      } else {
+        alert("Update failed: " + (data.error || "unknown error"));
+        select.value = prevStatus;
+      }
+    } catch (err) {
+      alert("Network error.");
+      select.value = prevStatus;
+    }
+    select.disabled = false;
+  });
+</script>

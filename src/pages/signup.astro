@@ -1,0 +1,552 @@
+---
+import AuthLayout from "../layouts/AuthLayout.astro";
+---
+
+<AuthLayout
+  title="Create Account — DeskMate"
+  description="Create your DeskMate account and get instant answers from your college's official documents."
+>
+  <div class="min-h-screen flex">
+
+    <!-- ═══ LEFT PANEL ═══ -->
+    <div class="hidden lg:flex lg:w-[55%] bg-dark flex-col relative overflow-hidden px-16 py-12">
+
+      <!-- Background blobs -->
+      <div class="absolute top-[-100px] right-[-60px] w-[360px] h-[360px] rounded-full bg-green opacity-[0.06] blur-[90px] pointer-events-none"></div>
+      <div class="absolute bottom-[-80px] left-[-80px] w-[300px] h-[300px] rounded-full bg-green opacity-[0.05] blur-[80px] pointer-events-none"></div>
+      <div class="absolute top-[35%] left-[10%] w-[200px] h-[200px] rounded-full bg-green opacity-[0.03] blur-[70px] pointer-events-none"></div>
+
+      <!-- Dot grid -->
+      <div class="absolute inset-0 pointer-events-none" style="background-image: radial-gradient(circle, rgba(185,255,102,0.07) 1px, transparent 1px); background-size: 28px 28px;"></div>
+
+      <!-- Logo -->
+      <a href="/" class="relative z-10 flex items-center gap-2 mb-auto">
+        <span class="text-2xl font-medium text-white">
+          Desk<span class="text-green">Mate</span>
+        </span>
+        <span class="text-xs text-[#555] border border-[#2d2e3a] rounded-full px-2 py-0.5 ml-1">Beta</span>
+      </a>
+
+      <!-- Headline -->
+      <div class="relative z-10 mt-16 mb-10">
+        <p class="text-green text-sm uppercase tracking-widest font-medium mb-4">Join DeskMate</p>
+        <h1 class="text-4xl xl:text-5xl font-medium text-white leading-tight mb-6">
+          Your college.<br />
+          Your documents.<br />
+          <span class="text-green">Your answers.</span>
+        </h1>
+        <p class="text-[#888] text-base leading-relaxed max-w-md">
+          Set up your account in under a minute. DeskMate works with your college's official documents from day one — no setup required on your end.
+        </p>
+      </div>
+
+      <!-- Three info cards -->
+      <div class="relative z-10 flex flex-col gap-3 mb-10">
+        <div class="bg-[#0f1019] border border-[#2d2e3a] rounded-[20px] p-5 flex items-start gap-4" style="animation: floatCard 7s ease-in-out infinite;">
+          <div class="w-10 h-10 rounded-[12px] bg-green/10 border border-green/20 flex items-center justify-center shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <div>
+            <p class="text-white text-sm font-medium mb-0.5">Document-grounded answers</p>
+            <p class="text-[#666] text-xs leading-relaxed">AI reads only from your college's officially uploaded PDFs. No guessing, no hallucinations.</p>
+          </div>
+        </div>
+
+        <div class="bg-[#0f1019] border border-[#2d2e3a] rounded-[20px] p-5 flex items-start gap-4" style="animation: floatCard 7s ease-in-out 1.5s infinite;">
+          <div class="w-10 h-10 rounded-[12px] bg-green/10 border border-green/20 flex items-center justify-center shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div>
+            <p class="text-white text-sm font-medium mb-0.5">Works in 3 languages</p>
+            <p class="text-[#666] text-xs leading-relaxed">Ask questions in English, Hindi or Telugu. DeskMate understands and responds accurately.</p>
+          </div>
+        </div>
+
+        <div class="bg-[#0f1019] border border-[#2d2e3a] rounded-[20px] p-5 flex items-start gap-4" style="animation: floatCard 7s ease-in-out 3s infinite;">
+          <div class="w-10 h-10 rounded-[12px] bg-green/10 border border-green/20 flex items-center justify-center shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <p class="text-white text-sm font-medium mb-0.5">Smart staff routing</p>
+            <p class="text-[#666] text-xs leading-relaxed">When AI can't answer, it routes you to exactly the right staff member — not a generic helpline.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonial snippet -->
+      <div class="relative z-10 bg-[#0f1019] border border-[#2d2e3a] rounded-[20px] p-5">
+        <p class="text-[#aaa] text-sm italic leading-relaxed mb-3">
+          "DeskMate answered my hostel allotment question at 11 PM on a Sunday with the exact regulation and page number. Worth every second."
+        </p>
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-green/20 border border-green/30 flex items-center justify-center">
+            <span class="text-green text-xs font-medium">A</span>
+          </div>
+          <div>
+            <p class="text-white text-xs font-medium">Arjun Reddy</p>
+            <p class="text-[#555] text-xs">B.Tech 3rd Year, CSE</p>
+          </div>
+          <div class="ml-auto flex gap-0.5">
+            {[1,2,3,4,5].map(() => (
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="#b9ff66"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            ))}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ RIGHT PANEL ═══ -->
+    <div class="w-full lg:w-[45%] bg-white flex flex-col">
+
+      <!-- Mobile logo -->
+      <div class="lg:hidden flex items-center justify-between px-8 pt-8 pb-4 border-b border-[#eee]">
+        <a href="/" class="text-xl font-medium text-dark">
+          Desk<span style="background:#b9ff66;border-radius:7px;padding:0 7px;">Mate</span>
+        </a>
+        <a href="/" class="text-sm text-[#666] underline">← Back home</a>
+      </div>
+
+      <!-- Form area - scrollable -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="px-8 sm:px-14 lg:px-16 py-10">
+
+          <!-- Heading -->
+          <div class="mb-8">
+            <p class="text-xs text-[#aaa] uppercase tracking-widest mb-2">Get started free</p>
+            <h2 class="text-3xl font-medium text-dark mb-2">Create your account</h2>
+            <p class="text-[#888] text-sm">Takes under a minute. No credit card needed.</p>
+          </div>
+
+          <!-- Error banner (hidden by default) -->
+          <div id="signup-error-banner" class="hidden mb-5 bg-red-50 border border-red-200 text-red-700 rounded-[14px] px-4 py-3 text-sm flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="signup-error-message"></span>
+          </div>
+
+          <!-- Role selector -->
+          <div class="mb-7">
+            <p class="text-sm font-medium text-dark mb-2.5">I am a</p>
+            <div class="flex gap-3">
+              <label class="flex-1 cursor-pointer">
+                <input type="radio" name="role" value="student" class="sr-only peer" checked />
+                <div class="border-2 border-[#e0e0e0] peer-checked:border-dark peer-checked:bg-dark rounded-[14px] p-3.5 text-center transition-all duration-200">
+                  <div class="text-xl mb-1 peer-checked:text-white">🎓</div>
+                  <p class="text-sm font-medium text-[#888] peer-checked:text-white transition-colors">Student</p>
+                </div>
+              </label>
+              <label class="flex-1 cursor-pointer">
+                <input type="radio" name="role" value="admin" class="sr-only peer" />
+                <div class="border-2 border-[#e0e0e0] peer-checked:border-dark peer-checked:bg-dark rounded-[14px] p-3.5 text-center transition-all duration-200">
+                  <div class="text-xl mb-1">🧑‍💼</div>
+                  <p class="text-sm font-medium text-[#888] peer-checked:text-white transition-colors">Staff / Admin</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Form -->
+          <form id="signup-form" class="flex flex-col gap-4" onsubmit="handleSignup(event)">
+
+            <!-- Name row -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-medium text-dark uppercase tracking-wide" for="first-name">First Name</label>
+                <input
+                  type="text"
+                  id="first-name"
+                  name="first_name"
+                  placeholder="Arjun"
+                  required
+                  class="w-full px-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all"
+                />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-medium text-dark uppercase tracking-wide" for="last-name">Last Name</label>
+                <input
+                  type="text"
+                  id="last-name"
+                  name="last_name"
+                  placeholder="Reddy"
+                  required
+                  class="w-full px-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all"
+                />
+              </div>
+            </div>
+
+            <!-- College Email -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-medium text-dark uppercase tracking-wide" for="signup-email">College Email</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#aaa]">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </span>
+                <input
+                  type="email"
+                  id="signup-email"
+                  name="email"
+                  placeholder="21cs1234@college.edu.in"
+                  required
+                  class="w-full pl-10 pr-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all"
+                />
+              </div>
+            </div>
+
+            <!-- College Name -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-medium text-dark uppercase tracking-wide" for="college">College / Institution</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#aaa] pointer-events-none">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </span>
+                <select
+                  id="college"
+                  name="college"
+                  required
+                  class="w-full pl-10 pr-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all appearance-none bg-white cursor-pointer"
+                >
+                  <option value="" disabled selected>Select your college</option>
+                  <option value="Vasavi College of Engineering">Vasavi College of Engineering</option>
+                  <option value="Vignana Bharathi Institute of Technology (VBIT)">Vignana Bharathi Institute of Technology (VBIT)</option>
+                  <option value="Chaitanya Bharathi Institute of Technology (CBIT)">Chaitanya Bharathi Institute of Technology (CBIT)</option>
+                  <option value="VNR Vignana Jyothi Institute of Engineering and Technology (VNRVJIET)">VNR Vignana Jyothi Institute of Engineering and Technology (VNRVJIET)</option>
+                  <option value="Neil Gogte Institute of Technology (NGIT)">Neil Gogte Institute of Technology (NGIT)</option>
+                  <option value="Keshav Memorial Institute of Technology">Keshav Memorial Institute of Technology</option>
+                  <option value="University of Hyderabad">University of Hyderabad</option>
+                  <option value="Osmania University">Osmania University</option>
+                  <option value="Indian Institute of Technology Hyderabad">Indian Institute of Technology Hyderabad</option>
+                  <option value="International Institute of Information Technology Hyderabad">International Institute of Information Technology Hyderabad</option>
+                  <option value="Jawaharlal Nehru Technological University Hyderabad">Jawaharlal Nehru Technological University Hyderabad</option>
+                  <option value="NALSAR University of Law">NALSAR University of Law</option>
+                  <option value="Maulana Azad National Urdu University">Maulana Azad National Urdu University</option>
+                  <option value="English and Foreign Languages University">English and Foreign Languages University</option>
+                  <option value="Professor Jayashankar Telangana State Agricultural University">Professor Jayashankar Telangana State Agricultural University</option>
+                  <option value="Dr. B.R. Ambedkar Open University">Dr. B.R. Ambedkar Open University</option>
+                  <option value="Mahindra University">Mahindra University</option>
+                  <option value="Woxsen University">Woxsen University</option>
+                  <option value="Anurag University">Anurag University</option>
+                  <option value="ICFAI Foundation for Higher Education">ICFAI Foundation for Higher Education</option>
+                  <option value="GITAM University Hyderabad Campus">GITAM University Hyderabad Campus</option>
+                  <option value="Indian School of Business">Indian School of Business</option>
+                  <option value="Nizam's Institute of Medical Sciences">Nizam's Institute of Medical Sciences</option>
+                  <option value="CMR Institute of Technology Hyderabad">CMR Institute of Technology Hyderabad</option>
+                  <option value="CVR College of Engineering">CVR College of Engineering</option>
+                  <option value="Gokaraju Rangaraju Institute of Engineering and Technology">Gokaraju Rangaraju Institute of Engineering and Technology</option>
+                  <option value="Institute of Aeronautical Engineering">Institute of Aeronautical Engineering</option>
+                  <option value="J.B. Institute of Engineering and Technology">J.B. Institute of Engineering and Technology</option>
+                  <option value="Deccan College of Engineering and Technology">Deccan College of Engineering and Technology</option>
+                  <option value="Ellenki College of Engineering and Technology">Ellenki College of Engineering and Technology</option>
+                  <option value="Vishwa Vishwani Institute of Systems and Management">Vishwa Vishwani Institute of Systems and Management</option>
+                  <option value="Dhruva College of Management">Dhruva College of Management</option>
+                  <option value="SUN International Institute for Tourism & Management">SUN International Institute for Tourism & Management</option>
+                  <option value="National Institute of Pharmaceutical Education and Research Hyderabad">National Institute of Pharmaceutical Education and Research Hyderabad</option>
+                  <option value="Malla Reddy Engineering College">Malla Reddy Engineering College</option>
+                  <option value="Malla Reddy College of Engineering and Technology">Malla Reddy College of Engineering and Technology</option>
+                  <option value="Malla Reddy Institute of Technology">Malla Reddy Institute of Technology</option>
+                  <option value="Methodist College of Engineering and Technology">Methodist College of Engineering and Technology</option>
+                  <option value="Stanley College of Engineering and Technology for Women">Stanley College of Engineering and Technology for Women</option>
+                  <option value="Lords Institute of Engineering and Technology">Lords Institute of Engineering and Technology</option>
+                  <option value="St. Mary's Engineering College">St. Mary's Engineering College</option>
+                </select>
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#aaa] pointer-events-none">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-medium text-dark uppercase tracking-wide" for="signup-password">Password</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#aaa]">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input
+                  type="password"
+                  id="signup-password"
+                  name="password"
+                  placeholder="Min. 8 characters"
+                  required
+                  minlength="8"
+                  class="w-full pl-10 pr-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all"
+                  oninput="checkStrength(this.value)"
+                />
+              </div>
+              <!-- Password strength bar -->
+              <div class="flex gap-1 mt-1" id="strength-bars">
+                <div class="h-1 flex-1 rounded-full bg-[#eee]" id="bar1"></div>
+                <div class="h-1 flex-1 rounded-full bg-[#eee]" id="bar2"></div>
+                <div class="h-1 flex-1 rounded-full bg-[#eee]" id="bar3"></div>
+                <div class="h-1 flex-1 rounded-full bg-[#eee]" id="bar4"></div>
+              </div>
+              <p id="strength-label" class="text-[10px] text-[#bbb]">Enter a password</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-medium text-dark uppercase tracking-wide" for="confirm-password">Confirm Password</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#aaa]">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <input
+                  type="password"
+                  id="confirm-password"
+                  name="confirm_password"
+                  placeholder="Re-enter password"
+                  required
+                  class="w-full pl-10 pr-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all"
+                />
+              </div>
+              <p id="match-label" class="text-[10px] text-[#bbb] hidden"></p>
+            </div>
+
+            <!-- Student profile fields (hidden for admin role) -->
+            <div id="student-profile-fields" class="flex flex-col gap-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-medium text-dark uppercase tracking-wide" for="degree-program">Degree <span class="normal-case font-normal text-[#aaa]">(optional)</span></label>
+                  <select id="degree-program" name="degree_program" class="w-full px-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all bg-white">
+                    <option value="">Select degree</option>
+                    <option value="B.Tech">B.Tech</option>
+                    <option value="M.Tech">M.Tech</option>
+                    <option value="MBA">MBA</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-medium text-dark uppercase tracking-wide" for="department">Department <span class="normal-case font-normal text-[#aaa]">(optional)</span></label>
+                  <input type="text" id="department" name="department" placeholder="e.g. CSE" class="w-full px-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-medium text-dark uppercase tracking-wide" for="year">Year <span class="normal-case font-normal text-[#aaa]">(optional)</span></label>
+                  <select id="year" name="year" class="w-full px-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all bg-white">
+                    <option value="">Select year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                    <option value="5">5th Year</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-medium text-dark uppercase tracking-wide" for="hosteller">Hostel resident? <span class="normal-case font-normal text-[#aaa]">(optional)</span></label>
+                  <select id="hosteller" name="hosteller" class="w-full px-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all bg-white">
+                    <option value="">Prefer not to say</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin Access Code (shown only for admin role) -->
+            <div id="access-code-field" class="hidden flex flex-col gap-1.5">
+              <label class="text-xs font-medium text-dark uppercase tracking-wide" for="access-code">Admin Access Code</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#aaa]">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+                </span>
+                <input
+                  type="text"
+                  id="access-code"
+                  name="access_code"
+                  placeholder="e.g. JNTU-ADMIN-9X72"
+                  class="w-full pl-10 pr-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all uppercase tracking-wider"
+                />
+              </div>
+              <p class="text-[10px] text-[#aaa] leading-relaxed">Provided by your institution.</p>
+            </div>
+
+            <!-- Terms -->
+            <div class="flex items-start gap-2.5 mt-1">
+              <input type="checkbox" id="terms" name="terms" required class="w-4 h-4 mt-0.5 rounded border-[#ccc] accent-dark cursor-pointer shrink-0" />
+              <label for="terms" class="text-xs text-[#888] cursor-pointer leading-relaxed">
+                I agree to DeskMate's
+                <a href="#" class="text-dark underline underline-offset-2 hover:text-green transition-colors">Terms of Service</a>
+                and
+                <a href="#" class="text-dark underline underline-offset-2 hover:text-green transition-colors">Privacy Policy</a>
+              </label>
+            </div>
+
+            <!-- Submit -->
+            <button
+              type="submit"
+              id="signup-btn"
+              class="w-full bg-dark text-white py-4 rounded-[14px] font-medium text-sm hover:bg-green hover:text-dark transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] mt-2 flex items-center justify-center gap-2"
+            >
+              <span id="signup-btn-text">Create Account</span>
+              <svg id="signup-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg id="signup-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="hidden animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </button>
+
+          </form>
+
+          <!-- Sign in link -->
+          <p class="text-center text-sm text-[#888] mt-6">
+            Already have an account?
+            <a href="/login" class="text-dark font-medium hover:text-green transition-colors underline underline-offset-2">Sign in</a>
+          </p>
+
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="hidden lg:flex items-center justify-between px-16 py-5 border-t border-[#f0f0f0] shrink-0">
+        <a href="/" class="text-xs text-[#bbb] hover:text-dark transition-colors">← Back to home</a>
+        <span class="text-xs text-[#ccc]">© 2024 DeskMate</span>
+        <a href="/login" class="text-xs text-[#888] hover:text-dark transition-colors underline">Sign in instead</a>
+      </div>
+
+    </div>
+  </div>
+
+</AuthLayout>
+
+<style>
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  input:focus {
+    box-shadow: 0 0 0 3px rgba(185, 255, 102, 0.15);
+  }
+
+  input[type="radio"]:checked ~ div {
+    border-color: #191a23;
+    background-color: #191a23;
+  }
+
+  input[type="radio"]:checked ~ div p {
+    color: white;
+  }
+</style>
+
+<script is:inline>
+  // Password strength checker
+  function checkStrength(val) {
+    var bars = ['bar1','bar2','bar3','bar4'];
+    var label = document.getElementById('strength-label');
+    var score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    var colors = ['#ef4444','#f97316','#eab308','#b9ff66'];
+    var labels = ['Weak','Fair','Good','Strong'];
+
+    bars.forEach(function(id, i) {
+      var el = document.getElementById(id);
+      el.style.backgroundColor = i < score ? colors[score - 1] : '#eee';
+    });
+
+    label.textContent = val.length === 0 ? 'Enter a password' : labels[score - 1] || 'Weak';
+    label.style.color = val.length === 0 ? '#bbb' : colors[score - 1] || '#ef4444';
+  }
+
+  // Show/hide admin access code field based on role selection
+  document.querySelectorAll('input[name="role"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var codeField = document.getElementById('access-code-field');
+      var codeInput = document.getElementById('access-code');
+      var studentFields = document.getElementById('student-profile-fields');
+      if (this.value === 'admin') {
+        codeField.classList.remove('hidden');
+        studentFields.classList.add('hidden');
+      } else {
+        codeField.classList.add('hidden');
+        codeInput.value = '';
+        studentFields.classList.remove('hidden');
+      }
+    });
+  });
+
+  // Password match check
+  document.getElementById('confirm-password').addEventListener('input', function() {
+    var pw = document.getElementById('signup-password').value;
+    var label = document.getElementById('match-label');
+    label.classList.remove('hidden');
+    if (this.value === pw) {
+      label.textContent = '✓ Passwords match';
+      label.style.color = '#b9ff66';
+    } else {
+      label.textContent = '✗ Passwords do not match';
+      label.style.color = '#ef4444';
+    }
+  });
+
+  // Form submit — real Supabase auth via fetch
+  function handleSignup(e) {
+    e.preventDefault();
+    var pw = document.getElementById('signup-password').value;
+    var cpw = document.getElementById('confirm-password').value;
+    var errorBanner = document.getElementById('signup-error-banner');
+    var errorMsg = document.getElementById('signup-error-message');
+
+    errorBanner.classList.add('hidden');
+
+    if (pw !== cpw) {
+      document.getElementById('confirm-password').style.borderColor = '#ef4444';
+      errorMsg.textContent = 'Passwords do not match.';
+      errorBanner.classList.remove('hidden');
+      return;
+    }
+
+    var btn = document.getElementById('signup-btn');
+    var text = document.getElementById('signup-btn-text');
+    var arrow = document.getElementById('signup-arrow');
+    var spinner = document.getElementById('signup-spinner');
+
+    btn.disabled = true;
+    text.textContent = 'Creating account...';
+    arrow.classList.add('hidden');
+    spinner.classList.remove('hidden');
+
+    var form = document.getElementById('signup-form');
+    var formData = new FormData(form);
+
+    // Append selected role (radio button may not be included in FormData if sr-only)
+    var selectedRole = document.querySelector('input[name="role"]:checked');
+    if (selectedRole) formData.set('role', selectedRole.value);
+
+    fetch('/api/auth/signup', { method: 'POST', body: formData })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.ok && data.pending) {
+          // Student created but awaiting admin approval — replace form with confirmation
+          var formEl = document.getElementById('signup-form');
+          var panel = document.createElement('div');
+          panel.className = 'text-center py-10 px-4';
+          panel.innerHTML =
+            '<div style="width:52px;height:52px;border-radius:16px;background:#f0f6ee;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">' +
+              '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7cae52" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
+            '</div>' +
+            '<p style="font-weight:500;color:#191a23;">Account created!</p>' +
+            '<p style="font-size:13px;color:#888;margin-top:6px;line-height:1.6;">You\'ll get access once your college admin approves your account. Check back soon.</p>' +
+            '<a href="/login" style="display:inline-block;margin-top:16px;font-size:13px;color:#191a23;text-decoration:underline;">Back to login</a>';
+          formEl.replaceWith(panel);
+        } else if (data.ok) {
+          window.location.href = data.redirect;
+        } else {
+          errorMsg.textContent = data.error || 'Sign up failed. Please try again.';
+          errorBanner.classList.remove('hidden');
+          btn.disabled = false;
+          text.textContent = 'Create Account';
+          arrow.classList.remove('hidden');
+          spinner.classList.add('hidden');
+        }
+      })
+      .catch(function() {
+        errorMsg.textContent = 'Network error. Please check your connection.';
+        errorBanner.classList.remove('hidden');
+        btn.disabled = false;
+        text.textContent = 'Create Account';
+        arrow.classList.remove('hidden');
+        spinner.classList.add('hidden');
+      });
+  }
+</script>

@@ -1,0 +1,60 @@
+---
+import MainHead from "../layouts/MainHead.astro";
+import "../styles/global.css";
+
+const { locals } = Astro;
+
+// Logged-out users have nothing to wait for; approved users are bounced by middleware
+if (!locals.user) {
+  return Astro.redirect("/login");
+}
+
+const rejected = locals.approvalStatus === "rejected";
+const firstName = (locals.userName ?? "").split(" ")[0] || "there";
+---
+
+<html lang="en">
+  <MainHead
+    title="Awaiting Approval — DeskMate"
+    description="Your DeskMate account is awaiting approval from your college admin."
+  />
+  <body class="font-grotesk bg-[#f6f7f9]">
+    <div class="min-h-screen flex items-center justify-center p-6">
+      <div class="bg-white rounded-[20px] border border-[#e8eaed] shadow-sm max-w-md w-full px-8 py-10 text-center">
+        <div class={`w-14 h-14 rounded-[18px] flex items-center justify-center mx-auto mb-5 ${rejected ? "bg-red-50" : "bg-[#f0f6ee]"}`}>
+          {rejected ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d9534f" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7cae52" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          )}
+        </div>
+
+        {rejected ? (
+          <>
+            <h1 class="text-xl font-medium text-dark">Access request declined</h1>
+            <p class="text-sm text-[#6b6f76] mt-3 leading-relaxed">
+              Hi {firstName} — your college admin has declined your access request.
+              If you believe this is a mistake, please contact your college administration office.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 class="text-xl font-medium text-dark">Almost there, {firstName}!</h1>
+            <p class="text-sm text-[#6b6f76] mt-3 leading-relaxed">
+              Your account has been created and is waiting for approval from your college admin.
+              You'll be able to use DeskMate as soon as they confirm you're a student there.
+            </p>
+            <p class="text-xs text-[#9aa0a6] mt-3">This usually takes less than a day. Check back soon.</p>
+          </>
+        )}
+
+        <form method="post" action="/api/auth/logout" class="mt-7">
+          <button type="submit" class="inline-flex items-center gap-2 text-sm font-medium text-dark border border-[#e0e0e0] rounded-[12px] px-5 py-2.5 hover:border-dark transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "doc-01",
+    "name": "Fee Structure 2024-25.pdf",
+    "category": "Finance",
+    "uploadedBy": "Admin",
+    "uploadedAt": "2024-07-15",
+    "expiryDate": "2025-06-30",
+    "pages": 8,
+    "size": "245 KB",
+    "status": "active",
+    "description": "Complete fee structure for all programs for the academic year 2024-25"
+  },
+  {
+    "id": "doc-02",
+    "name": "Hostel Regulations 2024.pdf",
+    "category": "Accommodation",
+    "uploadedBy": "Admin",
+    "uploadedAt": "2024-07-20",
+    "expiryDate": "2025-06-30",
+    "pages": 12,
+    "size": "380 KB",
+    "status": "active",
+    "description": "Rules and procedures for hostel allotment, mess, and residential life"
+  },
+  {
+    "id": "doc-03",
+    "name": "Academic Calendar 2024-25.pdf",
+    "category": "Academics",
+    "uploadedBy": "Admin",
+    "uploadedAt": "2024-06-01",
+    "expiryDate": "2025-05-31",
+    "pages": 4,
+    "size": "150 KB",
+    "status": "active",
+    "description": "Key dates: exam schedule, holidays, registration deadlines"
+  },
+  {
+    "id": "doc-04",
+    "name": "Examination Rules 2024.pdf",
+    "category": "Academics",
+    "uploadedBy": "Dr. Ramesh Kumar",
+    "uploadedAt": "2024-07-01",
+    "expiryDate": "2025-06-30",
+    "pages": 18,
+    "size": "520 KB",
+    "status": "active",
+    "description": "Exam regulations, malpractice rules, revaluation procedures"
+  },
+  {
+    "id": "doc-05",
+    "name": "Scholarship Guidelines 2024.pdf",
+    "category": "Finance",
+    "uploadedBy": "Ms. Deepa Sharma",
+    "uploadedAt": "2024-08-10",
+    "expiryDate": "2024-12-31",
+    "pages": 6,
+    "size": "195 KB",
+    "status": "expiring",
+    "description": "Eligibility and application process for all scholarship schemes"
+  },
+  {
+    "id": "doc-06",
+    "name": "Library Rules 2024.pdf",
+    "category": "Resources",
+    "uploadedBy": "Admin",
+    "uploadedAt": "2024-06-15",
+    "expiryDate": "2025-06-30",
+    "pages": 3,
+    "size": "98 KB",
+    "status": "active",
+    "description": "Borrowing limits, fine structure, and library access rules"
+  },
+  {
+    "id": "doc-07",
+    "name": "Student Handbook 2024.pdf",
+    "category": "General",
+    "uploadedBy": "Admin",
+    "uploadedAt": "2024-06-01",
+    "expiryDate": "2025-06-30",
+    "pages": 56,
+    "size": "1.2 MB",
+    "status": "active",
+    "description": "Code of conduct, leave rules, grievance procedures, and student rights"
+  }
+]

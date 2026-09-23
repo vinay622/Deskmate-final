@@ -1,0 +1,38 @@
+[
+    {
+        "index": 1,
+        "name": "Arjun Reddy",
+        "role": "B.Tech 3rd Year, CSE",
+        "comment": "I used to spend 30 minutes hunting through PDFs every time I had a question about exams. DeskMate gives me the answer in 3 seconds with the exact page number. It has become my first stop for any college query."
+    },
+    {
+        "index": 2,
+        "name": "Sneha Patel",
+        "role": "B.Tech 2nd Year, ECE",
+        "comment": "The citation feature is what makes DeskMate trustworthy. When it tells me a fee deadline, I can see exactly which document and page it came from. No more guessing or relying on rumors from seniors."
+    },
+    {
+        "index": 3,
+        "name": "Vikram Rao",
+        "role": "M.Tech 1st Year",
+        "comment": "I asked a question about scholarship eligibility in Telugu and got a clear answer with the document source. As someone who is more comfortable in my mother tongue, this made a huge difference."
+    },
+    {
+        "index": 4,
+        "name": "Divya Krishnan",
+        "role": "B.Tech 4th Year, Mech",
+        "comment": "During placement season I needed to know leave rules quickly. DeskMate told me the exact policy from the Student Handbook. The staff routing is also brilliant — it told me exactly who to contact when I had an edge case."
+    },
+    {
+        "index": 5,
+        "name": "Rahul Verma",
+        "role": "B.Tech 1st Year",
+        "comment": "As a new student I had hundreds of questions about everything. DeskMate is honestly better than asking seniors because seniors sometimes give outdated information. DeskMate answers from the latest official documents."
+    },
+    {
+        "index": 6,
+        "name": "Lakshmi Narayan",
+        "role": "B.Tech 3rd Year, IT",
+        "comment": "The admin who uploaded the documents said it only took 10 minutes to upload and configure everything. From an admin perspective, it is so simple. No coding needed, just upload PDFs and assign categories."
+    }
+]

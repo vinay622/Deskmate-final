@@ -1,0 +1,99 @@
+---
+import MainHead from "../../layouts/MainHead.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+import "../../styles/global.css";
+
+const { locals } = Astro;
+
+if (!locals.user || locals.userRole === "admin") {
+  return Astro.redirect("/app/chat");
+}
+
+const supabase = createSupabaseServerClient(Astro.request, Astro.cookies);
+const { data: tickets } = await supabase
+  .from("escalation_tickets")
+  .select("id, query, category, staff_name, status, resolution_note, created_at, updated_at")
+  .eq("student_id", locals.user.id)
+  .order("created_at", { ascending: false });
+
+const rows = tickets ?? [];
+const openCount = rows.filter((t) => t.status !== "resolved").length;
+
+const statusChip = (status: string) =>
+  status === "open" ? "chip-amber" : status === "in_progress" ? "chip-neutral" : "chip-lime";
+const statusLabel = (status: string) =>
+  status === "open" ? "Open" : status === "in_progress" ? "In progress" : "Resolved";
+const firstName = (locals.userName ?? "").split(" ")[0] || "there";
+---
+
+<html lang="en">
+  <MainHead
+    title="My Tickets — DeskMate"
+    description="Track the status of your escalation tickets."
+  />
+  <body class="font-grotesk bg-[#f6f7f9]">
+    <div class="max-w-2xl mx-auto px-5 py-8 min-h-screen flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-7">
+        <div>
+          <p class="eyebrow">Escalations</p>
+          <h1 class="text-xl font-medium text-dark mt-1.5">My Tickets</h1>
+          <p class="text-xs text-[#9aa0a6] mt-1">
+            {rows.length === 0
+              ? "Requests you raise from the chat will appear here."
+              : `${rows.length} ticket${rows.length === 1 ? "" : "s"} · ${openCount} awaiting resolution`}
+          </p>
+        </div>
+        <a
+          href="/app/chat"
+          class="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-dark border border-[#e0e0e0] rounded-[12px] px-4 py-2 hover:border-dark transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back to chat
+        </a>
+      </div>
+
+      {rows.length > 0 ? (
+        <div class="flex flex-col gap-3">
+          {rows.map((t) => (
+            <div class="app-card p-5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-mono text-[#9aa0a6]">#{t.id.slice(0, 8).toUpperCase()}</span>
+                <span class={`chip ${statusChip(t.status)}`}>{statusLabel(t.status)}</span>
+                {t.category && <span class="chip chip-neutral capitalize">{t.category}</span>}
+              </div>
+              <p class="text-[15px] text-dark mt-2 leading-snug">{t.query}</p>
+              <div class="flex items-center gap-3 mt-2.5 text-xs text-[#9aa0a6] flex-wrap">
+                {t.staff_name && <span>→ routed to <span class="font-medium text-[#6b6f76]">{t.staff_name}</span></span>}
+                <span>
+                  Raised {new Date(t.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+              </div>
+              {t.resolution_note && (
+                <div class="mt-3 text-xs text-[#555] bg-[#f8f9fb] border border-[#e8eaed] rounded-[10px] px-3 py-2">
+                  <span class="font-medium text-dark">Resolution:</span> {t.resolution_note}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="app-card px-5 py-16 text-center">
+          <div class="w-12 h-12 rounded-[16px] bg-[#f0f1f3] flex items-center justify-center mx-auto mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><path d="M4 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+          </div>
+          <p class="text-sm font-medium text-dark">No tickets yet, {firstName}</p>
+          <p class="text-xs text-[#9aa0a6] mt-1 max-w-xs mx-auto leading-relaxed">
+            When the assistant routes you to staff, you can raise a ticket from the chat — its status will show up here.
+          </p>
+          <a
+            href="/app/chat"
+            class="inline-flex items-center gap-2 mt-5 bg-dark text-white text-sm font-medium rounded-[12px] px-5 py-2.5 hover:bg-[#2d2e3a] transition-colors"
+          >
+            Ask the assistant
+          </a>
+        </div>
+      )}
+    </div>
+  </body>
+</html>

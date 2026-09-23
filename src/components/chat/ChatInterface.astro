@@ -1,0 +1,1566 @@
+---
+import { createSupabaseServerClient } from '../../lib/supabase';
+
+interface Props {
+  userName?: string;
+  userEmail?: string;
+  userRole?: 'student' | 'admin' | null;
+}
+
+const {
+  userName = 'Student',
+  userEmail = '',
+  userRole = 'student',
+} = Astro.props;
+
+const userInitial = userName.charAt(0).toUpperCase();
+
+const supabase = createSupabaseServerClient(Astro.request, Astro.cookies);
+const { count: indexedDocCount } = await supabase
+  .from('documents')
+  .select('id', { count: 'exact', head: true })
+  .eq('processing_status', 'ready');
+const docCount = indexedDocCount ?? 0;
+---
+
+<div class="flex h-screen bg-[#f6f7f9] overflow-hidden" id="chat-root" data-user-name={userName}>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside id="sidebar" class="w-[260px] shrink-0 flex flex-col bg-dark border-r border-[#30313d] z-20 transition-transform duration-300">
+
+    <!-- Logo -->
+    <div class="px-5 py-5 border-b border-[#30313d]">
+      <a href="/" class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-[10px] bg-green flex items-center justify-center shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#191a23" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <span class="text-base font-medium text-white leading-none">Desk<span style="color:#b9ff66;">Mate</span></span>
+      </a>
+    </div>
+
+    <!-- New Chat -->
+    <div class="px-4 pt-4 pb-2">
+      <button
+        id="new-chat-btn"
+        class="w-full flex items-center justify-center gap-2 bg-green text-dark hover:bg-white rounded-[12px] py-2.5 px-4 text-sm font-medium transition-all duration-200"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        New Chat
+      </button>
+    </div>
+
+    <!-- Recent Conversations -->
+    <div class="flex-1 overflow-y-auto px-3 py-2">
+      <p class="text-[10px] uppercase tracking-widest text-[#8a8f98] font-medium px-2 mb-2">Recent</p>
+      <div id="recent-chats-list" class="flex flex-col gap-0.5">
+        <p id="no-history-msg" class="text-xs text-[#8a8f98] px-2 py-2 italic">No conversations yet</p>
+      </div>
+    </div>
+
+    <!-- User area -->
+    <div class="px-4 py-4 border-t border-[#30313d]">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-[#30313d] flex items-center justify-center shrink-0">
+          <span class="text-green text-xs font-semibold">{userInitial}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-medium text-white truncate">{userName}</p>
+          <p class="text-[10px] text-[#8a8f98] truncate">{userEmail || (userRole === 'admin' ? 'Admin' : 'Student')}</p>
+        </div>
+        <button id="open-profile-modal" class="p-1.5 rounded-lg hover:bg-[#30313d] text-[#8a8f98] hover:text-white transition-colors" title="My Profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        {userRole !== 'admin' && (
+          <a href="/app/tickets" class="p-1.5 rounded-lg hover:bg-[#30313d] text-[#8a8f98] hover:text-white transition-colors" title="My Tickets">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+          </a>
+        )}
+        <form method="post" action="/api/auth/logout">
+          <button type="submit" class="p-1.5 rounded-lg hover:bg-[#30313d] text-[#8a8f98] hover:text-white transition-colors" title="Sign out">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CHAT AREA ═══ -->
+  <main class="flex-1 flex flex-col min-w-0 bg-[#f6f7f9]">
+
+    <!-- Top Header -->
+    <header class="flex items-center justify-between px-6 py-4 border-b border-[#e8eaed] bg-white/[0.86] backdrop-blur-md shrink-0">
+      <div class="flex items-center gap-3">
+        <button id="sidebar-toggle" class="lg:hidden p-1.5 rounded-lg hover:bg-[#f3f3f3] text-[#555] transition-colors">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-1.5">
+            <div class="w-2 h-2 rounded-full bg-green animate-pulse"></div>
+            <span class="text-sm font-medium text-dark">DeskMate AI</span>
+          </div>
+          <span class="text-[10px] text-[#aaa] border border-[#e0e0e0] rounded-full px-2 py-0.5 hidden sm:inline">Official Docs Only</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Announcements bell -->
+        <div class="relative" id="ann-bell-wrap">
+          <button id="ann-bell-btn" title="Announcements" class="relative p-2 rounded-lg text-[#555] hover:bg-[#f3f3f3] transition-colors">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span id="ann-badge" class="hidden absolute top-1 right-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-green text-dark text-[9px] font-semibold flex items-center justify-center leading-none border border-white"></span>
+          </button>
+
+          <!-- Dropdown -->
+          <div id="ann-dropdown" class="hidden absolute right-0 top-full mt-2 w-[340px] max-w-[calc(100vw-2rem)] bg-white rounded-[16px] border border-[#e8eaed] shadow-[0_16px_40px_rgba(0,0,0,0.14)] z-50 overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[#f0f1f3]">
+              <p class="text-sm font-medium text-dark">Announcements</p>
+              <span id="ann-count" class="text-[11px] text-[#9aa0a6]"></span>
+            </div>
+            <div id="ann-items" class="max-h-[360px] overflow-y-auto app-scroll">
+              <p class="px-4 py-8 text-center text-xs text-[#9aa0a6]">Loading…</p>
+            </div>
+          </div>
+        </div>
+        <div class="w-px h-5 bg-[#e8eaed]"></div>
+        <div class="flex items-center gap-2">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <select id="lang-selector" class="bg-transparent border border-[#e0e0e0] text-dark text-xs rounded-[8px] px-2 py-1.5 outline-none cursor-pointer focus:border-dark transition-colors">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="te">తెలుగు</option>
+          </select>
+        </div>
+        <div class="w-px h-5 bg-[#e8eaed]"></div>
+        <div class="flex items-center gap-1.5 text-[#aaa]">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="text-xs hidden sm:inline">{docCount} docs indexed</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Message List -->
+    <div id="message-list" class="flex-1 overflow-y-auto chat-canvas">
+
+      <!-- Welcome state -->
+      <div id="welcome-screen" class="h-full flex flex-col items-center justify-center px-6 py-12">
+        <div class="w-16 h-16 rounded-[22px] bg-dark flex items-center justify-center mb-5 shadow-sm">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h2 class="text-3xl font-semibold text-dark mb-2.5 text-center tracking-tight">
+          Welcome back, {userName}! 👋
+        </h2>
+        <p class="text-sm text-[#888] text-center max-w-md leading-relaxed">
+          Any queries today, <span class="font-medium text-[#555]">{userName}</span>? Ask me anything about your college.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Input Area -->
+    <div class="border-t border-[#e8eaed] bg-white/[0.9] backdrop-blur-md px-4 pb-4 pt-3 shrink-0">
+
+      <!-- Input row -->
+      <div class="relative max-w-3xl mx-auto">
+
+        <!-- Stop generating button (shown during streaming) -->
+        <button id="stop-btn" class="items-center gap-1.5 bg-white border border-[#e0e0e0] text-dark text-xs font-medium px-3 py-1.5 rounded-full shadow-sm hover:border-dark transition-all">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+          Stop generating
+        </button>
+
+        <!-- Agent dropdown — positioned relative to this container, opens upward -->
+        <div id="agent-dropdown" class="hidden absolute bottom-full left-0 mb-2 w-72 bg-white border border-[#e0e0e0] rounded-[16px] shadow-lg z-50 overflow-hidden">
+          <div class="px-3 py-2 border-b border-[#f0f0f0]">
+            <p class="text-[10px] text-[#aaa] uppercase tracking-widest font-medium">Select Agent</p>
+          </div>
+          <div id="agent-options" class="py-1.5"></div>
+        </div>
+        <div class="relative border border-[#e0e0e0] rounded-[18px] bg-[#f8f9fb] focus-within:border-dark focus-within:bg-white transition-all shadow-sm">
+
+          <!-- Agent selector bar (inside input box, top) -->
+          <div class="flex items-center gap-2 px-3 pt-2.5 pb-2 border-b border-[#ececec]">
+            <button id="agent-btn" class="flex items-center gap-1.5 text-xs text-[#555] hover:text-dark transition-colors group">
+              <span id="agent-emoji" class="text-sm">💬</span>
+              <span id="agent-label" class="font-medium">General</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[#ccc] group-hover:text-dark transition-colors"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="w-px h-3 bg-[#e0e0e0]"></div>
+            <span id="agent-hint-text" class="text-[10px] text-[#bbb]">Ask anything about your college</span>
+          </div>
+
+          <!-- Textarea -->
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Type your question..."
+            class="w-full bg-transparent px-4 py-3 text-sm text-dark placeholder-[#bbb] outline-none resize-none leading-relaxed"
+            style="min-height: 44px; max-height: 120px;"
+            autocomplete="off"
+          ></textarea>
+
+          <!-- Mic + Send buttons (inside box, bottom) -->
+          <div class="flex items-center justify-between px-3 pb-2.5">
+            <div class="flex items-center gap-2">
+              <button
+                id="mic-btn"
+                type="button"
+                title="Speak your question"
+                class="hidden w-9 h-9 rounded-[12px] text-[#c4c9cf] hover:text-dark hover:bg-[#eef0f3] flex items-center justify-center transition-all duration-200"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              </button>
+              <span id="mic-hint" class="text-[10px] text-[#d9534f] hidden">Mic access blocked</span>
+            </div>
+            <button
+              id="send-btn"
+              class="w-9 h-9 rounded-[12px] bg-dark hover:bg-[#2d2e3a] text-white flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+            </button>
+          </div>
+
+        </div>
+        <p class="text-center text-[10px] text-[#ccc] mt-2">Answers sourced from official college documents only</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<style is:global>
+  .chat-canvas {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(185, 255, 102, 0.14), transparent 32rem),
+      linear-gradient(#f8f9fb, #ffffff 28rem);
+  }
+  #welcome-screen > h2 { letter-spacing: -0.035em; }
+  #welcome-screen .starter-card { box-shadow: 0 1px 0 rgba(25, 26, 35, 0.04); }
+  #welcome-screen .starter-card:hover { transform: translateY(-3px); box-shadow: 0 12px 22px rgba(25, 26, 35, 0.1); }
+  #sidebar .recent-chat-item { color: #c8cbd2; }
+  #sidebar .recent-chat-item:hover { background: #30313d; color: #fff; }
+  #sidebar .recent-chat-item.active-session { background: #30313d; color: #fff; }
+
+  #chat-input { overflow-y: hidden; }
+
+  @keyframes micPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.45); }
+    70%  { box-shadow: 0 0 0 8px rgba(217, 83, 79, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
+  }
+  .mic-listening {
+    color: #d9534f !important;
+    animation: micPulse 1.4s infinite;
+  }
+
+  .markdown-body { font-size: 0.875rem; line-height: 1.65; }
+  .markdown-body p { margin: 0 0 0.5em; }
+  .markdown-body p:last-child { margin-bottom: 0; }
+  .markdown-body h3 { font-size: 0.95rem; font-weight: 600; margin: 0.75em 0 0.35em; }
+  .markdown-body h4 { font-size: 0.875rem; font-weight: 600; margin: 0.6em 0 0.25em; }
+  .markdown-body ul { margin: 0.35em 0 0.5em 1.2em; list-style: disc; }
+  .markdown-body ol { margin: 0.35em 0 0.5em 1.2em; list-style: decimal; }
+  .markdown-body li { margin: 0.15em 0; }
+  .markdown-body strong { font-weight: 600; }
+  .markdown-body em { font-style: italic; }
+  .markdown-body code { background: #eef0f4; border-radius: 4px; padding: 1px 5px; font-size: 0.82em; font-family: monospace; }
+  .markdown-body pre { background: #1e1f2a; color: #e2e4e9; border-radius: 10px; padding: 0.85em 1em; overflow-x: auto; margin: 0.5em 0; }
+  .markdown-body pre code { background: none; padding: 0; font-size: 0.82em; color: inherit; }
+  .markdown-body blockquote { border-left: 3px solid #b9ff66; padding-left: 0.75em; color: #666; margin: 0.5em 0; }
+
+  .streaming-cursor::after {
+    content: '▍';
+    display: inline-block;
+    color: #b9ff66;
+    animation: blink 0.7s step-end infinite;
+    margin-left: 1px;
+    font-size: 0.9em;
+    vertical-align: text-bottom;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  #stop-btn {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+  #stop-btn.visible { display: flex; }
+
+  @media (max-width: 1023px) {
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0; height: 100%;
+      transform: translateX(-100%);
+    }
+    #sidebar.open { transform: translateX(0); }
+    #agent-dropdown { left: 16px; }
+  }
+
+  .msg-appear {
+    animation: msgIn 0.2s ease-out;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .agent-option:hover { background: #f8f9fb; }
+  .agent-option.active { background: #f8f9fb; }
+
+  .recent-chat-item {
+    position: relative;
+  }
+  .recent-chat-item:hover {
+    background: #252631;
+  }
+  .recent-chat-item.active-session {
+    background: #2d2f3d;
+  }
+  .chat-menu-btn {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .recent-chat-item:hover .chat-menu-btn,
+  .recent-chat-item .chat-menu-btn.active {
+    opacity: 1;
+  }
+  .chat-item-dropdown {
+    display: none;
+    position: absolute;
+    right: 4px;
+    top: calc(100% + 4px);
+    z-index: 50;
+    min-width: 125px;
+    background: #22232e;
+    border: 1px solid #363847;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+    padding: 4px;
+  }
+  .chat-item-dropdown.show {
+    display: block;
+  }
+</style>
+
+<!-- My Profile Modal -->
+<div id="profile-modal" class="fixed inset-0 bg-[#000000]/[0.5] backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+  <div class="bg-white rounded-[20px] shadow-[0_24px_60px_rgba(0,0,0,0.25)] border border-[#e8eaed] max-w-md w-full">
+    <div class="flex justify-between items-center px-6 pt-5 pb-4 border-b border-[#e8eaed]">
+      <div>
+        <p class="text-[10px] uppercase tracking-widest text-[#aaa] font-medium">Personalization</p>
+        <h2 class="text-lg font-medium text-dark mt-1">My Profile</h2>
+      </div>
+      <button id="close-profile-modal" class="p-1.5 rounded-lg text-[#9aa0a6] hover:text-dark hover:bg-[#f0f1f3] transition-colors">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="profile-form" class="flex flex-col gap-4 px-6 py-5">
+      <div id="profile-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-[12px] px-4 py-3"></div>
+      <p class="text-xs text-[#9aa0a6] leading-relaxed -mt-1">DeskMate uses this to tailor answers to your year, department, and hostel status.</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-dark mb-1.5">Degree</label>
+          <select id="profile-degree" class="w-full bg-[#f8f9fb] border border-[#e8eaed] rounded-[12px] px-3 py-2.5 text-sm text-dark outline-none">
+            <option value="">Not set</option>
+            <option value="B.Tech">B.Tech</option>
+            <option value="M.Tech">M.Tech</option>
+            <option value="MBA">MBA</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-dark mb-1.5">Department</label>
+          <input id="profile-dept" type="text" placeholder="e.g. CSE" class="w-full bg-[#f8f9fb] border border-[#e8eaed] rounded-[12px] px-3 py-2.5 text-sm text-dark outline-none" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-dark mb-1.5">Year</label>
+          <select id="profile-year" class="w-full bg-[#f8f9fb] border border-[#e8eaed] rounded-[12px] px-3 py-2.5 text-sm text-dark outline-none">
+            <option value="">Not set</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+            <option value="5">5th Year</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-dark mb-1.5">Hostel resident?</label>
+          <select id="profile-hostel" class="w-full bg-[#f8f9fb] border border-[#e8eaed] rounded-[12px] px-3 py-2.5 text-sm text-dark outline-none">
+            <option value="">Not set</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" id="save-profile-btn" class="w-full bg-dark text-white rounded-[12px] py-3 text-sm font-medium hover:bg-[#2d2e3a] transition-colors mt-1">
+        Save Profile
+      </button>
+    </form>
+  </div>
+</div>
+
+<script is:inline>
+  // ─── Agents ───
+  var AGENTS = [
+    { id: 'general',     emoji: '💬', label: 'General',      hint: 'Ask anything about your college',    topics: [] },
+    { id: 'academics',   emoji: '🎓', label: 'Academics',    hint: 'Courses, results & attendance',      topics: ['exam', 'leave', 'revaluation', 'academic', 'course'] },
+    { id: 'fees',        emoji: '💰', label: 'Fees',         hint: 'Payments, fines & fee structure',    topics: ['fee', 'fees', 'fine', 'payment', 'tuition', 'mess'] },
+    { id: 'admissions',  emoji: '📋', label: 'Admissions',   hint: 'Joining process & transfers',        topics: ['admission', 'join', 'transfer', 'enroll', 'apply'] },
+    { id: 'hostel',      emoji: '🏠', label: 'Hostel',       hint: 'Accommodation, mess & rules',        topics: ['hostel', 'mess', 'accommodation', 'room', 'warden'] },
+    { id: 'placements',  emoji: '💼', label: 'Placements',   hint: 'Jobs, internships & companies',      topics: ['placement', 'job', 'internship', 'company', 'career', 'recruit'] },
+    { id: 'library',     emoji: '📚', label: 'Library',      hint: 'Books, resources & timings',         topics: ['library', 'book', 'borrow', 'resource', 'fine'] },
+    { id: 'scholarships',emoji: '🏆', label: 'Scholarships', hint: 'Grants, funds & eligibility',        topics: ['scholarship', 'grant', 'fund', 'merit', 'stipend'] },
+  ];
+
+  var currentAgent = AGENTS[0];
+  var currentSessionId = null;
+  var messageBuffer = [];
+
+  // ─── Markdown renderer ───
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function inlineMd(text) {
+    var s = escHtml(text);
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    s = s.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    return s;
+  }
+  function renderMarkdown(raw) {
+    if (!raw) return '';
+    var lines = raw.split('\n');
+    var out = [];
+    var inCode = false, inList = false, listTag = '';
+
+    function closeList() {
+      if (inList) { out.push('</' + listTag + '>'); inList = false; listTag = ''; }
+    }
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var trim = line.trim();
+
+      // Fenced code blocks
+      if (trim.startsWith('```')) {
+        if (inCode) { out.push('</code></pre>'); inCode = false; }
+        else { closeList(); out.push('<pre><code>'); inCode = true; }
+        continue;
+      }
+      if (inCode) { out.push(escHtml(line) + '\n'); continue; }
+
+      // Blank line
+      if (!trim) { closeList(); continue; }
+
+      // Headings
+      var hm = trim.match(/^(#{1,4})\s+(.*)/);
+      if (hm) {
+        closeList();
+        var lvl = Math.min(hm[1].length + 2, 6);
+        out.push('<h' + lvl + '>' + inlineMd(hm[2]) + '</h' + lvl + '>');
+        continue;
+      }
+
+      // Bullet list
+      var bm = trim.match(/^[-*]\s+(.*)/);
+      if (bm) {
+        if (!inList || listTag !== 'ul') { closeList(); out.push('<ul>'); inList = true; listTag = 'ul'; }
+        out.push('<li>' + inlineMd(bm[1]) + '</li>');
+        continue;
+      }
+
+      // Numbered list
+      var nm = trim.match(/^\d+\.\s+(.*)/);
+      if (nm) {
+        if (!inList || listTag !== 'ol') { closeList(); out.push('<ol>'); inList = true; listTag = 'ol'; }
+        out.push('<li>' + inlineMd(nm[1]) + '</li>');
+        continue;
+      }
+
+      // Blockquote
+      var qm = trim.match(/^>\s?(.*)/);
+      if (qm) { closeList(); out.push('<blockquote>' + inlineMd(qm[1]) + '</blockquote>'); continue; }
+
+      // Paragraph
+      closeList();
+      out.push('<p>' + inlineMd(trim) + '</p>');
+    }
+
+    closeList();
+    if (inCode) out.push('</code></pre>');
+    return out.join('');
+  }
+
+  // ─── Build agent dropdown options ───
+  (function() {
+    var optContainer = document.getElementById('agent-options');
+    AGENTS.forEach(function(agent) {
+      var btn = document.createElement('button');
+      btn.className = 'agent-option w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors' + (agent.id === 'general' ? ' active' : '');
+      btn.dataset.agentId = agent.id;
+      btn.innerHTML = '<span class="text-base w-5 text-center">' + agent.emoji + '</span>'
+        + '<div class="flex flex-col"><span class="text-xs font-medium text-dark">' + agent.label + '</span>'
+        + '<span class="text-[10px] text-[#aaa]">' + agent.hint + '</span></div>'
+        + (agent.id === 'general' ? '<svg class="ml-auto" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '');
+      btn.addEventListener('click', function() {
+        selectAgent(agent.id);
+      });
+      optContainer.appendChild(btn);
+    });
+  })();
+
+  function selectAgent(agentId) {
+    currentAgent = AGENTS.find(function(a) { return a.id === agentId; }) || AGENTS[0];
+    document.getElementById('agent-emoji').textContent = currentAgent.emoji;
+    document.getElementById('agent-label').textContent = currentAgent.label;
+    document.getElementById('agent-hint-text').textContent = currentAgent.hint;
+
+    // Update active state in dropdown
+    document.querySelectorAll('.agent-option').forEach(function(btn) {
+      var isActive = btn.dataset.agentId === agentId;
+      btn.classList.toggle('active', isActive);
+      // update checkmark
+      var existing = btn.querySelector('svg.check-mark');
+      if (existing) existing.remove();
+      if (isActive) {
+        var check = document.createElement('span');
+        check.className = 'ml-auto';
+        check.innerHTML = '<svg class="check-mark" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+        btn.appendChild(check);
+      }
+    });
+    closeAgentDropdown();
+  }
+
+  // ─── Agent dropdown toggle ───
+  function openAgentDropdown() {
+    document.getElementById('agent-dropdown').classList.remove('hidden');
+  }
+  function closeAgentDropdown() {
+    document.getElementById('agent-dropdown').classList.add('hidden');
+  }
+
+  document.getElementById('agent-btn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('agent-dropdown');
+    dd.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', function(e) {
+    var dd = document.getElementById('agent-dropdown');
+    if (!dd.classList.contains('hidden') && !dd.contains(e.target) && e.target !== document.getElementById('agent-btn')) {
+      closeAgentDropdown();
+    }
+  });
+
+  // ─── Lang detection ───
+  function detectLanguage(text) {
+    if (/[\u0900-\u097F]/.test(text)) return 'hi';
+    if (/[\u0C00-\u0C7F]/.test(text)) return 'te';
+    return 'en';
+  }
+
+  // ─── Timestamp ───
+  function formatTimestamp() {
+    return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  // ─── Create bubble ───
+  function createBubble(role, content, timestamp, meta) {
+    var isUser = role === 'user';
+    var outer = document.createElement('div');
+    outer.className = 'flex ' + (isUser ? 'justify-end' : 'justify-start') + ' mb-5 px-6 msg-appear';
+
+    var inner = document.createElement('div');
+    inner.className = 'max-w-[72%] flex flex-col gap-2 ' + (isUser ? 'items-end' : 'items-start');
+
+    var bubble = document.createElement('div');
+    bubble.className = 'px-4 py-3 ' + (isUser
+      ? 'bg-dark text-white rounded-[18px] rounded-br-[4px]'
+      : 'bg-[#f8f9fb] border border-[#e8eaed] rounded-[18px] rounded-bl-[4px] text-dark');
+
+    var p = document.createElement(isUser ? 'p' : 'div');
+    p.className = isUser
+      ? 'text-sm leading-relaxed whitespace-pre-wrap'
+      : 'markdown-body';
+    if (isUser) {
+      p.textContent = content;
+    } else {
+      p.innerHTML = renderMarkdown(content);
+    }
+    bubble.appendChild(p);
+    inner.appendChild(bubble);
+
+    // Citation badges
+    if (!isUser) addBadges(inner, meta);
+
+    // Staff redirect card
+    if (!isUser && meta && meta.routeTo) {
+      var staffCard = document.createElement('div');
+      staffCard.className = 'bg-white border border-[#e8eaed] shadow-sm rounded-[16px] p-4 w-full mt-1';
+
+      var staffHeader = document.createElement('div');
+      staffHeader.className = 'flex items-center gap-2 mb-3';
+      staffHeader.innerHTML = '<div class="w-7 h-7 rounded-lg bg-dark/5 flex items-center justify-center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#191a23" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><p class="text-xs font-medium text-dark uppercase tracking-wider">Suggested Contact</p>';
+      staffCard.appendChild(staffHeader);
+
+      var sName = document.createElement('p');
+      sName.className = 'font-medium text-dark text-sm mb-1';
+      sName.textContent = meta.routeTo.name;
+      staffCard.appendChild(sName);
+
+      var details = document.createElement('div');
+      details.className = 'text-xs text-[#888] flex flex-col gap-1';
+
+      var infoRows = [
+        { icon: 'M17.657 16.657L13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z', text: meta.routeTo.room },
+        { icon: 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', text: meta.routeTo.hours },
+      ];
+      infoRows.forEach(function(d) {
+        var row = document.createElement('div');
+        row.className = 'flex items-center gap-1.5';
+        row.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="' + d.icon + '"/></svg><span>' + d.text + '</span>';
+        details.appendChild(row);
+      });
+      var emailRow = document.createElement('div');
+      emailRow.className = 'flex items-center gap-1.5';
+      emailRow.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><a href="mailto:' + meta.routeTo.email + '" class="text-dark underline underline-offset-2 hover:text-green transition-colors">' + meta.routeTo.email + '</a>';
+      details.appendChild(emailRow);
+
+      staffCard.appendChild(details);
+      inner.appendChild(staffCard);
+    }
+
+    var ts = document.createElement('span');
+    ts.className = 'text-[10px] text-[#ccc] px-1';
+    ts.textContent = timestamp;
+    inner.appendChild(ts);
+
+    outer.appendChild(inner);
+    return outer;
+  }
+
+  // ─── Session management (Supabase API) ───
+  function truncate(str, n) {
+    return str.length > n ? str.slice(0, n) + '…' : str;
+  }
+
+  async function getSessions() {
+    try {
+      var r = await fetch('/api/chat/sessions');
+      if (!r.ok) return [];
+      var d = await r.json();
+      return d.sessions || [];
+    } catch(e) { return []; }
+  }
+
+  async function createSession(title) {
+    try {
+      var r = await fetch('/api/chat/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title })
+      });
+      var d = await r.json();
+      return d.session || null;
+    } catch(e) { return null; }
+  }
+
+  async function getSessionMessages(sessionId) {
+    try {
+      var r = await fetch('/api/chat/messages/' + sessionId);
+      if (!r.ok) return [];
+      var d = await r.json();
+      return d.messages || [];
+    } catch(e) { return []; }
+  }
+
+  async function postMessage(sessionId, role, content, meta) {
+    try {
+      await fetch('/api/chat/messages/' + sessionId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: role, content: content, meta: meta || {} })
+      });
+    } catch(e) {}
+  }
+
+  // ─── Render sidebar recent conversations ───
+  async function renderRecentChats() {
+    var sessions = await getSessions();
+    var container = document.getElementById('recent-chats-list');
+    var noMsg = document.getElementById('no-history-msg');
+
+    var oldItems = container.querySelectorAll('.recent-chat-item');
+    oldItems.forEach(function(el) { el.remove(); });
+
+    if (sessions.length === 0) {
+      if (noMsg) noMsg.style.display = '';
+      return;
+    }
+    if (noMsg) noMsg.style.display = 'none';
+
+    sessions.slice(0, 20).forEach(function(sess) {
+      var item = document.createElement('div');
+      item.className = 'recent-chat-item group relative flex items-center justify-between gap-1.5 px-2.5 py-2 rounded-[10px] cursor-pointer transition-all ' + (sess.id === currentSessionId ? 'active-session' : '');
+      item.dataset.sessionId = sess.id;
+
+      var displayTitle = escHtml(sess.title || 'New Chat');
+      var timeStr = formatRelativeTime(new Date(sess.created_at).getTime());
+
+      item.innerHTML = ''
+        + '<div class="flex items-start gap-2 min-w-0 flex-1 chat-content-btn py-0.5">'
+        +   '<svg class="shrink-0 mt-0.5 text-[#8a8f98]" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+        +   '<div class="flex-1 min-w-0">'
+        +     '<p class="session-title text-xs font-medium text-[#f0f1f3] truncate leading-snug">' + displayTitle + '</p>'
+        +     '<p class="text-[10px] text-[#8a8f98] mt-0.5">' + timeStr + '</p>'
+        +   '</div>'
+        + '</div>'
+        + '<button type="button" class="chat-menu-btn shrink-0 opacity-0 group-hover:opacity-100 p-1 rounded-md text-[#8a8f98] hover:text-white hover:bg-[#343644] transition-all" title="Options">'
+        +   '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg>'
+        + '</button>';
+
+      // Click to load chat (only if clicking main content area)
+      var contentBtn = item.querySelector('.chat-content-btn');
+      if (contentBtn) {
+        contentBtn.addEventListener('click', function() {
+          loadSession(sess.id);
+        });
+      }
+
+      // 3 dots button — open shared floating dropdown
+      var menuBtn = item.querySelector('.chat-menu-btn');
+      if (menuBtn) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openChatDropdown(menuBtn, sess);
+        });
+      }
+
+      container.appendChild(item);
+    });
+  }
+
+  // ─── Shared floating dropdown (body-level, avoids overflow clipping) ───
+  var _floatingDropdown = null;
+  var _activeMenuBtn = null;
+  var _activeDropdownSessId = null;
+
+  function buildFloatingDropdown() {
+    var el = document.createElement('div');
+    el.id = 'chat-floating-dropdown';
+    el.style.cssText = 'position:fixed;z-index:9999;min-width:130px;background:#22232e;border:1px solid #363847;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,0.55);padding:4px;display:none;';
+    el.innerHTML = ''
+      + '<button type="button" data-ddaction="rename" style="width:100%;display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:12px;color:#d1d5db;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;">'
+      +   '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>'
+      +   'Edit name'
+      + '</button>'
+      + '<button type="button" data-ddaction="delete" style="width:100%;display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:12px;color:#f87171;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;margin-top:2px;">'
+      +   '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
+      +   'Delete'
+      + '</button>';
+    el.querySelector('[data-ddaction="rename"]').addEventListener('mouseover', function() { this.style.background='#2c2e3d'; this.style.color='#fff'; });
+    el.querySelector('[data-ddaction="rename"]').addEventListener('mouseout', function() { this.style.background='transparent'; this.style.color='#d1d5db'; });
+    el.querySelector('[data-ddaction="delete"]').addEventListener('mouseover', function() { this.style.background='rgba(239,68,68,0.12)'; this.style.color='#fca5a5'; });
+    el.querySelector('[data-ddaction="delete"]').addEventListener('mouseout', function() { this.style.background='transparent'; this.style.color='#f87171'; });
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function getFloatingDropdown() {
+    if (!_floatingDropdown || !document.body.contains(_floatingDropdown)) {
+      _floatingDropdown = buildFloatingDropdown();
+    }
+    return _floatingDropdown;
+  }
+
+  function closeFloatingDropdown() {
+    var dd = getFloatingDropdown();
+    dd.style.display = 'none';
+    if (_activeMenuBtn) { _activeMenuBtn.style.opacity = ''; _activeMenuBtn = null; }
+    _activeDropdownSessId = null;
+  }
+
+  function openChatDropdown(btn, sess) {
+    var dd = getFloatingDropdown();
+    if (_activeDropdownSessId === sess.id && dd.style.display !== 'none') { closeFloatingDropdown(); return; }
+    closeFloatingDropdown();
+
+    var rect = btn.getBoundingClientRect();
+    dd.style.display = 'block';
+    var ddWidth = 138;
+    var left = rect.right + 4;
+    if (left + ddWidth > window.innerWidth - 8) { left = rect.left - ddWidth - 4; }
+    dd.style.left = left + 'px';
+    dd.style.top = rect.top + 'px';
+    btn.style.opacity = '1';
+    _activeMenuBtn = btn;
+    _activeDropdownSessId = sess.id;
+
+    var renameBtn = dd.querySelector('[data-ddaction="rename"]');
+    var deleteBtn = dd.querySelector('[data-ddaction="delete"]');
+    var newRename = renameBtn.cloneNode(true);
+    var newDelete = deleteBtn.cloneNode(true);
+    renameBtn.parentNode.replaceChild(newRename, renameBtn);
+    deleteBtn.parentNode.replaceChild(newDelete, deleteBtn);
+    newRename.addEventListener('mouseover', function() { this.style.background='#2c2e3d'; this.style.color='#fff'; });
+    newRename.addEventListener('mouseout', function() { this.style.background='transparent'; this.style.color='#d1d5db'; });
+    newDelete.addEventListener('mouseover', function() { this.style.background='rgba(239,68,68,0.12)'; this.style.color='#fca5a5'; });
+    newDelete.addEventListener('mouseout', function() { this.style.background='transparent'; this.style.color='#f87171'; });
+
+    newRename.addEventListener('click', async function(e) {
+      e.stopPropagation();
+      closeFloatingDropdown();
+      var newTitle = prompt('Enter a new name for this chat:', sess.title || '');
+      if (newTitle === null) return;
+      newTitle = newTitle.trim(); if (!newTitle) return;
+      try {
+        var res = await fetch('/api/chat/sessions/' + sess.id, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title:newTitle}) });
+        var data = await res.json();
+        if (data.ok) { await renderRecentChats(); } else { alert('Failed to rename: ' + (data.error||'Unknown error')); }
+      } catch(err) { alert('Network error while renaming chat.'); }
+    });
+
+    newDelete.addEventListener('click', async function(e) {
+      e.stopPropagation();
+      closeFloatingDropdown();
+      if (!confirm('Are you sure you want to delete this conversation?')) return;
+      try {
+        var res = await fetch('/api/chat/sessions/' + sess.id, { method:'DELETE' });
+        var data = await res.json();
+        if (data.ok) {
+          if (currentSessionId === sess.id) {
+            currentSessionId = null; messageBuffer = [];
+            var list = document.getElementById('message-list');
+            list.innerHTML = ''; list.appendChild(buildWelcomeScreen());
+            document.getElementById('chat-input').value = '';
+          }
+          await renderRecentChats();
+        } else { alert('Failed to delete: ' + (data.error||'Unknown error')); }
+      } catch(err) { alert('Network error while deleting chat.'); }
+    });
+  }
+
+  // Close floating dropdown on outside click
+  document.addEventListener('click', function(e) {
+    var dd = document.getElementById('chat-floating-dropdown');
+    if (dd && !e.target.closest('.chat-menu-btn') && !e.target.closest('#chat-floating-dropdown')) {
+      closeFloatingDropdown();
+    }
+  });
+
+
+  function formatRelativeTime(ts) {
+    var diff = Date.now() - ts;
+    var mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    var days = Math.floor(hrs / 24);
+    return days + 'd ago';
+  }
+
+  // ─── Load a past session ───
+  async function loadSession(sessionId) {
+    currentSessionId = sessionId;
+    var msgs = await getSessionMessages(sessionId);
+    var list = document.getElementById('message-list');
+    list.innerHTML = '';
+
+    // Populate conversation memory from persisted messages
+    messageBuffer = msgs.map(function(msg) {
+      return { role: msg.role, content: msg.content };
+    });
+
+    msgs.forEach(function(msg) {
+      var ts = new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+      var el = createBubble(msg.role, msg.content, ts, msg.meta || {});
+      el.classList.remove('msg-appear');
+      list.appendChild(el);
+    });
+
+    list.scrollTo({ top: list.scrollHeight, behavior: 'auto' });
+    await renderRecentChats();
+
+    // Close sidebar on mobile
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  function formatInitialTitle(str) {
+    if (!str) return 'New Chat';
+    var clean = str.replace(/^[#>\s*\-_]+/g, '').trim();
+    if (clean.length > 45) {
+      clean = clean.slice(0, 42).replace(/\s+\S*$/, '') + '…';
+    }
+    return clean.charAt(0).toUpperCase() + clean.slice(1) || 'New Chat';
+  }
+
+  // ─── Append message ───
+  async function appendMessage(role, content, meta) {
+    // Remove welcome screen if present
+    var screen = document.getElementById('welcome-screen');
+    if (screen) screen.remove();
+
+    // Start new session on first user message
+    if (role === 'user' && currentSessionId === null) {
+      var initialTitle = formatInitialTitle(content);
+      var sess = await createSession(initialTitle);
+      if (sess) {
+        currentSessionId = sess.id;
+        await renderRecentChats();
+      }
+    }
+
+    if (currentSessionId) {
+      await postMessage(currentSessionId, role, content, meta);
+    }
+
+    var list = document.getElementById('message-list');
+    var el = createBubble(role, content, formatTimestamp(), meta);
+    list.appendChild(el);
+    list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+  }
+
+  // ─── Typing indicator ───
+  function showTyping() {
+    var list = document.getElementById('message-list');
+    var el = document.createElement('div');
+    el.id = 'typing-indicator';
+    el.className = 'flex justify-start mb-5 px-6';
+    el.innerHTML = '<div class="bg-[#f8f9fb] border border-[#e8eaed] rounded-[18px] rounded-bl-[4px] px-4 py-3"><div class="flex gap-1 items-center h-4"><span class="w-1.5 h-1.5 bg-[#bbb] rounded-full animate-bounce" style="animation-delay:0ms"></span><span class="w-1.5 h-1.5 bg-[#bbb] rounded-full animate-bounce" style="animation-delay:150ms"></span><span class="w-1.5 h-1.5 bg-[#bbb] rounded-full animate-bounce" style="animation-delay:300ms"></span></div></div>';
+    list.appendChild(el);
+    list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+  }
+  function hideTyping() {
+    var el = document.getElementById('typing-indicator');
+    if (el) el.remove();
+  }
+
+  // ─── Badge helper (shared by createBubble and streaming) ───
+  // ─── Feedback thumbs (👍/👎) on completed bot answers ───
+  function renderFeedback(inner, logId) {
+    if (!logId) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'flex items-center gap-1 mt-1';
+
+    var up = document.createElement('button');
+    up.type = 'button';
+    up.title = 'Helpful';
+    up.className = 'p-1 rounded-md text-[#c4c9cf] hover:text-green hover:bg-[#f0f6ee] transition-colors';
+    up.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10v12M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg>';
+
+    var down = document.createElement('button');
+    down.type = 'button';
+    down.title = 'Not helpful';
+    down.className = 'p-1 rounded-md text-[#c4c9cf] hover:text-[#d9534f] hover:bg-[#fdf0ef] transition-colors';
+    down.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 14V2M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg>';
+
+    var hint = document.createElement('span');
+    hint.className = 'text-[10px] text-[#d9534f] ml-1 hidden';
+    hint.textContent = 'Try again';
+
+    function lock(chosen) {
+      up.disabled = true;
+      down.disabled = true;
+      if (chosen === 'up') { up.classList.remove('text-[#c4c9cf]'); up.classList.add('text-green'); }
+      if (chosen === 'down') { down.classList.remove('text-[#c4c9cf]'); down.classList.add('text-[#d9534f]'); }
+    }
+
+    function send(feedback, reason) {
+      up.disabled = true; down.disabled = true; hint.classList.add('hidden');
+      fetch('/api/chat/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ queryLogId: logId, feedback: feedback, reason: reason || '' }),
+      }).then(function (r) { return r.json(); }).then(function (data) {
+        if (data && data.ok) { lock(feedback); }
+        else { up.disabled = false; down.disabled = false; hint.classList.remove('hidden'); }
+      }).catch(function () {
+        up.disabled = false; down.disabled = false; hint.classList.remove('hidden');
+      });
+    }
+
+    up.onclick = function () { send('up'); };
+    down.onclick = function () {
+      // Reveal a one-line optional reason input, then submit.
+      if (wrap.querySelector('[data-fb-reason]')) return;
+      var row = document.createElement('div');
+      row.className = 'flex items-center gap-1 mt-1 w-full';
+      var input = document.createElement('input');
+      input.setAttribute('data-fb-reason', '');
+      input.type = 'text';
+      input.placeholder = 'What was wrong? (optional)';
+      input.className = 'flex-1 text-xs border border-[#e8eaed] rounded-md px-2 py-1 outline-none focus:border-green';
+      var go = document.createElement('button');
+      go.type = 'button';
+      go.textContent = 'Send';
+      go.className = 'text-xs px-2 py-1 rounded-md bg-dark text-white hover:opacity-90';
+      go.onclick = function () { send('down', input.value); };
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { send('down', input.value); } });
+      row.appendChild(input); row.appendChild(go);
+      wrap.appendChild(row);
+      input.focus();
+    };
+
+    wrap.appendChild(up);
+    wrap.appendChild(down);
+    wrap.appendChild(hint);
+    inner.appendChild(wrap);
+  }
+
+  function addBadges(inner, meta) {
+    if (!meta) return;
+    var hasBadges = false;
+    var badgeRow = document.createElement('div');
+    badgeRow.className = 'flex items-center gap-2 flex-wrap';
+
+    if (meta.sources && meta.sources.length > 0) {
+      meta.sources.forEach(function(src) {
+        var linked = !!src.fileUrl;
+        var sb = document.createElement(linked ? 'a' : 'span');
+        sb.className = 'inline-flex items-center gap-1.5 bg-[#f3f3f3] border border-[#e0e0e0] text-dark text-[11px] px-3 py-1 rounded-full font-medium' + (linked ? ' hover:bg-[#ececec] hover:border-[#c9cdd3] transition-colors' : '');
+        var iconSvg = '<svg width="10" height="12" viewBox="0 0 10 12" fill="#888"><path d="M1 0h8v12H1V0zm2 3h4v1H3V3zm0 2h4v1H3V5zm0 2h3v1H3V7z"/></svg>';
+        if (linked) {
+          sb.href = src.fileUrl;
+          sb.target = '_blank';
+          sb.rel = 'noopener noreferrer';
+          sb.title = 'Open document';
+          iconSvg += '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>';
+        }
+        sb.innerHTML = iconSvg + escHtml(src.documentName);
+        badgeRow.appendChild(sb);
+        if (src.category) {
+          var cb = document.createElement('span');
+          cb.className = 'text-[11px] text-[#888] px-2.5 py-0.5 bg-[#f3f3f3] rounded-full border border-[#e0e0e0]';
+          cb.textContent = src.category;
+          badgeRow.appendChild(cb);
+        }
+        hasBadges = true;
+      });
+    }
+    if (meta.hasContext === false) {
+      var gb = document.createElement('span');
+      gb.className = 'text-[11px] px-2.5 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-full';
+      gb.textContent = 'General knowledge';
+      badgeRow.appendChild(gb);
+      hasBadges = true;
+    }
+    if (hasBadges) inner.appendChild(badgeRow);
+  }
+
+  // ─── Streaming bubble factory ───
+  function createStreamingBubble() {
+    var outer = document.createElement('div');
+    outer.className = 'flex justify-start mb-5 px-6 msg-appear';
+    var inner = document.createElement('div');
+    inner.className = 'max-w-[72%] flex flex-col gap-2 items-start';
+    var bubble = document.createElement('div');
+    bubble.className = 'px-4 py-3 bg-[#f8f9fb] border border-[#e8eaed] rounded-[18px] rounded-bl-[4px] text-dark';
+    var contentEl = document.createElement('div');
+    contentEl.className = 'markdown-body streaming-cursor';
+    bubble.appendChild(contentEl);
+    inner.appendChild(bubble);
+    outer.appendChild(inner);
+    return { outer: outer, inner: inner, contentEl: contentEl };
+  }
+
+  // ─── Handle send ───
+  async function handleSend() {
+    var input = document.getElementById('chat-input');
+    var text = input.value.trim();
+    if (!text) return;
+
+    // Track in conversation memory
+    messageBuffer.push({ role: 'user', content: text });
+
+    await appendMessage('user', text, {});
+    input.value = '';
+    input.style.height = 'auto';
+
+    var btn = document.getElementById('send-btn');
+    btn.disabled = true;
+    showTyping();
+
+    // Send last 10 messages (5 user-assistant turns) as history
+    var history = messageBuffer.slice(-11, -1);
+
+    try {
+      var res = await fetch('/api/chat/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: text, agent: currentAgent.id, session_id: currentSessionId }),
+      });
+
+      // Non-200 errors (401, 400, 500 before streaming starts)
+      if (!res.ok) {
+        hideTyping();
+        btn.disabled = false;
+        var errData = {};
+        try { errData = await res.json(); } catch(e) {}
+        await appendMessage('assistant', errData.error || 'Sorry, something went wrong.', {});
+        return;
+      }
+
+      // Kick off streaming
+      hideTyping();
+      var list = document.getElementById('message-list');
+      var sb = createStreamingBubble();
+      list.appendChild(sb.outer);
+      list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      var fullText = '';
+      var lineBuf = '';
+      var streamMeta = { sources: [], hasContext: true };
+      var ticketOffer = null;
+      var stopped = false;
+      var feedbackLogId = null;
+      var chunkCount = 0;
+
+      // Show stop button
+      var stopBtn = document.getElementById('stop-btn');
+      stopBtn.classList.add('visible');
+      function stopStreaming() {
+        stopped = true;
+        reader.cancel();
+        stopBtn.classList.remove('visible');
+        sb.contentEl.classList.remove('streaming-cursor');
+      }
+      stopBtn.onclick = stopStreaming;
+
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done || stopped) break;
+
+        lineBuf += decoder.decode(chunk.value, { stream: true });
+        var lines = lineBuf.split('\n');
+        lineBuf = lines.pop() || '';
+
+        for (var j = 0; j < lines.length; j++) {
+          var line = lines[j].trim();
+          if (!line) continue;
+          try {
+            var parsed = JSON.parse(line);
+            if (parsed.type === 'chunk' && parsed.text) {
+              fullText += parsed.text;
+              chunkCount++;
+              sb.contentEl.innerHTML = renderMarkdown(fullText);
+              // Scroll every 5 chunks to avoid jank on every token
+              if (chunkCount % 5 === 0) {
+                list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+              }
+            } else if (parsed.type === 'offer_ticket') {
+              ticketOffer = { query: text, category: parsed.category || null, staffName: parsed.staffName || null };
+            } else if (parsed.type === 'done') {
+              streamMeta = { sources: parsed.sources || [], hasContext: parsed.hasContext };
+              feedbackLogId = parsed.queryLogId || null;
+            } else if (parsed.type === 'error' && !fullText) {
+              fullText = parsed.error || 'Sorry, something went wrong.';
+              sb.contentEl.innerHTML = renderMarkdown(fullText);
+            }
+          } catch(e) {}
+        }
+      }
+
+      // Remove cursor and stop button when done
+      sb.contentEl.classList.remove('streaming-cursor');
+      stopBtn.classList.remove('visible');
+      stopBtn.onclick = null;
+      list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+
+      btn.disabled = false;
+
+      // Append badges + timestamp now that stream is complete
+      addBadges(sb.inner, streamMeta);
+      var ts = document.createElement('span');
+      ts.className = 'text-[10px] text-[#ccc] px-1';
+      ts.textContent = formatTimestamp();
+      sb.inner.appendChild(ts);
+
+      // Feedback thumbs — only when we have a query log id and the answer wasn't stopped
+      if (!stopped) {
+        renderFeedback(sb.inner, feedbackLogId);
+      }
+
+      // Ticket confirmation buttons (escalation flow only)
+      if (ticketOffer && !stopped) {
+        renderTicketOffer(sb.inner, ticketOffer);
+        list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+      }
+
+      // Persist to Supabase and track in memory
+      messageBuffer.push({ role: 'assistant', content: fullText });
+      if (currentSessionId) {
+        await postMessage(currentSessionId, 'assistant', fullText, streamMeta);
+      }
+
+    } catch(e) {
+      hideTyping();
+      btn.disabled = false;
+      document.getElementById('stop-btn').classList.remove('visible');
+      await appendMessage('assistant', 'Network error. Please check your connection and try again.', {});
+    }
+  }
+
+  // ─── Build welcome screen (used by New Chat) ───
+  function buildWelcomeScreen() {
+    var rootEl = document.getElementById('chat-root');
+    var currentName = (rootEl && rootEl.getAttribute('data-user-name')) || 'Student';
+    var welcome = document.createElement('div');
+    welcome.id = 'welcome-screen';
+    welcome.className = 'h-full flex flex-col items-center justify-center px-6 py-12';
+    welcome.innerHTML = ''
+      + '<div class="w-16 h-16 rounded-[22px] bg-dark flex items-center justify-center mb-5 shadow-sm">'
+      +   '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+      + '</div>'
+      + '<h2 class="text-3xl font-semibold text-dark mb-2.5 text-center tracking-tight">Welcome back, ' + escHtml(currentName) + '! 👋</h2>'
+      + '<p class="text-sm text-[#888] text-center max-w-md leading-relaxed">Any queries today, <span class="font-medium text-[#555]">' + escHtml(currentName) + '</span>? Ask me anything about your college.</p>';
+    return welcome;
+  }
+  // ─── New chat ───
+  document.getElementById('new-chat-btn').addEventListener('click', async function() {
+    currentSessionId = null;
+    messageBuffer = [];
+    var list = document.getElementById('message-list');
+    list.innerHTML = '';
+    list.appendChild(buildWelcomeScreen());
+
+    document.getElementById('chat-input').value = '';
+    document.getElementById('chat-input').style.height = 'auto';
+    document.getElementById('sidebar').classList.remove('open');
+    await renderRecentChats();
+  });
+
+  // ─── Voice input (Web Speech API, English, no auto-send) ───
+  function initVoiceInput() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var micBtn = document.getElementById('mic-btn');
+    if (!SR || !micBtn) return; // Unsupported → leave button hidden
+
+    micBtn.classList.remove('hidden'); // Supported → reveal
+
+    var input = document.getElementById('chat-input');
+    var hint = document.getElementById('mic-hint');
+    var recognition = new SR();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    var isListening = false;
+    var baseText = '';
+
+    function setIdle() {
+      isListening = false;
+      micBtn.classList.remove('mic-listening');
+      input.setAttribute('placeholder', 'Type your question...');
+    }
+
+    function setListening() {
+      isListening = true;
+      hint.classList.add('hidden');
+      micBtn.classList.add('mic-listening');
+      input.setAttribute('placeholder', 'Listening…');
+    }
+
+    micBtn.addEventListener('click', function () {
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+      baseText = input.value ? input.value + ' ' : '';
+      try {
+        recognition.start();
+      } catch (e) {
+        // start() throws if called too soon after a previous stop; ignore
+      }
+    });
+
+    recognition.onstart = function () { setListening(); };
+
+    recognition.onresult = function (event) {
+      var transcript = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      input.value = baseText + transcript;
+      // Trigger the existing auto-resize handler
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    };
+
+    recognition.onerror = function (event) {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        hint.classList.remove('hidden');
+        setTimeout(function () { hint.classList.add('hidden'); }, 4000);
+      }
+      setIdle();
+    };
+
+    recognition.onend = function () { setIdle(); };
+  }
+  initVoiceInput();
+
+  // ─── Events ───
+  document.getElementById('send-btn').addEventListener('click', function() { handleSend(); });
+
+  document.getElementById('chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  });
+
+  document.getElementById('chat-input').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  // Starter cards — event delegation so it works after New Chat rebuilds the screen
+  document.getElementById('message-list').addEventListener('click', function(e) {
+    var card = e.target.closest('.starter-card');
+    if (card) {
+      document.getElementById('chat-input').value = card.dataset.text || '';
+      handleSend();
+    }
+  });
+
+  // Mobile sidebar
+  var sidebarToggle = document.getElementById('sidebar-toggle');
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+  }
+
+  // ─── Ticket confirmation (escalation flow) ───
+  function renderTicketOffer(container, offer) {
+    var wrap = document.createElement('div');
+    wrap.className = 'flex items-center gap-2 mt-2 px-1';
+
+    var yesBtn = document.createElement('button');
+    yesBtn.className = 'px-3.5 py-1.5 rounded-full bg-dark text-white text-xs font-medium hover:opacity-90 transition-opacity';
+    yesBtn.textContent = 'Yes, raise a ticket';
+
+    var noBtn = document.createElement('button');
+    noBtn.className = 'px-3.5 py-1.5 rounded-full bg-white border border-[#e0e0e0] text-[#555] text-xs font-medium hover:border-dark hover:text-dark transition-colors';
+    noBtn.textContent = 'No, thanks';
+
+    function finish(html) {
+      var note = document.createElement('p');
+      note.className = 'text-xs text-[#6b6f76] mt-2 px-1';
+      note.innerHTML = html;
+      wrap.replaceWith(note);
+    }
+
+    noBtn.addEventListener('click', function () {
+      finish('Okay — no ticket raised.');
+    });
+
+    yesBtn.addEventListener('click', async function () {
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      yesBtn.textContent = 'Raising…';
+      try {
+        var res = await fetch('/api/tickets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: offer.query, category: offer.category, staff_name: offer.staffName }),
+        });
+        var data = await res.json();
+        if (data.ok) {
+          var shortId = String(data.id).slice(0, 8).toUpperCase();
+          finish('🎫 Ticket <strong>#' + shortId + '</strong> raised — the admin team will follow up. <a href="/app/tickets" class="text-dark font-medium underline underline-offset-2">Track it</a>');
+        } else {
+          finish('Could not raise the ticket: ' + (data.error || 'unknown error'));
+        }
+      } catch (e) {
+        finish('Network error — ticket not raised.');
+      }
+    });
+
+    wrap.appendChild(yesBtn);
+    wrap.appendChild(noBtn);
+    container.appendChild(wrap);
+  }
+
+  // ─── My Profile modal ───
+  (function () {
+    var modal = document.getElementById('profile-modal');
+    var openBtn = document.getElementById('open-profile-modal');
+    var closeBtn = document.getElementById('close-profile-modal');
+    var saveBtn = document.getElementById('save-profile-btn');
+    var errEl = document.getElementById('profile-error');
+    if (!modal || !openBtn) return;
+
+    function openModal() {
+      errEl.classList.add('hidden');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      fetch('/api/profile')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data && data.ok && data.profile) {
+            document.getElementById('profile-degree').value = data.profile.degree_program || '';
+            document.getElementById('profile-dept').value = data.profile.department || '';
+            document.getElementById('profile-year').value = data.profile.year != null ? String(data.profile.year) : '';
+            document.getElementById('profile-hostel').value = data.profile.hosteller === true ? 'true' : data.profile.hosteller === false ? 'false' : '';
+          }
+        })
+        .catch(function () { /* leave fields as-is */ });
+    }
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+
+    saveBtn.addEventListener('click', function () {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+      fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          degree_program: document.getElementById('profile-degree').value,
+          department: document.getElementById('profile-dept').value,
+          year: document.getElementById('profile-year').value || null,
+          hosteller: document.getElementById('profile-hostel').value || null,
+        }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data && data.ok) {
+            closeModal();
+          } else {
+            errEl.textContent = (data && data.error) || 'Failed to save.';
+            errEl.classList.remove('hidden');
+          }
+        })
+        .catch(function () {
+          errEl.textContent = 'Network error. Please try again.';
+          errEl.classList.remove('hidden');
+        })
+        .finally(function () {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Profile';
+        });
+    });
+  })();
+
+  // ─── Init ───
+  renderRecentChats();
+
+  // ─── Announcements bell ───
+  (function () {
+    var bellBtn = document.getElementById('ann-bell-btn');
+    var dropdown = document.getElementById('ann-dropdown');
+    var badge = document.getElementById('ann-badge');
+    var itemsEl = document.getElementById('ann-items');
+    var countEl = document.getElementById('ann-count');
+    if (!bellBtn || !dropdown) return;
+
+    // Unread announcements from the server (per-user tracking via announcement_reads)
+    var unread = [];
+
+    function esc(s) {
+      var d = document.createElement('div');
+      d.textContent = s == null ? '' : String(s);
+      return d.innerHTML;
+    }
+
+    function updateBadge() {
+      if (unread.length > 0) {
+        badge.textContent = unread.length > 9 ? '9+' : String(unread.length);
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function render() {
+      if (unread.length === 0) {
+        itemsEl.innerHTML =
+          '<p class="px-4 py-8 text-center text-xs text-[#9aa0a6]">You\u2019re all caught up! 🎉</p>';
+        countEl.textContent = '';
+        return;
+      }
+      countEl.textContent = unread.length + ' unread';
+      itemsEl.innerHTML = unread
+        .map(function (a) {
+          var date = new Date(a.created_at).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short',
+          });
+          return (
+            '<div class="px-4 py-3.5 border-b border-[#f0f1f3] last:border-b-0 bg-[#fafff2]">' +
+              '<div class="flex items-center gap-1.5 flex-wrap">' +
+                '<p class="text-[13px] font-medium text-dark leading-snug">' + esc(a.title) + '</p>' +
+                (a.pinned ? '<span class="chip chip-lime !text-[9px] !px-1.5 !py-0.5">Pinned</span>' : '') +
+                '<span class="chip chip-lime !text-[9px] !px-1.5 !py-0.5">New</span>' +
+              '</div>' +
+              '<p class="text-xs text-[#555] mt-1 leading-relaxed whitespace-pre-line">' + esc(a.body) + '</p>' +
+              '<div class="flex items-center gap-2 mt-1.5 text-[10px] text-[#9aa0a6]">' +
+                (a.category ? '<span>' + esc(a.category) + '</span><span>·</span>' : '') +
+                '<span>' + date + '</span>' +
+              '</div>' +
+            '</div>'
+          );
+        })
+        .join('');
+    }
+
+    function markAllRead() {
+      if (unread.length === 0) return;
+      var ids = unread.map(function (a) { return a.id; });
+      fetch('/api/announcements/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: ids }),
+      }).catch(function () { /* non-fatal — badge just reappears next load */ });
+      unread = [];
+      updateBadge();
+    }
+
+    function toggleDropdown() {
+      var isOpen = !dropdown.classList.contains('hidden');
+      if (isOpen) {
+        dropdown.classList.add('hidden');
+      } else {
+        render();
+        dropdown.classList.remove('hidden');
+        markAllRead();
+      }
+    }
+
+    bellBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggleDropdown();
+    });
+    document.addEventListener('click', function (e) {
+      if (!dropdown.classList.contains('hidden') && !e.target.closest('#ann-bell-wrap')) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Fetch unread notification-worthy announcements on load
+    fetch('/api/announcements/notifications')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          unread = data.unread || [];
+          updateBadge();
+        }
+      })
+      .catch(function () { /* non-fatal — bell just stays empty */ });
+  })();
+</script>

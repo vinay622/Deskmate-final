@@ -1,0 +1,219 @@
+---
+import { Image } from "astro:assets";
+import decorForm from "../../assets/pics/contact-pic.png";
+---
+
+<div
+  class="flex relative justify-start items-center p-[60px] bg-[#F3F3F3] rounded-[45px] overflow-hidden"
+>
+  <!-- Success state (hidden by default) -->
+  <div id="form-success" class="hidden w-full flex flex-col items-center justify-center py-16 text-center gap-5">
+    <div class="w-16 h-16 rounded-full bg-dark flex items-center justify-center mb-2">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b9ff66" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 class="text-2xl font-medium text-dark">Message received!</h3>
+    <p class="text-[#555] max-w-xs leading-relaxed">Thanks for reaching out. We'll get back to you at the email you provided within 24 hours.</p>
+    <button id="form-reset-btn" class="btn-secondary px-8 py-3 rounded-2xl text-sm mt-2">Send another message</button>
+  </div>
+
+  <form id="contact-form" class="bg-gray sm:p-6 h-full w-full lg:max-w-lg">
+    <div class="flex flex-col sm:flex-row gap-[35px] sm:items-center mb-10">
+      <div class="flex items-center gap-[14px]">
+        <input
+          type="checkbox"
+          id="checkbox1"
+          name="checkbox1"
+          class="form-checkbox text-black"
+        />
+        <label for="checkbox1" class="text-black">General Inquiry</label>
+      </div>
+      <div class="flex items-center gap-[14px]">
+        <input
+          type="checkbox"
+          id="checkbox2"
+          name="checkbox2"
+          class="form-checkbox text-black"
+        />
+        <label for="checkbox2" class="flex items-center text-black">College Partnership</label>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label for="name" class="block text-black mb-2">Name*</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        placeholder="Your name"
+        class="w-full px-[30px] py-[18px] border border-black rounded-[14px] text-black outline-none focus:border-[#b9ff66] transition-colors"
+      />
+    </div>
+
+    <div class="mb-4">
+      <label for="email" class="block text-black mb-2">Email*</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="your@college.edu.in"
+        class="w-full px-[30px] py-[18px] border border-black rounded-[14px] text-black outline-none focus:border-[#b9ff66] transition-colors"
+      />
+    </div>
+
+    <div class="mb-4">
+      <label for="message" class="block text-black mb-2">Message*</label>
+      <textarea
+        id="message"
+        name="message"
+        placeholder="What would you like to know about DeskMate?"
+        rows="4"
+        class="w-full px-[30px] py-[18px] border border-black rounded-[14px] text-black outline-none focus:border-[#b9ff66] transition-colors resize-none"
+      ></textarea>
+    </div>
+
+    <button type="submit" id="form-submit-btn" name="submit" class="btn-primary w-full flex items-center justify-center gap-2">
+      <span id="submit-label">Send Message</span>
+      <svg id="submit-spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    </button>
+
+    <!-- Honeypot: hidden from humans, catches bots -->
+    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+  </form>
+  <picture class="absolute right-[-25%] top-[2%] bottom-[2%] hidden lg:block">
+    <Image src={decorForm} alt="decor" />
+  </picture>
+</div>
+<style>
+  .form-checkbox {
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #000;
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .form-checkbox:before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--green);
+    transform: scale(0);
+    transition: transform 0.1s ease-in-out;
+  }
+
+  .form-checkbox:checked:before {
+    transform: scale(0.6);
+  }
+</style>
+<script>
+  function formSetup() {
+    var cb1 = document.getElementById("checkbox1") as HTMLInputElement;
+    var cb2 = document.getElementById("checkbox2") as HTMLInputElement;
+    var message = document.getElementById("message") as HTMLInputElement;
+    var form = document.getElementById("contact-form") as HTMLFormElement;
+    var successEl = document.getElementById("form-success");
+    var resetBtn = document.getElementById("form-reset-btn");
+    var submitBtn = document.getElementById("form-submit-btn") as HTMLButtonElement;
+    var submitLabel = document.getElementById("submit-label");
+    var submitSpinner = document.getElementById("submit-spinner");
+
+    if (cb1 && cb2) {
+      cb1.checked = true;
+
+      cb2.addEventListener("change", function () {
+        if (cb2.checked) {
+          cb1.checked = false;
+          message.value = "We're interested in a college partnership with DeskMate. Please contact us.";
+        } else {
+          message.value = "";
+          cb1.checked = true;
+        }
+      });
+      cb1.addEventListener("change", function () {
+        if (cb1.checked) {
+          cb2.checked = false;
+          message.value = "";
+        } else {
+          cb2.checked = true;
+          message.value = "We're interested in a college partnership with DeskMate. Please contact us.";
+        }
+      });
+    }
+
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        var nameVal = (document.getElementById("name") as HTMLInputElement).value.trim();
+        var emailVal = (document.getElementById("email") as HTMLInputElement).value.trim();
+        var messageVal = (document.getElementById("message") as HTMLInputElement).value.trim();
+        var honeypot = (document.getElementById("website") as HTMLInputElement).value;
+        var topicVal = cb2 && cb2.checked ? "partnership" : "general";
+
+        if (!nameVal || !emailVal || !messageVal) return;
+
+        // Show spinner
+        if (submitLabel) submitLabel.textContent = "Sending...";
+        if (submitSpinner) submitSpinner.classList.remove("hidden");
+        if (submitBtn) submitBtn.disabled = true;
+
+        var showSuccess = function () {
+          if (form) form.classList.add("hidden");
+          if (successEl) successEl.classList.remove("hidden");
+        };
+        var showError = function () {
+          if (submitLabel) submitLabel.textContent = "Send Message";
+          if (submitSpinner) submitSpinner.classList.add("hidden");
+          if (submitBtn) submitBtn.disabled = false;
+          alert("Could not send your message. Please try again in a moment.");
+        };
+
+        try {
+          var res = await fetch("/api/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: nameVal,
+              email: emailVal,
+              message: messageVal,
+              topic: topicVal,
+              website: honeypot,
+            }),
+          });
+          var data = await res.json();
+          if (data.ok) showSuccess();
+          else showError();
+        } catch (err) {
+          showError();
+        }
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", function () {
+        if (successEl) successEl.classList.add("hidden");
+        if (form) {
+          form.classList.remove("hidden");
+          form.reset();
+          if (cb1) cb1.checked = true;
+          if (cb2) cb2.checked = false;
+          if (message) message.value = "";
+        }
+        if (submitLabel) submitLabel.textContent = "Send Message";
+        if (submitSpinner) submitSpinner.classList.add("hidden");
+        if (submitBtn) submitBtn.disabled = false;
+      });
+    }
+  }
+
+  formSetup();
+  document.addEventListener("astro:after-swap", formSetup);
+</script>

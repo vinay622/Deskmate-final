@@ -1,0 +1,293 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: "Grotesk";
+    src: url("/fonts/grotesk/SpaceGrotesk-Regular.woff"), format("woff");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Grotesk";
+    src: url("/fonts/grotesk/SpaceGrotesk-Medium.woff"), format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  .font-outline {
+    -webkit-text-stroke: 2.5px black;
+    background-color: transparent;
+  }
+  .font-outline-sm {
+    -webkit-text-stroke: 1.2px black;
+    background-color: transparent;
+  }
+
+  :root {
+    --green: #b9ff66;
+    --black: rgb(0, 0, 0);
+    --dark: #191a23;
+    --gray: #f3f3f3;
+    --white: #ffffff;
+    --canvas: #f6f7f9;
+    --ink-muted: #626671;
+    --line: #e5e7eb;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    color: var(--dark);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--green); color: var(--dark); }
+
+  :focus-visible {
+    outline: 3px solid rgba(185, 255, 102, 0.9);
+    outline-offset: 3px;
+  }
+
+  /* @layer base {
+    * {
+      box-sizing: border-box;
+      font-family: "Grotesk", sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-size: 20px;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      line-height: 120%;
+      font-weight: 500;
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 500;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        font-size: 16px;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      h1 {
+        font-size: 2.688rem;
+      }
+
+      h2 {
+        font-size: 2.25rem;
+      }
+
+      h3 {
+        font-size: 1.625rem;
+      }
+
+      h4 {
+        font-size: 1.125rem;
+      }
+    }
+  } */
+
+  @layer components {
+    .btn-primary {
+      @apply inline-flex items-center justify-center bg-dark text-white rounded-2xl px-[35px] py-4 transition-all duration-200;
+      box-shadow: 0 3px 0 #0c0d12;
+    }
+    .btn-primary:hover {
+      @apply bg-green text-black;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 #0c0d12;
+    }
+
+    .btn-secondary {
+      @apply inline-flex items-center justify-center bg-transparent text-black px-[35px] py-4 rounded-2xl border border-solid border-black transition-all duration-200;
+    }
+    .btn-secondary:hover {
+      @apply bg-black text-white border-green transform scale-105;
+    }
+
+    .btn-tertiary {
+      @apply inline-flex items-center justify-center bg-green text-black rounded-2xl px-[35px] py-4 transition-all duration-200;
+    }
+    .btn-tertiary:hover {
+      @apply bg-white text-black transform scale-105;
+    }
+
+    .greenhead {
+      @apply bg-green text-black rounded-md px-[7px];
+    }
+
+    .whitehead {
+      @apply bg-white text-black rounded-[7px] px-[7px];
+    }
+
+    .blackhead {
+      @apply bg-black text-white rounded-[7px] px-[7px];
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body { overflow-x: hidden; }
+
+.font-utility { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+.page-grid {
+  background-image: linear-gradient(rgba(25, 26, 35, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(25, 26, 35, 0.035) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.surface-lift { transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease; }
+.surface-lift:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(25, 26, 35, 0.1); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   App design system (admin surfaces) — refined Positivus.
+   Same dark + lime identity, applied with tighter radii and
+   a single accent so data-dense screens feel premium, not toy-like.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --canvas: #f6f7f9;   /* app background — cooler neutral than --gray */
+  --hairline: #e8eaed; /* borders */
+  --muted: #6b6f76;    /* secondary text */
+  --faint: #9aa0a6;    /* tertiary text / icons */
+}
+
+@layer components {
+  /* Buttons — app (12px radius, no giant blob) */
+  .btn-app-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-[12px] px-5 py-2.5 text-sm font-medium bg-dark text-white transition-all duration-200;
+  }
+  .btn-app-primary:hover {
+    @apply bg-green text-dark;
+  }
+  .btn-app-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-[12px] px-5 py-2.5 text-sm font-medium bg-white text-dark border border-[#e8eaed] transition-all duration-200;
+  }
+  .btn-app-secondary:hover {
+    @apply border-dark;
+  }
+  .btn-app-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-[12px] px-4 py-2.5 text-sm font-medium text-[#6b6f76] transition-all duration-200;
+  }
+  .btn-app-ghost:hover {
+    @apply bg-[#f0f1f3] text-dark;
+  }
+
+  /* Surface */
+  .app-card {
+    @apply bg-white border border-[#e8eaed] rounded-[20px];
+  }
+
+  /* Form controls */
+  .app-input {
+    @apply w-full bg-[#f8f9fb] border border-[#e8eaed] rounded-[12px] px-4 py-2.5 text-sm text-dark outline-none transition-all duration-200 placeholder-[#aab0b6];
+  }
+  .app-input:focus {
+    @apply border-dark bg-white;
+    box-shadow: 0 0 0 3px rgba(185, 255, 102, 0.18);
+  }
+
+  /* Chips — tonal, on-brand (replaces the blue/purple/orange rainbow) */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium;
+  }
+  .chip-ink { @apply bg-dark text-white; }
+  .chip-lime { @apply bg-green text-dark; }
+  .chip-neutral { @apply bg-[#f0f1f3] text-[#555] border border-[#e8eaed]; }
+  .chip-amber { @apply bg-amber-50 text-amber-700 border border-amber-200; }
+  .chip-danger { @apply bg-red-50 text-red-600 border border-red-200; }
+
+  /* Sidebar navigation (dark rail) */
+  .nav-item {
+    @apply flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[#9aa0a6] transition-colors duration-200;
+  }
+  .nav-item:hover {
+    @apply text-white;
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+  .nav-item-active,
+  .nav-item-active:hover {
+    @apply bg-green text-dark;
+  }
+
+  /* Eyebrow / section label */
+  .eyebrow {
+    @apply text-[11px] uppercase tracking-widest font-medium text-[#9aa0a6];
+  }
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Slim scrollbar for app panels */
+.app-scroll::-webkit-scrollbar { width: 6px; }
+.app-scroll::-webkit-scrollbar-track { background: transparent; }
+.app-scroll::-webkit-scrollbar-thumb { background: #d5d8dd; border-radius: 3px; }
+.app-scroll::-webkit-scrollbar-thumb:hover { background: #b9bdc4; }
+
+/* markdown style */
+.content p {
+  margin: 20px 0;
+  font-size: 1.1rem;
+}
+
+.content h2 {
+  margin: 20px 0;
+  font-size: 1.4rem;
+  font-weight: bold;
+}

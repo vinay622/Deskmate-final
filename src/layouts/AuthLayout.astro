@@ -1,0 +1,13 @@
+---
+import MainHead from "./MainHead.astro";
+import "../styles/global.css";
+
+const { title, description } = Astro.props;
+---
+
+<html lang="en">
+  <MainHead title={title} description={description} />
+  <body class="bg-dark font-grotesk min-h-screen">
+    <slot />
+  </body>
+</html>
