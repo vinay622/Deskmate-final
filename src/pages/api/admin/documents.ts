@@ -14,7 +14,7 @@ function computeStatus(expiryDate: string | null): 'active' | 'expiring' | 'expi
 }
 
 export const POST: APIRoute = async ({ request, cookies, locals }) => {
-  if (!locals.user || locals.userRole !== 'admin') {
+  if (!locals.user || (locals.userRole !== 'admin' && locals.userRole !== 'staff')) {
     return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
       status: 401, headers: { 'Content-Type': 'application/json' },
     });

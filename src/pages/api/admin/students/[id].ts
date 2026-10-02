@@ -5,7 +5,7 @@ const VALID_STATUSES = ['approved', 'rejected'];
 
 // POST: Approve or reject a student of the admin's college
 export const POST: APIRoute = async ({ request, cookies, locals, params }) => {
-  if (!locals.user || locals.userRole !== 'admin') {
+  if (!locals.user || (locals.userRole !== 'admin' && locals.userRole !== 'staff')) {
     return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
       status: 401, headers: { 'Content-Type': 'application/json' },
     });

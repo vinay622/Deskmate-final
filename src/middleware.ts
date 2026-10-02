@@ -17,19 +17,36 @@ export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.userName = null;
   context.locals.collegeName = null;
   context.locals.approvalStatus = null;
+  context.locals.isActive = true;
 
   if (user) {
-    // Fetch role, name, college, and approval state from profiles table
+    // Fetch role, name, college, approval state, and active state from profiles table
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, full_name, college_name, approval_status")
+      .select("role, full_name, college_name, approval_status, is_active")
       .eq("id", user.id)
       .single();
 
-    context.locals.userRole = (profile?.role as "student" | "admin") ?? null;
+    context.locals.userRole = (profile?.role as "student" | "staff" | "admin") ?? null;
     context.locals.userName = profile?.full_name ?? null;
     context.locals.collegeName = profile?.college_name ?? null;
     context.locals.approvalStatus = profile?.approval_status ?? null;
+    context.locals.isActive = profile?.is_active ?? true;
+
+    // Block deactivated accounts
+    if (profile?.is_active === false) {
+      await supabase.auth.signOut();
+      const pathname = new URL(context.request.url).pathname;
+      if (pathname.startsWith("/app/")) {
+        return context.redirect("/login?error=deactivated");
+      }
+      if (pathname.startsWith("/api/") && !pathname.startsWith("/api/auth/")) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "Account deactivated" }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
   }
 
   const pathname = new URL(context.request.url).pathname;
@@ -52,8 +69,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
-  // Approved (or admin) users have no business on /pending
+  // Approved (or staff/admin) users have no business on /pending
   if (pathname === "/pending" && user && !isUnapprovedStudent) {
+    if (context.locals.userRole === "admin" || context.locals.userRole === "staff") {
+      return context.redirect("/app/admin");
+    }
     return context.redirect("/app/chat");
   }
 
@@ -64,9 +84,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect(`/login?next=${next_url}`);
     }
 
-    // Protect /app/admin/* — must be admin
-    if (pathname.startsWith("/app/admin") && context.locals.userRole !== "admin") {
-      return context.redirect("/app/chat?error=unauthorized");
+    // Protect /app/admin/* — must be admin or staff
+    const isStaffOrAdmin =
+      context.locals.userRole === "admin" || context.locals.userRole === "staff";
+
+    if (pathname.startsWith("/app/admin")) {
+      if (!isStaffOrAdmin) {
+        return context.redirect("/app/chat?error=unauthorized");
+      }
+
+      // Accounts management is restricted exclusively to college admins
+      if (pathname.startsWith("/app/admin/accounts") && context.locals.userRole !== "admin") {
+        return context.redirect("/app/admin?error=forbidden");
+      }
     }
   }
 

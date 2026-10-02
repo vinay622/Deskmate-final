@@ -14,6 +14,7 @@ const pathname = Astro.url.pathname;
 const user = Astro.locals.user;
 const userRole = Astro.locals.userRole;
 const isAdmin = userRole === 'admin';
+const isStaffOrAdmin = userRole === 'admin' || userRole === 'staff';
 const fullName = Astro.locals.userName ?? '';
 const firstName = fullName.split(' ')[0] || 'You';
 
@@ -73,7 +74,7 @@ function isActive(href: string) {
             ))}
             <div class="lg:hidden flex items-center justify-center mt-3 gap-3 flex-wrap">
               {user ? (
-                isAdmin ? (
+                isStaffOrAdmin ? (
                   <>
                     <a
                       class="mobile-nav-link px-6 py-3 rounded-2xl border border-zinc-900 text-black hover:bg-black hover:text-white inline-flex text-base"
@@ -87,7 +88,7 @@ function isActive(href: string) {
                       href="/app/admin"
                       data-close-menu="true"
                     >
-                      Admin Dashboard
+                      {isAdmin ? "Admin Dashboard" : "Staff Portal"}
                     </a>
                   </>
                 ) : (
@@ -124,11 +125,11 @@ function isActive(href: string) {
 
       <div>
         {isAppPage ? (
-          <!-- App pages: "Admin Dashboard" for admins + "Open Chat" -->
+          <!-- App pages: "Admin Dashboard" for admins/staff + "Open Chat" -->
           <div class="hidden lg:flex items-center gap-3">
-            {isAdmin && (
+            {isStaffOrAdmin && (
               <a href="/app/admin" class="px-7 py-3.5 rounded-2xl border border-[#b9ff66] text-white hover:bg-[#b9ff66] hover:text-dark text-sm font-medium transition-all">
-                Admin Dashboard
+                {isAdmin ? "Admin Dashboard" : "Staff Portal"}
               </a>
             )}
             <a href="/app/chat" class="px-7 py-3.5 rounded-2xl bg-green hover:bg-dark text-dark hover:text-white border border-dark text-sm font-medium transition-all">
@@ -136,12 +137,12 @@ function isActive(href: string) {
             </a>
           </div>
         ) : user ? (
-          <!-- Logged-in on public pages: greet + admin dashboard (admin) or open app (student) -->
+          <!-- Logged-in on public pages: greet + admin dashboard (admin/staff) or open app (student) -->
           <div class="hidden lg:flex items-center gap-3">
             <span class="text-sm text-[#555]">Hi, <span class="font-medium text-dark">{firstName}</span></span>
-            {isAdmin ? (
+            {isStaffOrAdmin ? (
               <a href="/app/admin" class="px-7 py-3.5 rounded-2xl bg-green border border-dark text-dark hover:bg-dark hover:text-white text-sm font-medium transition-all">
-                Admin Dashboard
+                {isAdmin ? "Admin Dashboard" : "Staff Portal"}
               </a>
             ) : (
               <a href="/app/chat" class="px-7 py-3.5 rounded-2xl bg-green border border-dark text-dark hover:bg-dark hover:text-white text-sm font-medium transition-all">

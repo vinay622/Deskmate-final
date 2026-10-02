@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from '../../../../lib/supabase';
 import { deleteDocumentVectors } from '../../../../lib/pinecone';
 
 export const DELETE: APIRoute = async ({ request, cookies, locals, params }) => {
-  if (!locals.user || locals.userRole !== 'admin') {
+  if (!locals.user || (locals.userRole !== 'admin' && locals.userRole !== 'staff')) {
     return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
       status: 401, headers: { 'Content-Type': 'application/json' },
     });

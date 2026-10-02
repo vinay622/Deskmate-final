@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "../../../lib/supabase";
 
 const { request, cookies, locals } = Astro;
 
-if (!locals.user || locals.userRole !== "admin") {
+if (!locals.user || (locals.userRole !== "admin" && locals.userRole !== "staff")) {
   return Astro.redirect("/login");
 }
 

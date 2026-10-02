@@ -1,0 +1,664 @@
+================================================================================
+          DESKMATE 2.0 — VOICE CLONE PRESENTATION SCRIPT (ENTHUSIASTIC)
+================================================================================
+
+Duration Estimate: ~15 minutes
+Format: Cloned voice narration over live project demonstration
+Tone: Joyful, enthusiastic, conversational — yet professional
+Tips: Speak naturally. Let the excitement come through. Pause where you
+      see "[pause]". Emphasize words in *asterisks*.
+
+================================================================================
+                         PART 1 — FULL SPOKEN SCRIPT
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 1: OPENING — INTRODUCE DESKMATE  (~1 min)
+────────────────────────────────────────────────────────────────────────────────
+
+Hey everyone! [pause] Welcome. So today, I'm really excited to walk you
+through something I've been working on — it's called DeskMate 2.0, and
+it's basically an AI-powered helpdesk assistant that I built *specifically*
+for college students.
+
+Now, let me start with a question — right? Think about this. [pause]
+
+A student wants to know the hostel fee for next semester. What do they
+usually do? They call the office — nobody picks up. They walk to the
+accounts department — it's lunch break. They search the college website —
+and the PDF is buried three clicks deep, forty pages long. [pause] And
+this happens *every single day*, to thousands of students.
+
+So that's the problem. And DeskMate? That's the solution.
+
+With DeskMate, a student can just type their question in plain language —
+something like "What is the hostel fee for second-year B.Tech students?" —
+and boom, they get an accurate, cited answer in *seconds*. Available 24/7.
+No waiting. No running around.
+
+And here's the *really* important part — DeskMate doesn't guess. It
+doesn't make things up. Every answer comes directly from documents that the
+college administration has *officially* uploaded. If the info isn't there,
+it'll either tell you honestly, or route you to the exact staff member who
+can help. Pretty cool, right?
+
+So who uses this? Two types of users. Students — they use the chat
+interface. And administrators — they manage the knowledge base, staff
+directory, announcements, and analytics.
+
+Now what makes this *different* from, say, a basic chatbot? Three things.
+[pause] First, it uses Retrieval-Augmented Generation — or RAG — which
+means it pulls real documents *before* generating answers. Second, it's an
+actual AI agent — it classifies intent, detects language, personalizes
+answers, and even auto-creates support tickets. And third, it has complete
+college-scoped data isolation — so colleges sharing the same platform *never*
+see each other's data.
+
+Alright! Let's dive in and see it in action.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 2: STARTING THE APPLICATION  (~15 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+Okay, so first things first — I'll fire up the dev server. I'll just run
+npm run dev in the terminal. [pause] This starts the Astro development
+server, which renders pages server-side for super fast loads and ships
+minimal JavaScript to the browser. And we're up!
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 3: LANDING PAGE  (~45 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+Alright, so *this* is the DeskMate landing page — the first thing anyone
+sees when they visit.
+
+Right at the top, you've got the navbar. If you're logged in, you'll see a
+personalized greeting with your name. If not, you get the Sign Up and Login
+buttons — nice and clean.
+
+The hero section immediately tells you what this is about — "Your college.
+Your documents. Your answers." [pause] Simple, direct.
+
+Scrolling down, we've got feature cards — and these aren't just marketing
+copy, by the way. Every single one of these is a *real*, implemented feature.
+Document-grounded answers, exact citations, multilingual support, smart
+staff routing, easy admin upload, automatic document expiration handling —
+all of it works.
+
+Further down, there's a "How It Works" section, a testimonials carousel
+built with Swiper — super smooth and touch-friendly — a team section, and
+at the bottom, a contact form that saves messages right to the database.
+
+Oh, and the whole page uses Lenis for that buttery smooth scroll feel.
+Feels premium, right?
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 4: SIGN-UP AND AUTHENTICATION  (~1 min 15 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+Alright, let me click on Sign Up and show you how a new user gets onboarded.
+
+So here's the registration page. The first thing the form asks is — are
+you a Student, or an Admin? And this matters *a lot* because it completely
+changes the flow.
+
+For students, we collect the basics — name, email, password, college name.
+And then there are optional fields: degree program, department, year of
+study, and whether they're a hosteller. Now, these aren't just for show —
+the AI actually *uses* this information to personalize answers. So if a
+second-year B.Tech CS hostel student asks about fees, they get *their*
+specific fee, not a generic list. Pretty smart, right?
+
+For admin signup, it's a bit different. Instead of academic details, admins
+need to enter a one-time admin access code. These codes are pre-generated
+in the database, tied to a specific college, and once used — that's it,
+can't be reused. So you can't just sign up and magically become an admin.
+Security first!
+
+Now when you submit the form, here's what happens behind the scenes.
+[pause] Supabase Auth creates the user and sends a confirmation email. At
+the same time, a PostgreSQL trigger automatically creates a profile row
+with all the user's metadata. And for students, there's an extra step —
+they need admin approval before they can actually use the chat. Until then,
+they see a "Pending Approval" page.
+
+And the authentication? It's all enforced at the *server* level. The Astro
+middleware validates the session on every single request, checks the role,
+and blocks unauthorized access. A student trying to hit admin routes?
+Redirected instantly. This isn't just hiding buttons in the UI — it's
+real, server-side enforcement.
+
+Cool! Let me log in as a student now.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 5: STUDENT EXPERIENCE  (~1 min 30 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+And here we go — this is the chat interface! This is really the *heart* of
+DeskMate.
+
+On the left, you've got a sidebar with chat sessions — just like ChatGPT,
+you can create multiple threads, switch between them, rename them, delete
+them. Everything's saved server-side, so you can come back days later and
+continue a conversation.
+
+At the top, there's an agent selector — General, Academics, Fees, Hostel —
+each one adjusts the AI's focus area. The main area is the chat window with
+an auto-resizing input field, and — if your browser supports it — a
+microphone button for voice input.
+
+Alright, let me type a question! [pause] I'll go with: "What is the hostel
+fee for second-year students?"
+
+And *watch* this — see how the response streams in token by token? Real-
+time, just like ChatGPT. That's because we're using a ReadableStream to
+forward each token from Gemini directly to the browser.
+
+Now look at the response carefully. The answer is specific and accurate —
+it references the actual fee from the uploaded document. Below the response,
+you can see citation badges showing the source document. These are
+*clickable* — students can download and verify the original document
+themselves! And those thumbs-up and thumbs-down buttons? That feedback goes
+straight to admin analytics.
+
+Let me quickly show you voice input too. [pause] I click the mic, the
+browser starts listening, I speak my question, and — boom — it appears in
+real time. Really helpful for accessibility.
+
+Now here's something I'm *really* proud of. If I ask something that's not
+covered by any document, the AI doesn't just say "I don't know" and leave
+you hanging. Nope! It finds the relevant staff member from the directory
+and shows you their full contact details — name, email, phone, office hours,
+room number. And sometimes, it even *autonomously* creates a support ticket
+using Gemini's function calling. No human intervention needed.
+
+Students can also check their tickets and see announcements with unread
+notification badges. Everything's connected.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 6: AI / INTELLIGENT FEATURES  (~2 min)
+────────────────────────────────────────────────────────────────────────────────
+
+Okay, so this is where it gets *really* interesting. Let me explain what's
+actually happening behind the scenes when a student sends a question.
+
+First up — intent analysis. [pause] DeskMate doesn't just blindly throw
+every message at the AI. It uses a two-tier classification system.
+
+Tier one is super fast regex-based pattern matching. Simple greetings like
+"Hi" or "Hello"? Caught instantly — zero API calls, zero cost, zero
+latency. Same for "Thanks" or "Bye," and off-topic stuff like "Write me a
+Python script." All handled without touching the expensive AI pipeline.
+
+For trickier queries, tier two kicks in — Gemini itself classifies the
+intent and detects the language. English, Hindi, Telugu, Tamil, Kannada,
+you name it.
+
+Only genuine college queries make it to the full RAG pipeline.
+
+So — what *is* RAG? [pause] RAG stands for Retrieval-Augmented Generation,
+and honestly, this is the *heart and soul* of DeskMate.
+
+Think of it like an open-book exam, right? You don't answer from memory
+alone — you look up the relevant pages first, read the specific paragraphs,
+and *then* write your answer. That's exactly what RAG does.
+
+Here's the step-by-step flow:
+
+Step one — the student's question gets converted into a 1024-dimensional
+vector embedding using Pinecone's multilingual-e5-large model. Basically,
+it turns the text into math that the computer can compare.
+
+Step two — before doing anything expensive, we check the semantic cache.
+If someone recently asked a nearly identical question — like 98% similarity
+or higher — the cached answer comes back *instantly*. We're talking 200
+milliseconds instead of three seconds. Huge difference!
+
+Step three — if it's a cache miss, the embedding searches Pinecone for the
+top 30 most similar document chunks.
+
+Step four — those chunks get filtered against Supabase to remove anything
+from expired or failed documents. Only the top 5 survive.
+
+Step five — a detailed system prompt is built with the AI's behavioral
+rules, the student's profile info, those 5 context chunks, conversation
+history, and the actual question.
+
+Step six — this goes to Google Gemini, which streams back the response
+token by token.
+
+And step seven — after generation, the answer gets cached for future
+similar questions, and the whole interaction is logged for analytics.
+
+So basically, every single answer is accurate, fast, cited, and fully
+traceable. [pause] I think that's *really* powerful.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 7: DOCUMENT UPLOAD AND KNOWLEDGE BASE  (~1 min 30 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+Alright, let's switch over to the admin side now! [pause] Because the
+quality of DeskMate's answers depends entirely on the knowledge base —
+so let me show you how documents get into the system.
+
+On the Documents page, admins can see all uploaded documents with names,
+categories, processing status, and expiry dates.
+
+Clicking "Add Document" gives you two options — upload a file via drag-and-
+drop — PDF, DOCX, TXT, or even images — *or* sync a URL using our
+Firecrawl integration. Let me walk through a file upload.
+
+Now, here's what happens behind the scenes — and this is one of my
+*favorite* parts of the project:
+
+First, the file goes to Supabase Storage and a metadata record is created
+with status "processing."
+
+Then, text extraction. For PDFs, built-in parsing. For Word documents, a
+library called mammoth converts them to text. Images? OCR-based extraction.
+
+Next — chunking! The text gets split into roughly 1,000-character chunks
+with a 200-character overlap. Why the overlap? Because sentences can get
+cut at chunk boundaries, and the overlap ensures important info is captured
+in at least one chunk completely.
+
+Then each chunk gets turned into a 1,024-dimensional embedding — processed
+in batches of 10 to stay within rate limits.
+
+And finally, all those vectors with metadata get upserted into Pinecone in
+batches of 100. Once done, the document status flips to "ready." If
+anything goes wrong, it's marked "failed" so the admin can retry.
+
+For the URL sync option — super convenient! Admin just pastes a URL,
+Firecrawl goes out and scrapes the page — handles JavaScript rendering,
+cookie banners, popups, everything — and returns clean Markdown. Then the
+same chunk-embed-store pipeline kicks in.
+
+Pretty seamless, right?
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 8: DATABASE ARCHITECTURE  (~45 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+Okay, quick but important distinction here. [pause] DeskMate uses *two*
+very different storage systems, and understanding why both exist is key.
+
+Supabase PostgreSQL is the relational database — it handles all structured
+application data. Users, profiles, chat sessions, messages, document
+metadata, staff directory, tickets, announcements, query logs, admin codes.
+Ten core tables, every single one with Row Level Security policies.
+
+Then there's Pinecone — the vector database. This doesn't store user data
+at all. It stores vectorized document knowledge in two namespaces: the main
+one for document chunk embeddings, and a separate "semantic_cache" one for
+query-answer pairs.
+
+So basically — Supabase handles the *application logic*, Pinecone handles
+the *semantic intelligence*. They're complementary, not competing. Both
+essential!
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 9: ADMIN DASHBOARD WALKTHROUGH  (~1 min 30 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+Alright, let me give you the full admin dashboard tour! [pause]
+
+When an admin logs in, they see four stat tiles right at the top: total
+documents, staff members, indexed documents ready for AI, and pending
+student approvals — that last one lights up with an amber border when
+there are students waiting. Nice visual cue.
+
+Below that, quick-action cards link to each section. Let me run through
+them.
+
+Documents — I already showed you the upload process. But admins can also
+filter, search, and delete documents — and deleting *also* removes the
+vectors from Pinecone, so they stop appearing in AI answers. Clean removal.
+
+Staff Directory — each entry has name, role, department, contact info, and
+topics they handle. The AI uses this for smart routing, so this is
+*directly* powering the escalation feature.
+
+Students — admins see all registered students and manage their approval
+status. New registrations come in as "pending" until approved. Gives the
+college full control.
+
+Tickets — all escalation tickets in one place, with status tracking —
+open, in progress, resolved — and resolution notes. It's a complete audit
+trail of everything the AI couldn't handle.
+
+Announcements — admins can post notices with pinning and expiry dates. The
+system tracks read and unread status per student, so those notification
+badges actually mean something.
+
+And then — [pause] — *Analytics*. This is honestly one of the most
+*powerful* tools in the whole system.
+
+You've got stat tiles showing total queries, percentage answered with
+context, escalation rate, and thumbs-down count. Trending Topics shows
+what's spiking this week versus last week. Suggested Documents — this one's
+really clever — it clusters unanswered queries and tells admins *exactly*
+what documents to upload. Top Categories shows query distribution. Language
+Breakdown shows which languages students prefer. And Knowledge Gaps lists
+queries with no context or negative feedback, with a "reviewed" dismiss
+option.
+
+Basically, the analytics page helps admins *continuously* improve the
+knowledge base. Love this feature!
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 10: BACKEND ARCHITECTURE  (~1 min)
+────────────────────────────────────────────────────────────────────────────────
+
+Alright, let me quickly walk you through the overall backend architecture.
+[pause] It follows a clean four-layer structure.
+
+Layer 1 — the Client. That's the browser. Astro-rendered UI, minimal
+JavaScript. Fast and lightweight.
+
+Layer 2 — the Server. TypeScript API routes running as serverless functions
+on Vercel. Every single request goes through the Astro middleware first —
+session validation, role checking, access control. No shortcuts.
+
+Layer 3 — Data Storage. Three systems working together: Supabase PostgreSQL
+for structured data, Supabase Storage for uploaded files, and Pinecone for
+vectors and semantic caching.
+
+Layer 4 — External APIs. Google Gemini for language generation and function
+calling. Pinecone Inference for embeddings. Firecrawl for web scraping.
+
+And here's something I want to emphasize — the system uses a *fail-closed*
+security model. If any authorization check fails — network error, timeout,
+whatever — access is *denied*, never defaulted. So unauthorized data can
+never accidentally reach the AI. That's a really important design decision.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 11: TECHNOLOGY STACK  (~1 min)
+────────────────────────────────────────────────────────────────────────────────
+
+Let me do a quick rundown of the tech stack! [pause]
+
+Frontend — Astro 5 with server-side rendering. Compiles to minimal HTML and
+JS, which keeps things *really* fast. Styling — TailwindCSS 3.4 for a
+consistent, utility-first design system.
+
+Language — TypeScript 5.4. Strict type safety everywhere, which is *super*
+important when you have complex data flows like RAG pipelines.
+
+Database and Auth — Supabase. It's basically PostgreSQL with Row Level
+Security, email authentication, and file storage all in one service.
+Incredibly convenient.
+
+AI — Google Gemini, specifically gemini-2.5-flash. Chose it for the speed,
+streaming capability, native function calling, and strong multilingual
+understanding — essential for Hindi and Telugu support.
+
+Vector Database — Pinecone, with its own inference service running the
+multilingual-e5-large embedding model. So we don't even need a separate
+embedding API — it's all built in!
+
+Web Scraping — Firecrawl for the URL sync feature. Document Parsing —
+mammoth for DOCX files. Deployment — Vercel with Node.js 22 runtime.
+
+And for that polished feel — Lenis for smooth scrolling and Swiper 11 for
+the testimonials carousel.
+
+Great stack, works beautifully together!
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 12: SECURITY  (~45 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+Alright, security — really important, so let me hit the highlights quickly.
+[pause]
+
+Row Level Security on *every* single table. Even if someone bypasses the
+app code and queries Supabase directly, they can only see what they're
+authorized to see.
+
+Server-side role-based access control via middleware — not client-side
+hiding.
+
+One-time admin access codes tied to specific colleges. Student approval
+workflow — pending until the admin says yes.
+
+Database-backed rate limiting — 20 queries per user per minute, and it
+persists across server restarts so you can't just reconnect to bypass it.
+
+Fail-closed authorization — if a check fails, access is *denied*, period.
+
+Automatic document expiration enforcement — even if vectors exist in
+Pinecone, expired documents get filtered out before reaching the AI.
+
+College-scoped data isolation across *all* queries. And session auth via
+HTTP-only cookies validated server-side.
+
+Security is baked into *every layer* of this system.
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 13: STUDENT BENEFITS  (~30 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+So what does all of this mean for students? [pause]
+
+Instant answers — instead of hours of searching. 24/7 availability —
+midnight, weekends, holidays, doesn't matter. Multilingual support in
+English, Hindi, and Telugu. Every answer cited with the source document,
+so you can *always* verify. Personalized responses based on your degree,
+department, year, and hosteller status. Smart escalation to the right staff
+member when the AI can't help. And — honestly — a *massive* reduction in
+the repetitive load on administrative staff.
+
+It's a win-win for everyone!
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 14: FUTURE SCOPE  (~30 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+And before I close, let me quickly touch on where this could go next.
+[pause]
+
+More agentic tools — like checking fee payment status or booking
+appointments directly through chat. Expanded multilingual support beyond
+three languages. A native mobile app. Push notifications for announcements
+and ticket updates. ERP integration for real-time attendance and grades.
+Trend prediction in analytics. Full voice-to-voice conversation. And
+AI-driven proactive suggestions based on student behavior patterns.
+
+Lots of exciting possibilities ahead!
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 15: CLOSING  (~30 sec)
+────────────────────────────────────────────────────────────────────────────────
+
+So to wrap it all up — [pause] — DeskMate 2.0 brings together four
+powerful concepts: application management with role-based access and
+approval workflows; structured data with PostgreSQL, ten normalized tables,
+and Row Level Security; Retrieval-Augmented Generation using vector
+embeddings and semantic search; and an agentic AI system that classifies
+intent, personalizes responses, detects languages, creates tickets on its
+own, and routes to humans when needed.
+
+It's a practical, *working* platform solving a real problem — built with
+Astro, TypeScript, Supabase, Pinecone, Google Gemini, and Firecrawl,
+deployed on Vercel.
+
+Thank you so much for watching! I really appreciate your time. And I'd be
+happy to answer any questions you might have. [pause] Thanks!
+
+
+================================================================================
+                   PART 2 — SCREEN-BY-SCREEN DEMO GUIDE
+================================================================================
+
++------+---------------------------------------------+------------------------------------------------------+
+| Step | What I show on screen                       | What I say                                           |
++------+---------------------------------------------+------------------------------------------------------+
+|   1  | Title slide / blank screen                  | "Hey everyone! Today I'm going to walk you through   |
+|      |                                             | DeskMate 2.0 — really excited to show you this."     |
++------+---------------------------------------------+------------------------------------------------------+
+|   2  | Still on title / intro                      | Explain the problem enthusiastically: students waste  |
+|      |                                             | hours, phones unanswered, wrong departments.         |
++------+---------------------------------------------+------------------------------------------------------+
+|   3  | Terminal window                             | Type: npm run dev                                    |
+|      |                                             | "Let me fire up the Astro dev server!"               |
++------+---------------------------------------------+------------------------------------------------------+
+|   4  | Browser opens → Landing page loads          | "And here we go — this is the DeskMate landing page!"|
++------+---------------------------------------------+------------------------------------------------------+
+|   5  | Scroll through landing page                 | Walk through hero, features, How It Works,           |
+|      |                                             | testimonials carousel, team, contact form.           |
++------+---------------------------------------------+------------------------------------------------------+
+|   6  | Click "Sign Up" in navbar                   | "Let me show you how a new user gets onboarded."     |
++------+---------------------------------------------+------------------------------------------------------+
+|   7  | Signup page → toggle Student/Admin          | Explain student fields and admin access code.        |
+|      |                                             | Emphasize personalization and security.              |
++------+---------------------------------------------+------------------------------------------------------+
+|   8  | Explain auth flow                           | Supabase Auth, PostgreSQL trigger, email             |
+|      |                                             | verification, pending approval.                     |
++------+---------------------------------------------+------------------------------------------------------+
+|   9  | Click "Login" → Login page                  | "Cool! Let me log in as a student now."              |
++------+---------------------------------------------+------------------------------------------------------+
+|  10  | Enter credentials → Submit                  | "Every request goes through middleware — session,     |
+|      |                                             | profile, role, protection. No shortcuts."            |
++------+---------------------------------------------+------------------------------------------------------+
+|  11  | Chat interface loads                        | "And here it is — the heart of DeskMate!"            |
+|      |                                             | Explain sidebar, agent selector, chat window.        |
++------+---------------------------------------------+------------------------------------------------------+
+|  12  | Type hostel fee question → Send             | "Watch this — see how it streams in real-time?"      |
+|      |                                             | Point out citations and feedback buttons.            |
++------+---------------------------------------------+------------------------------------------------------+
+|  13  | Click microphone button                     | "And check out the voice input! Really helpful       |
+|      |                                             | for accessibility."                                  |
++------+---------------------------------------------+------------------------------------------------------+
+|  14  | Type unanswerable question                  | "Now here's something I'm really proud of —"         |
+|      |                                             | Show staff routing and auto ticket creation.         |
++------+---------------------------------------------+------------------------------------------------------+
+|  15  | Navigate to Tickets (student side)          | Show ticket statuses. "Everything's connected."      |
++------+---------------------------------------------+------------------------------------------------------+
+|  16  | Pause — explain AI pipeline                 | Intent analysis (two-tier), RAG (7 steps), cache.    |
+|      |                                             | Use the open-book exam analogy.                      |
++------+---------------------------------------------+------------------------------------------------------+
+|  17  | Logout → Login as Admin                     | "Alright, let's switch to the admin side!"           |
++------+---------------------------------------------+------------------------------------------------------+
+|  18  | Admin Dashboard loads                       | "So here's the admin dashboard — love this layout."  |
+|      |                                             | Walk through stat tiles and quick-action cards.      |
++------+---------------------------------------------+------------------------------------------------------+
+|  19  | Click "Manage Documents"                    | Show document list, filters, delete removes vectors. |
++------+---------------------------------------------+------------------------------------------------------+
+|  20  | Click "Add Document" → Upload a PDF         | Walk through the processing pipeline with energy.    |
++------+---------------------------------------------+------------------------------------------------------+
+|  21  | Show "Sync URL" tab                         | "Super convenient! Just paste a URL and Firecrawl    |
+|      |                                             | handles the rest."                                   |
++------+---------------------------------------------+------------------------------------------------------+
+|  22  | Navigate to Staff page                      | Show directory and AI routing use.                   |
++------+---------------------------------------------+------------------------------------------------------+
+|  23  | Navigate to Students page                   | Show approval workflow. "Full control for admins."   |
++------+---------------------------------------------+------------------------------------------------------+
+|  24  | Navigate to Tickets page (admin side)       | "Complete audit trail — nothing slips through."      |
++------+---------------------------------------------+------------------------------------------------------+
+|  25  | Navigate to Announcements                   | Show pinning, expiry, notifications.                 |
++------+---------------------------------------------+------------------------------------------------------+
+|  26  | Navigate to Analytics                       | "This is honestly one of the most powerful tools!"   |
+|      |                                             | Walk through all analytics sections.                 |
++------+---------------------------------------------+------------------------------------------------------+
+|  27  | Pause — architecture & stack                | 4-layer architecture, tech stack, and security.      |
++------+---------------------------------------------+------------------------------------------------------+
+|  28  | Pause — benefits & future scope             | Student benefits and future possibilities.           |
++------+---------------------------------------------+------------------------------------------------------+
+|  29  | Return to landing page                      | "DeskMate 2.0 brings it all together. Thank you      |
+|      |                                             | so much for watching! Happy to answer questions."    |
++------+---------------------------------------------+------------------------------------------------------+
+
+
+================================================================================
+               PART 3 — TECHNICAL ARCHITECTURE EXPLANATION
+================================================================================
+
+(Use this when a judge asks: "Can you explain what happens behind the scenes?")
+
+--------
+
+Oh absolutely, great question! So the architecture has four layers —
+let me walk you through each one.
+
+At the top, the Client layer — that's the browser. Students and admins
+interact with an Astro-rendered UI that ships *minimal* JavaScript, which
+keeps everything super fast.
+
+Second, the Server layer. All business logic runs as TypeScript API routes
+inside Astro, deployed as serverless functions on Vercel. And here's the
+key — every single request passes through a middleware that validates the
+session using Supabase Auth, fetches the user's profile and role, and
+enforces access control *before* anything else runs.
+
+Third, the Data layer. Three storage systems working together. Supabase
+PostgreSQL is the primary relational database — it handles user accounts,
+profiles, chat sessions, messages, document metadata, staff directory,
+escalation tickets, announcements, query logs, and admin access codes.
+Every table has Row Level Security policies. Supabase Storage holds the
+uploaded files. And Pinecone — the vector database — stores document chunk
+embeddings for semantic search, plus a semantic cache of past query-answer
+pairs.
+
+Fourth, External APIs. Google Gemini handles language generation, intent
+classification, and agentic function calling. Pinecone Inference generates
+1024-dimensional embeddings. And Firecrawl handles web scraping for URL
+ingestion.
+
+Now the complete flow when a student asks a question — this is the fun
+part! The browser sends a POST to /api/chat/generate. Rate limiting checks
+query_logs in Supabase. Intent analysis runs — fast regex first, then
+Gemini for ambiguous cases. If it's a genuine college question, the query
+gets embedded, semantic cache is checked, and on a miss, top 30 chunks
+come from Pinecone, get filtered against Supabase for expired docs, reduced
+to top 5, and packed into a prompt with the student's profile and chat
+history. Gemini streams the response directly to the browser. Background
+caching happens, and everything gets logged for analytics.
+
+The document pipeline is similar — upload to Supabase Storage, extract
+text, chunk into overlapping segments, batch embed, batch upsert to
+Pinecone. For URLs, Firecrawl scrapes first, then the same pipeline runs.
+
+And the whole thing uses a fail-closed security model — if any check fails,
+access is denied, never defaulted. RLS, middleware, access codes, approval
+workflows, and college-scoped filtering all work together. Really robust!
+
+
+================================================================================
+               PART 4 — 30-SECOND PROJECT SUMMARY
+================================================================================
+
+(Use this when someone asks: "What is your project?")
+
+--------
+
+So DeskMate 2.0 is an AI-powered helpdesk for college students! Students
+type a question — in English, Hindi, or Telugu — and DeskMate searches
+through the college's officially uploaded documents, finds the relevant
+info, and generates a precise, cited answer using Google Gemini and a
+Retrieval-Augmented Generation pipeline. It's *not* a generic chatbot — it
+only answers from verified documents, personalizes responses based on the
+student's profile, and automatically routes to human staff when it can't
+help. For admins, there's a full dashboard to manage documents, staff,
+students, announcements, tickets, and analytics. Built with Astro,
+Supabase, Pinecone, and Gemini, deployed on Vercel. It's a complete,
+production-grade AI platform — not just a CRUD application!
+
+================================================================================
+                               END OF SCRIPT
+================================================================================

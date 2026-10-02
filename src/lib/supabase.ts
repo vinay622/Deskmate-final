@@ -24,10 +24,11 @@ export function createSupabaseServerClient(
           );
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            cookies.set(name, value, options as any)
-          );
+          const isHttps = request.url.startsWith("https:");
+          cookiesToSet.forEach(({ name, value, options }) => {
+            const cookieOptions = { ...options, secure: isHttps ? options?.secure : false };
+            cookies.set(name, value, cookieOptions as any);
+          });
         },
       },
     }

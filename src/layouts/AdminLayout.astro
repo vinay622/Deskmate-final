@@ -5,7 +5,7 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
-  active: "dashboard" | "documents" | "staff" | "students" | "tickets" | "announcements" | "analytics";
+  active: "dashboard" | "documents" | "staff" | "students" | "tickets" | "announcements" | "analytics" | "accounts";
   pageTitle: string;
   eyebrow?: string;
 }
@@ -13,8 +13,8 @@ interface Props {
 const { title, description = "", active, pageTitle, eyebrow } = Astro.props;
 
 const userName = Astro.locals.userName ?? "Admin";
-const userEmail = Astro.locals.user?.email ?? "";
 const collegeName = Astro.locals.collegeName ?? "";
+const userRole = Astro.locals.userRole ?? "admin";
 const userInitial = userName.charAt(0).toUpperCase();
 
 const nav = [
@@ -32,10 +32,20 @@ const nav = [
   },
   {
     id: "staff",
-    label: "Staff",
+    label: "Staff Directory",
     href: "/app/admin/staff",
     icon: `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
   },
+  ...(userRole === "admin"
+    ? [
+        {
+          id: "accounts",
+          label: "Staff Accounts",
+          href: "/app/admin/accounts",
+          icon: `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="12" cy="12" r="3"/>`,
+        },
+      ]
+    : []),
   {
     id: "students",
     label: "Students",
@@ -83,7 +93,7 @@ const nav = [
               Desk<span class="text-green">Mate</span>
             </span>
           </a>
-          <p class="eyebrow mt-3 pl-0.5">Admin Console</p>
+          <p class="eyebrow mt-3 pl-0.5">{userRole === 'admin' ? 'Admin Console' : 'Staff Portal'}</p>
         </div>
 
         <!-- Nav -->
@@ -115,7 +125,7 @@ const nav = [
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-medium text-white truncate">{userName}</p>
-              <p class="text-[10px] text-[#9aa0a6] truncate">{collegeName || userEmail || "Administrator"}</p>
+              <p class="text-[10px] text-[#9aa0a6] truncate">{collegeName ? `${collegeName} • ${userRole === 'admin' ? 'Admin' : 'Staff'}` : (userRole === 'admin' ? 'Administrator' : 'Staff Member')}</p>
             </div>
             <form method="post" action="/api/auth/logout">
               <button type="submit" class="p-1.5 rounded-lg text-[#9aa0a6] hover:text-white hover:bg-[#ffffff]/[0.06] transition-colors" title="Sign out">

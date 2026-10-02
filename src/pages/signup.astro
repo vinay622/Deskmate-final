@@ -342,9 +342,9 @@ import AuthLayout from "../layouts/AuthLayout.astro";
               </div>
             </div>
 
-            <!-- Admin Access Code (shown only for admin role) -->
+            <!-- Access Code (shown for staff / admin role) -->
             <div id="access-code-field" class="hidden flex flex-col gap-1.5">
-              <label class="text-xs font-medium text-dark uppercase tracking-wide" for="access-code">Admin Access Code</label>
+              <label class="text-xs font-medium text-dark uppercase tracking-wide" for="access-code">Access Code</label>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#aaa]">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
@@ -353,11 +353,11 @@ import AuthLayout from "../layouts/AuthLayout.astro";
                   type="text"
                   id="access-code"
                   name="access_code"
-                  placeholder="e.g. JNTU-ADMIN-9X72"
+                  placeholder="Enter staff or admin access code"
                   class="w-full pl-10 pr-4 py-3.5 border border-[#e0e0e0] rounded-[14px] text-dark text-sm outline-none focus:border-dark transition-all uppercase tracking-wider"
                 />
               </div>
-              <p class="text-[10px] text-[#aaa] leading-relaxed">Provided by your institution.</p>
+              <p class="text-[10px] text-[#aaa] leading-relaxed">Provided by your institution. An Admin access code grants college admin privileges.</p>
             </div>
 
             <!-- Terms -->

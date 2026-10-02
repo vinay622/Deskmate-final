@@ -62,7 +62,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       .eq('session_id', sessionId)
       .order('created_at', { ascending: false })
       .limit(11);
-    
+
     if (messages) {
       history = messages
         .reverse()
@@ -77,7 +77,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 
   // 2. Fetch the student's profile for personalization (only for college queries)
   let profile: StudentProfile | null = null;
-  if (locals.userRole !== 'admin' && analysis.intent === 'COLLEGE_QUERY') {
+  if (locals.userRole === 'student' && analysis.intent === 'COLLEGE_QUERY') {
     try {
       const { data: p } = await supabase
         .from('profiles')
@@ -103,11 +103,11 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
   if (analysis.requiresVectorSearch) {
     const profileTerms = profile
       ? [
-          profile.degreeProgram,
-          profile.department,
-          profile.year != null ? `year ${profile.year}` : null,
-          profile.hosteller ? 'hostel' : null,
-        ].filter(Boolean).join(' ')
+        profile.degreeProgram,
+        profile.department,
+        profile.year != null ? `year ${profile.year}` : null,
+        profile.hosteller ? 'hostel' : null,
+      ].filter(Boolean).join(' ')
       : '';
 
     try {
@@ -129,7 +129,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
         .from('documents')
         .select('id, expiry_date, processing_status')
         .in('id', docIds);
-      
+
       // Flaw 3: Fail-closed on security/authorization logic error
       if (docsError) {
         throw new Error(docsError.message);

@@ -12,7 +12,7 @@ import { upsertDocumentChunks, deleteDocumentVectors } from '../../../../../lib/
  * first so a partial previous run can't leave stale chunks behind.
  */
 export const POST: APIRoute = async ({ request, cookies, locals, params }) => {
-  if (!locals.user || locals.userRole !== 'admin') {
+  if (!locals.user || (locals.userRole !== 'admin' && locals.userRole !== 'staff')) {
     return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
       status: 401, headers: { 'Content-Type': 'application/json' },
     });
@@ -136,7 +136,7 @@ export const POST: APIRoute = async ({ request, cookies, locals, params }) => {
     });
   } catch (err: any) {
     // Ensure we never leave the doc stuck in "processing"
-    await supabase.from('documents').update({ processing_status: 'failed' }).eq('id', id).then(() => {}, () => {});
+    await supabase.from('documents').update({ processing_status: 'failed' }).eq('id', id).then(() => { }, () => { });
     return new Response(JSON.stringify({ ok: false, error: err.message || 'Internal error' }), {
       status: 500, headers: { 'Content-Type': 'application/json' },
     });

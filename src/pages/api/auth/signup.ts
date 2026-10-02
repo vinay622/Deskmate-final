@@ -63,25 +63,26 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     }
   }
 
-  // Admin: verify access code first (before creating the user)
-  if (role === 'admin') {
+  let assignedRole = role;
+
+  // Staff / Admin: verify access code first (before creating the user)
+  if (role === 'admin' || role === 'staff') {
     if (!accessCode) {
       return new Response(
-        JSON.stringify({ ok: false, error: 'Admin access code is required.' }),
+        JSON.stringify({ ok: false, error: 'Access code is required.' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Codes are reusable — one standing code per college (user decision 2026-07-22)
     const { data: codeRow, error: codeError } = await supabase
       .from('admin_access_codes')
-      .select('id, college_name')
+      .select('id, college_name, role')
       .eq('code', accessCode.toUpperCase())
       .single();
 
     if (codeError || !codeRow) {
       return new Response(
-        JSON.stringify({ ok: false, error: 'Invalid admin access code.' }),
+        JSON.stringify({ ok: false, error: 'Invalid access code.' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -92,9 +93,31 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    assignedRole = codeRow.role || 'staff';
+
+    // 1 Admin per college: check if an admin already exists when using admin access code
+    if (assignedRole === 'admin') {
+      const { data: existingAdmin } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('college_name', college)
+        .eq('role', 'admin')
+        .limit(1);
+
+      if (existingAdmin && existingAdmin.length > 0) {
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            error: 'An admin account has already been registered for this college. Please sign up using the staff access code or contact your college administrator.'
+          }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
   }
 
-  // Create auth user, passing role and college as metadata so the
+  // Create auth user, passing assigned role and college as metadata so the
   // handle_new_user trigger creates the profiles row automatically,
   // bypassing RLS (works even when email confirmation is required).
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -103,15 +126,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     options: {
       data: {
         full_name: `${firstName} ${lastName}`,
-        role,
+        role: assignedRole,
         college_name: college,
         ...(role === 'student'
           ? {
-              degree_program: degreeProgram,
-              department: department,
-              year: yearRaw,
-              hosteller: hostellerRaw,
-            }
+            degree_program: degreeProgram,
+            department: department,
+            year: yearRaw,
+            hosteller: hostellerRaw,
+          }
           : {}),
       },
     },
@@ -124,8 +147,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     );
   }
 
-  // Students wait for admin approval; admins go straight in
-  if (role === 'student') {
+  // Students wait for admin approval; admins and staff go straight to portal
+  if (assignedRole === 'student') {
     return new Response(
       JSON.stringify({ ok: true, pending: true }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

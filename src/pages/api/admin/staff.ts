@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from '../../../lib/supabase';
 
 // GET: List all staff members for the admin's college
 export const GET: APIRoute = async ({ request, cookies, locals }) => {
-  if (!locals.user || locals.userRole !== 'admin') {
+  if (!locals.user || (locals.userRole !== 'admin' && locals.userRole !== 'staff')) {
     return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
       status: 401, headers: { 'Content-Type': 'application/json' },
     });
@@ -36,7 +36,7 @@ export const GET: APIRoute = async ({ request, cookies, locals }) => {
 
 // POST: Create new staff member
 export const POST: APIRoute = async ({ request, cookies, locals }) => {
-  if (!locals.user || locals.userRole !== 'admin') {
+  if (!locals.user || (locals.userRole !== 'admin' && locals.userRole !== 'staff')) {
     return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
       status: 401, headers: { 'Content-Type': 'application/json' },
     });

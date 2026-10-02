@@ -4,10 +4,11 @@
 declare namespace App {
   interface Locals {
     user: import("@supabase/supabase-js").User | null;
-    userRole: "student" | "admin" | null;
+    userRole: "student" | "staff" | "admin" | null;
     userName: string | null;
     collegeName: string | null;
     approvalStatus: string | null;
+    isActive?: boolean;
   }
 }
 
