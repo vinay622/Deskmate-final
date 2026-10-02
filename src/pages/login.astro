@@ -125,6 +125,14 @@ const next = Astro.url.searchParams.get("next") ?? "";
           </div>
         )}
 
+        <!-- Registered success banner -->
+        {Astro.url.searchParams.get("registered") === "1" && (
+          <div class="mb-6 bg-[#f0fdf4] border border-[#bbf7d0] text-[#166534] rounded-[14px] px-4 py-3 text-sm flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 text-[#16a34a]"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Account created successfully! Please sign in with your credentials to verify your account.</span>
+          </div>
+        )}
+
         <!-- Deactivated banner -->
         {Astro.url.searchParams.get("error") === "deactivated" && (
           <div class="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-[14px] px-4 py-3 text-sm flex items-center gap-2">

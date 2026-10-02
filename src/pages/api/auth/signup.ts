@@ -147,7 +147,111 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     );
   }
 
-  // Students wait for admin approval; admins and staff go straight to portal
+  // If user already exists in auth.users, Supabase returns identities: [] without creating a new user or running the trigger
+  const isExistingAuthUser = Boolean(
+    authData.user.identities && authData.user.identities.length === 0
+  );
+
+  if (isExistingAuthUser) {
+    // Check if the user already has an active row in public.profiles
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .eq('id', authData.user.id)
+      .maybeSingle();
+
+    if (existingProfile) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: 'An account with this email address already exists. Please log in instead.',
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Account exists in auth.users, but the profile row was deleted in public.profiles!
+    // Authenticate with the provided password to claim the session and recreate the profile.
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError || !signInData.user) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error:
+            'This email is already registered in Supabase Auth with a different password. If you deleted your profile from the database, please delete the user from Supabase Dashboard > Authentication > Users to register fresh, or sign up using your original password.'
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Update user metadata in auth.users
+    await supabase.auth.updateUser({
+      data: {
+        full_name: `${firstName} ${lastName}`,
+        role: assignedRole,
+        college_name: college,
+        ...(role === 'student'
+          ? {
+            degree_program: degreeProgram,
+            department: department,
+            year: yearRaw,
+            hosteller: hostellerRaw,
+          }
+          : {}),
+      },
+    });
+
+    // Recreate the profile row in public.profiles
+    const approvalStatus = (assignedRole === 'admin' || assignedRole === 'staff') ? 'approved' : 'pending';
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: signInData.user.id,
+        email,
+        full_name: `${firstName} ${lastName}`,
+        role: assignedRole,
+        college_name: college,
+        approval_status: approvalStatus,
+        is_active: true,
+        ...(role === 'student'
+          ? {
+            degree_program: degreeProgram || null,
+            department: department || null,
+            year: yearRaw ? parseInt(yearRaw, 10) : null,
+            hosteller: hostellerRaw === 'true' ? true : (hostellerRaw === 'false' ? false : null),
+          }
+          : {}),
+      });
+
+    if (profileError) {
+      console.error('[Signup] Error inserting profile for existing auth user:', profileError);
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: 'Failed to create profile. Please delete the user from Supabase Dashboard > Authentication > Users and try again.'
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (assignedRole === 'student') {
+      return new Response(
+        JSON.stringify({ ok: true, pending: true }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ ok: true, redirect: '/login?registered=1' }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Students wait for admin approval; admins and staff go to login with confirmation
   if (assignedRole === 'student') {
     return new Response(
       JSON.stringify({ ok: true, pending: true }),
@@ -156,7 +260,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, redirect: '/app/admin' }),
+    JSON.stringify({ ok: true, redirect: '/login?registered=1' }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
 };
