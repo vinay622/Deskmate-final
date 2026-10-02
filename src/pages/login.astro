@@ -231,23 +231,6 @@ const next = Astro.url.searchParams.get("next") ?? "";
             </button>
           </form>
 
-          <!-- Divider -->
-          <div class="flex items-center gap-3 my-8">
-            <div class="flex-1 h-[1px] bg-[#eee]"></div>
-            <span class="text-xs text-[#ccc] uppercase tracking-wider">or</span>
-            <div class="flex-1 h-[1px] bg-[#eee]"></div>
-          </div>
-
-          <!-- Demo access -->
-          <a
-            href="/app/chat"
-            class="w-full border-2 border-[#e0e0e0] hover:border-dark text-dark py-4 rounded-[14px] font-medium text-sm transition-all duration-200 hover:bg-[#f9f9f9] flex items-center justify-center gap-2 group"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Try Demo Without Sign In
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </a>
-
           <!-- Sign up link -->
           <p class="text-center text-sm text-[#888] mt-8">
             Don't have an account?
