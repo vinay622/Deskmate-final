@@ -10,15 +10,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     let next = "";
     let trustDevice = false;
 
+    let rawEmail = "";
     if (contentType.includes("application/json")) {
       const body = await request.json().catch(() => ({}));
-      email = String(body.email ?? "").trim().toLowerCase();
+      rawEmail = String(body.email ?? "").trim();
+      email = rawEmail.toLowerCase();
       password = String(body.password ?? "");
       next = String(body.next ?? "").trim();
       trustDevice = Boolean(body.trustDevice ?? body.trust_device ?? body.remember);
     } else {
       const formData = await request.formData();
-      email = String(formData.get("email") ?? "").trim().toLowerCase();
+      rawEmail = String(formData.get("email") ?? "").trim();
+      email = rawEmail.toLowerCase();
       password = String(formData.get("password") ?? "");
       next = String(formData.get("next") ?? "").trim();
       const td = formData.get("trust_device");
@@ -34,26 +37,62 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     // 1. Verify credentials statelessly (without issuing session cookies yet)
     const fallbackClient = createSupabaseFallbackClient();
-    const { data: authData, error: authError } = await fallbackClient.auth.signInWithPassword({
+    let { data: authData, error: authError } = await fallbackClient.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (authError || !authData.user) {
+    // Fallback: if lowercased email failed and rawEmail was different, try with rawEmail
+    if ((authError || !authData?.user) && rawEmail && rawEmail !== email) {
+      const retryResult = await fallbackClient.auth.signInWithPassword({
+        email: rawEmail,
+        password,
+      });
+      if (retryResult.data?.user) {
+        authData = retryResult.data;
+        authError = null;
+        email = rawEmail;
+      }
+    }
+
+    if (authError || !authData?.user) {
+      console.error("[Login] Auth error for email:", email, authError);
+      const isEmailNotConfirmed = authError?.message?.toLowerCase().includes("email not confirmed");
+      const errorMsg = isEmailNotConfirmed
+        ? "Please confirm your email address. A confirmation link was sent to your inbox upon signup."
+        : (authError?.message || "Invalid email or password.");
+
       return new Response(
-        JSON.stringify({ ok: false, error: "Invalid email or password." }),
+        JSON.stringify({ ok: false, error: errorMsg }),
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // 2. Check if account is active
+    // 2. Check if account exists in profiles and is active
     const { data: profile } = await fallbackClient
       .from("profiles")
       .select("role, is_active")
       .eq("id", authData.user.id)
-      .single();
+      .maybeSingle();
 
-    if (profile && profile.is_active === false) {
+    if (!profile) {
+      console.warn("[Login] User authenticated in auth.users but profile is deleted:", authData.user.id);
+      cookies.delete("deskmate_trusted_device", { path: "/" });
+      cookies.delete("deskmate_2fa_pending", { path: "/" });
+
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "Account not found or has been removed. Please sign up for a new account.",
+        }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (profile.is_active === false) {
+      cookies.delete("deskmate_trusted_device", { path: "/" });
+      cookies.delete("deskmate_2fa_pending", { path: "/" });
+
       return new Response(
         JSON.stringify({
           ok: false,

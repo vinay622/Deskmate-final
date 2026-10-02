@@ -125,6 +125,22 @@ const next = Astro.url.searchParams.get("next") ?? "";
           </div>
         )}
 
+        <!-- Deactivated banner -->
+        {Astro.url.searchParams.get("error") === "deactivated" && (
+          <div class="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-[14px] px-4 py-3 text-sm flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Your account has been deactivated. Please contact your college administrator.</span>
+          </div>
+        )}
+
+        <!-- Deleted / not found banner -->
+        {Astro.url.searchParams.get("error") === "account_not_found" && (
+          <div class="mb-6 bg-amber-50 border border-amber-200 text-amber-800 rounded-[14px] px-4 py-3 text-sm flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 text-amber-600"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>This account has been removed or does not exist. Please register for a new account.</span>
+          </div>
+        )}
+
         <!-- Error banner (hidden by default) -->
         <div id="error-banner" class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 rounded-[14px] px-4 py-3 text-sm flex items-center gap-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>

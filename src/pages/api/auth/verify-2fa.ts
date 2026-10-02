@@ -71,13 +71,34 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     cookies.delete("deskmate_2fa_pending", { path: "/" });
 
     // 5. Determine destination
+    // 5. Determine destination and verify profile exists
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, is_active")
       .eq("id", verifyData.user.id)
-      .single();
+      .maybeSingle();
 
-    const role = profile?.role ?? "student";
+    if (!profile) {
+      cookies.delete("deskmate_trusted_device", { path: "/" });
+      cookies.delete("deskmate_2fa_pending", { path: "/" });
+      await supabase.auth.signOut();
+      return new Response(
+        JSON.stringify({ ok: false, error: "Account not found or has been removed. Please register again." }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (profile.is_active === false) {
+      cookies.delete("deskmate_trusted_device", { path: "/" });
+      cookies.delete("deskmate_2fa_pending", { path: "/" });
+      await supabase.auth.signOut();
+      return new Response(
+        JSON.stringify({ ok: false, error: "Your account has been deactivated. Please contact your college administrator." }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const role = profile.role ?? "student";
     let destination = (role === "admin" || role === "staff") ? "/app/admin" : "/app/chat";
     if (pending.next && pending.next.startsWith("/app/")) {
       destination = pending.next;

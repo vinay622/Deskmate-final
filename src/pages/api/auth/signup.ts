@@ -5,7 +5,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const formData = await request.formData();
   const firstName = String(formData.get('first_name') ?? '').trim();
   const lastName = String(formData.get('last_name') ?? '').trim();
-  const email = String(formData.get('email') ?? '').trim();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
   const college = String(formData.get('college') ?? '').trim();
   const role = String(formData.get('role') ?? 'student');

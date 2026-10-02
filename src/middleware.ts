@@ -25,7 +25,24 @@ export const onRequest = defineMiddleware(async (context, next) => {
       .from("profiles")
       .select("role, full_name, college_name, approval_status, is_active")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
+
+    // If account was deleted from profiles table, revoke access and sign out
+    if (!profile) {
+      await supabase.auth.signOut();
+      context.cookies.delete("deskmate_trusted_device", { path: "/" });
+      context.cookies.delete("deskmate_2fa_pending", { path: "/" });
+      const pathname = new URL(context.request.url).pathname;
+      if (pathname.startsWith("/app/")) {
+        return context.redirect("/login?error=account_not_found");
+      }
+      if (pathname.startsWith("/api/") && !pathname.startsWith("/api/auth/")) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "Account not found or has been deleted." }),
+          { status: 401, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     context.locals.userRole = (profile?.role as "student" | "staff" | "admin") ?? null;
     context.locals.userName = profile?.full_name ?? null;
@@ -36,6 +53,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Block deactivated accounts
     if (profile?.is_active === false) {
       await supabase.auth.signOut();
+      context.cookies.delete("deskmate_trusted_device", { path: "/" });
+      context.cookies.delete("deskmate_2fa_pending", { path: "/" });
       const pathname = new URL(context.request.url).pathname;
       if (pathname.startsWith("/app/")) {
         return context.redirect("/login?error=deactivated");
