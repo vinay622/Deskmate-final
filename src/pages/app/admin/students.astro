@@ -17,6 +17,15 @@ const { data: students } = await supabase
   .order("created_at", { ascending: false })
   .limit(300);
 
+const { data: domainsData } = await supabase
+  .from("college_domains")
+  .select("id, domain")
+  .eq("college_name", locals.collegeName)
+  .order("created_at", { ascending: true });
+
+const collegeDomains = domainsData ?? [];
+const isAdmin = locals.userRole === "admin";
+
 const rows = students ?? [];
 const pending = rows.filter((s) => s.approval_status === "pending");
 const approved = rows.filter((s) => s.approval_status === "approved");
@@ -73,6 +82,106 @@ const formatHostel = (h: boolean | null) => {
     <div class="app-card p-4">
       <p class="text-xs text-[#9aa0a6] font-medium">Rejected Requests</p>
       <p class="text-2xl font-medium text-dark mt-1">{rejected.length}</p>
+    </div>
+  </div>
+
+  <!-- ═══ Allowed Student Email Domains Strip ═══ -->
+  <div class="app-card p-4 sm:p-5 mb-8 border border-[#e5e7eb] bg-white rounded-[18px]">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <!-- Left: Label & Info -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="size-8 rounded-[10px] bg-dark text-green flex items-center justify-center shrink-0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-dark">Allowed Student Email Domains</h3>
+            <span class="text-[11px] font-medium text-[#777] bg-gray px-2 py-0.5 rounded-md" id="domains-count-badge">
+              {collegeDomains.length} {collegeDomains.length === 1 ? 'domain' : 'domains'}
+            </span>
+          </div>
+          <p class="text-xs text-[#888] mt-0.5">Students can only register using these domains. Add <code class="font-mono text-dark bg-gray px-1 rounded">gmail.com</code> if your college lacks official student mail IDs.</p>
+        </div>
+      </div>
+
+      <!-- Right: Domains Pills & Add Button -->
+      <div class="flex items-center gap-2 flex-wrap" id="domains-container">
+        {collegeDomains.map((d, index) => (
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#f0f1f3] text-dark border border-[#e2e4e8] transition-all"
+            id={`domain-pill-${d.domain.replace(/\./g, '-')}`}
+          >
+            <span>@{d.domain}</span>
+            {d.domain === 'gmail.com' ? (
+              <span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-semibold">Personal</span>
+            ) : index === 0 ? (
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold">Official</span>
+            ) : null}
+            {isAdmin && (
+              <button
+                type="button"
+                onclick={`handleRemoveDomain('${d.domain}')`}
+                class="hover:text-red-600 transition-colors ml-0.5 text-[#888] text-sm leading-none focus:outline-none cursor-pointer"
+                title={`Remove @${d.domain}`}
+              >
+                &times;
+              </button>
+            )}
+          </span>
+        ))}
+
+        {isAdmin && (
+          <div class="inline-flex items-center">
+            <!-- Add Domain Button -->
+            <button
+              type="button"
+              id="show-add-domain-btn"
+              onclick="toggleAddDomainInput(true)"
+              class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium text-dark bg-green/40 hover:bg-green border border-dark/20 transition-all cursor-pointer"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Add Domain</span>
+            </button>
+
+            <!-- Inline Add Form (Hidden by default) -->
+            <form
+              id="add-domain-form"
+              class="hidden items-center gap-1.5"
+              onsubmit="handleAddDomain(event)"
+            >
+              <div class="relative flex items-center">
+                <span class="absolute left-2.5 text-xs text-[#888]">@</span>
+                <input
+                  type="text"
+                  id="new-domain-input"
+                  placeholder="e.g. gmail.com"
+                  class="pl-6 pr-2.5 py-1 text-xs bg-white border border-[#ccc] focus:border-dark rounded-full outline-none w-36 sm:w-40 text-dark"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                id="save-domain-btn"
+                class="px-2.5 py-1 bg-dark text-white hover:bg-green hover:text-dark text-xs font-medium rounded-full transition-all cursor-pointer"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onclick="toggleAddDomainInput(false)"
+                class="text-xs text-[#888] hover:text-dark px-1.5 py-1 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- Domain Feedback Banner -->
+    <div id="domain-feedback-banner" class="hidden mt-3 text-xs px-3.5 py-2 rounded-lg items-center gap-2">
+      <span id="domain-feedback-text"></span>
     </div>
   </div>
 
@@ -619,5 +728,98 @@ const formatHostel = (h: boolean | null) => {
 
     updateStudentStatus(id, status, btn);
   });
+
+  // ═══ Allowed Domains Dynamic Management ═══
+  function toggleAddDomainInput(show) {
+    var form = document.getElementById("add-domain-form");
+    var btn = document.getElementById("show-add-domain-btn");
+    var input = document.getElementById("new-domain-input");
+    if (!form || !btn) return;
+    if (show) {
+      form.classList.remove("hidden");
+      form.classList.add("flex");
+      btn.classList.add("hidden");
+      if (input) input.focus();
+    } else {
+      form.classList.add("hidden");
+      form.classList.remove("flex");
+      btn.classList.remove("hidden");
+      if (input) input.value = "";
+    }
+  }
+
+  function showDomainFeedback(msg, isError) {
+    var banner = document.getElementById("domain-feedback-banner");
+    var text = document.getElementById("domain-feedback-text");
+    if (!banner || !text) return;
+    text.textContent = msg;
+    banner.className = isError
+      ? "mt-3 text-xs px-3.5 py-2 rounded-lg flex items-center gap-2 bg-red-50 text-red-700 border border-red-200"
+      : "mt-3 text-xs px-3.5 py-2 rounded-lg flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200";
+    banner.classList.remove("hidden");
+    setTimeout(function() {
+      banner.classList.add("hidden");
+    }, 5000);
+  }
+
+  async function handleAddDomain(e) {
+    e.preventDefault();
+    var input = document.getElementById("new-domain-input");
+    var saveBtn = document.getElementById("save-domain-btn");
+    var rawDomain = input ? input.value.trim().toLowerCase() : "";
+    if (!rawDomain) return;
+
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "...";
+    }
+
+    try {
+      var res = await fetch("/api/admin/domains", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: rawDomain }),
+      });
+      var data = await res.json();
+      if (data.ok) {
+        showDomainFeedback(data.message || "Domain added successfully! Reloading...", false);
+        setTimeout(function() { window.location.reload(); }, 600);
+      } else {
+        showDomainFeedback(data.error || "Failed to add domain.", true);
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Add";
+        }
+      }
+    } catch (err) {
+      showDomainFeedback("Network error. Please try again.", true);
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Add";
+      }
+    }
+  }
+
+  async function handleRemoveDomain(domain) {
+    if (!domain) return;
+    if (!confirm("Remove @" + domain + " from allowed student domains? Students with this domain will no longer be able to register.")) return;
+
+    try {
+      var res = await fetch("/api/admin/domains", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: domain }),
+      });
+      var data = await res.json();
+      if (data.ok) {
+        showDomainFeedback(data.message || "Domain removed successfully.", false);
+        setTimeout(function() { window.location.reload(); }, 500);
+      } else {
+        showDomainFeedback(data.error || "Failed to remove domain.", true);
+      }
+    } catch (err) {
+      showDomainFeedback("Network error. Please try again.", true);
+    }
+  }
 </script>
 
