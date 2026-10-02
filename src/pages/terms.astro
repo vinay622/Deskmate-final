@@ -1,0 +1,338 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import Section from "../components/sections/Section.astro";
+---
+
+<MainLayout
+  title="Terms of Service — DeskMate"
+  description="Read the DeskMate Terms of Service governing student, faculty, and administrative access to the campus AI assistant platform."
+>
+  <!-- Hero Section -->
+  <Section id="terms-hero">
+    <div class="pt-16 pb-12 text-center max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green/20 border border-dark text-dark text-xs font-medium uppercase tracking-wider mb-6">
+        <span class="w-2 h-2 rounded-full bg-dark animate-pulse"></span>
+        Institutional Governance & Compliance
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight text-dark leading-tight mb-6">
+        Terms of <span class="greenhead">Service</span>
+      </h1>
+      <p class="text-base sm:text-lg text-[#555] max-w-2xl mx-auto leading-relaxed">
+        These Terms govern your access to and use of DeskMate, the AI-powered academic assistant platform built specifically for higher education institutions.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-[#777]">
+        <span class="flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Effective Date: October 2, 2026
+        </span>
+        <span>&bull;</span>
+        <span>Version 2.4.0</span>
+        <span>&bull;</span>
+        <span class="text-dark font-medium">Applicable to Students, Staff & Administrators</span>
+      </div>
+    </div>
+  </Section>
+
+  <!-- Key Highlights Banner -->
+  <Section id="terms-highlights">
+    <div class="mb-14">
+      <div class="bg-dark text-white rounded-[32px] p-6 sm:p-10 border border-dark shadow-[0px_5px_0px_#191a23]">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div class="space-y-2">
+            <span class="text-green text-xs font-semibold uppercase tracking-widest block">Summary at a Glance</span>
+            <h2 class="text-2xl sm:text-3xl font-medium text-white">Three Fundamental Principles of DeskMate</h2>
+            <p class="text-sm text-[#aaa] max-w-2xl">
+              DeskMate is designed to eliminate misinformation on campus. We hold our platform to strict verification and privacy standards.
+            </p>
+          </div>
+          <a href="#section-1" class="btn-tertiary text-xs uppercase tracking-wider font-semibold px-6 py-3 whitespace-nowrap shrink-0">
+            Read Full Terms &darr;
+          </a>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#2d2e3a]">
+          <div class="bg-[#242531] p-5 rounded-[20px] border border-[#373949]">
+            <div class="text-green font-semibold text-sm mb-1.5 flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Verified Institutional Emails
+            </div>
+            <p class="text-xs text-[#bbb] leading-relaxed">
+              Student accounts are restricted to whitelisted campus email domains, requiring administrative review before activation.
+            </p>
+          </div>
+          <div class="bg-[#242531] p-5 rounded-[20px] border border-[#373949]">
+            <div class="text-green font-semibold text-sm mb-1.5 flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Strict Citation Grounding
+            </div>
+            <p class="text-xs text-[#bbb] leading-relaxed">
+              Every answer provided by the AI is backed by official institution notices, syllabus PDFs, or college circulars with verifiable citations.
+            </p>
+          </div>
+          <div class="bg-[#242531] p-5 rounded-[20px] border border-[#373949]">
+            <div class="text-green font-semibold text-sm mb-1.5 flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Human-in-the-Loop Escalation
+            </div>
+            <p class="text-xs text-[#bbb] leading-relaxed">
+              When queries cannot be resolved from institutional documents, students can escalate inquiries to college staff via our integrated ticketing system.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- Main Content Layout -->
+  <Section id="terms-body">
+    <div class="grid lg:grid-cols-12 gap-10 pb-20 items-start">
+      
+      <!-- Table of Contents Sidebar -->
+      <aside class="hidden lg:block lg:col-span-4 sticky top-28 bg-[#f9fafb] p-6 rounded-[28px] border border-[#e5e7eb] shadow-sm">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-[#666] mb-4">Table of Contents</h3>
+        <nav class="space-y-1 text-sm">
+          <a href="#section-1" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">1. Acceptance & Contractual Scope</a>
+          <a href="#section-2" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">2. Eligibility & College Affiliation</a>
+          <a href="#section-3" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">3. Roles & Account Approvals</a>
+          <a href="#section-4" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">4. Account Security & Two-Factor Auth</a>
+          <a href="#section-5" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">5. AI Assistance & Grounding Disclaimer</a>
+          <a href="#section-6" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">6. Ticket Escalation & Staff Resolution</a>
+          <a href="#section-7" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">7. Prohibited Uses & Academic Integrity</a>
+          <a href="#section-8" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">8. Intellectual Property & Document Rights</a>
+          <a href="#section-9" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">9. Account Removal & Session Revocation</a>
+          <a href="#section-10" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">10. Disclaimers & Limitation of Liability</a>
+          <a href="#section-11" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">11. Governing Law & Modifications</a>
+          <a href="#section-12" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">12. Contact & Grievance Officer</a>
+        </nav>
+
+        <div class="mt-8 pt-6 border-t border-[#e5e7eb]">
+          <div class="flex items-center gap-3 text-xs text-[#777]">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Need legal clarification? Contact <a href="mailto:legal@deskmate.edu" class="text-dark underline font-medium">legal@deskmate.edu</a></span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Legal Provisions -->
+      <div class="lg:col-span-8 space-y-12 text-[#2d2e3a]">
+        
+        <!-- Section 1 -->
+        <article id="section-1" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">01</span>
+            <h2 class="text-2xl font-medium text-dark">Acceptance & Contractual Scope</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            By registering for, accessing, or using DeskMate ("DeskMate", "we", "our", or "the Platform"), you agree to be bound by these Terms of Service ("Terms") and our integrated <a href="/privacy" class="text-dark font-medium underline hover:text-green">Privacy Policy</a>. If you do not agree to these Terms, you must not access or use the Platform.
+          </p>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            These Terms constitute a legally binding agreement between you and the operators of DeskMate. If you are using DeskMate on behalf of an educational institution, university department, or academic organization, you represent and warrant that you possess the institutional authority to bind such entity to these Terms.
+          </p>
+        </article>
+
+        <!-- Section 2 -->
+        <article id="section-2" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">02</span>
+            <h2 class="text-2xl font-medium text-dark">Eligibility & College Affiliation</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            DeskMate is exclusively provided for currently enrolled students, employed faculty members, administrative staff, and designated campus officers of recognized educational institutions partnering with or registered on DeskMate.
+          </p>
+          <div class="bg-gray p-6 rounded-[24px] border border-[#e0e0e0] space-y-3">
+            <h4 class="text-sm font-semibold text-dark flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark"><polyline points="20 6 9 17 4 12"/></svg>
+              Mandatory Domain Verification
+            </h4>
+            <p class="text-xs sm:text-sm text-[#666] leading-relaxed">
+              Student registrations require an active, institutional email address belonging to configured college domains (e.g., <code class="font-mono text-dark bg-white px-1.5 py-0.5 rounded border border-[#ddd]">@college.edu.in</code>). DeskMate validates email domains against registered college records. Personal email providers (such as Gmail, Yahoo, or Outlook) are strictly barred from student self-registration.
+            </p>
+          </div>
+        </article>
+
+        <!-- Section 3 -->
+        <article id="section-3" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">03</span>
+            <h2 class="text-2xl font-medium text-dark">Roles & Account Approvals</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            DeskMate operates a three-tier role-based access model, each carrying specific privileges and obligations:
+          </p>
+          <div class="grid sm:grid-cols-3 gap-4 text-xs">
+            <div class="p-4 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
+              <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold bg-gray text-dark mb-2">Student Role</span>
+              <p class="text-[#666] leading-relaxed">
+                Requires institution admin approval before accessing academic chat and knowledge repositories. Subject to academic verification.
+              </p>
+            </div>
+            <div class="p-4 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
+              <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold bg-[#e0e7ff] text-[#3730a3] mb-2">Staff Role</span>
+              <p class="text-[#666] leading-relaxed">
+                Authorized via official college staff access codes. Empowered to respond to, resolve, and close student inquiry tickets.
+              </p>
+            </div>
+            <div class="p-4 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
+              <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold bg-green/40 text-dark mb-2">Admin Role</span>
+              <p class="text-[#666] leading-relaxed">
+                Authorized via exclusive college admin access codes (limited to one designated admin per institution). Manages documents, users, and codes.
+              </p>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-[#666] leading-relaxed">
+            Institution Administrators retain unilateral authority to approve, deny, deactivate, or purge student and staff accounts associated with their college.
+          </p>
+        </article>
+
+        <!-- Section 4 -->
+        <article id="section-4" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">04</span>
+            <h2 class="text-2xl font-medium text-dark">Account Security & Two-Factor Authentication</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            Given the sensitive nature of academic records and campus announcements, DeskMate enforces rigorous authentication protocols:
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-xs sm:text-sm text-[#555]">
+            <li><strong>Two-Factor Authentication (2FA):</strong> All logins from unrecognized devices require verification via a one-time passcode (OTP) delivered to your registered college email.</li>
+            <li><strong>Trusted Devices:</strong> Users may opt to trust a personal browser for up to 30 days via cryptographically signed tokens. You are strictly responsible for maintaining physical control of any trusted hardware.</li>
+            <li><strong>Credential Confidentiality:</strong> You must never disclose your password, 2FA code, or admin access code to another individual. DeskMate personnel will never ask for your password.</li>
+          </ul>
+        </article>
+
+        <!-- Section 5 -->
+        <article id="section-5" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">05</span>
+            <h2 class="text-2xl font-medium text-dark">AI Assistance & Grounding Disclaimer</h2>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-[24px] p-6 text-amber-900 space-y-3">
+            <div class="flex items-center gap-2 font-medium text-sm">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-amber-700 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Important Notice Regarding Automated AI Outputs
+            </div>
+            <p class="text-xs sm:text-sm text-amber-800 leading-relaxed">
+              DeskMate utilizes advanced Retrieval-Augmented Generation (RAG) to reference official college documents uploaded by campus administrators. While DeskMate achieves industry-leading accuracy with explicit citations, automated responses are assistive and informational.
+            </p>
+            <p class="text-xs sm:text-sm text-amber-800 leading-relaxed">
+              In the event of any discrepancy between an AI response and an officially published circular, gazette, or written directive signed by the Principal, Dean, or Controller of Examinations, the physical signed administrative document shall always take precedence.
+            </p>
+          </div>
+        </article>
+
+        <!-- Section 6 -->
+        <article id="section-6" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">06</span>
+            <h2 class="text-2xl font-medium text-dark">Ticket Escalation & Staff Resolution</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            When an inquiry cannot be answered with high confidence from existing institutional documentation, DeskMate provides a direct support ticket escalation channel:
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-xs sm:text-sm text-[#555]">
+            <li>Tickets submitted by students are routed directly to designated staff members and administrators of their respective college.</li>
+            <li>Users agree to use ticketing in good faith for genuine academic, fee, hostel, or administrative concerns. Submitting abusive, repetitive, profane, or fraudulent tickets is strictly prohibited.</li>
+            <li>College staff members act as the final human authority on all escalated matters.</li>
+          </ul>
+        </article>
+
+        <!-- Section 7 -->
+        <article id="section-7" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">07</span>
+            <h2 class="text-2xl font-medium text-dark">Prohibited Uses & Academic Integrity</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            You agree not to engage in any of the following unauthorized activities while accessing DeskMate:
+          </p>
+          <div class="grid sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3.5 rounded-xl border border-red-200 bg-red-50/50 text-red-900">
+              <strong>Prompt Injections & Jailbreaking:</strong> Attempting to manipulate the AI to generate fraudulent academic documents or bypass grounding constraints.
+            </div>
+            <div class="p-3.5 rounded-xl border border-red-200 bg-red-50/50 text-red-900">
+              <strong>Unauthorized Scraping & Extraction:</strong> Automated extraction, scraping, or harvesting of institutional syllabi or peer student information.
+            </div>
+            <div class="p-3.5 rounded-xl border border-red-200 bg-red-50/50 text-red-900">
+              <strong>Account Impersonation:</strong> Registering accounts with another student's or staff member's credentials or domain handles.
+            </div>
+            <div class="p-3.5 rounded-xl border border-red-200 bg-red-50/50 text-red-900">
+              <strong>Infrastructure Disruption:</strong> Attempting DDoS attacks, brute-forcing 2FA endpoints, or degrading service availability for other campus members.
+            </div>
+          </div>
+        </article>
+
+        <!-- Section 8 -->
+        <article id="section-8" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">08</span>
+            <h2 class="text-2xl font-medium text-dark">Intellectual Property & Document Rights</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            All official academic documents, syllabus circulars, and institutional notifications uploaded to DeskMate remain the exclusive intellectual property of the respective university, autonomous college, or affiliated board.
+          </p>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            DeskMate holds a non-exclusive license to process, parse, index, and generate vector embeddings solely for the purpose of serving RAG queries to authorized campus members. We do not claim ownership of institution materials, nor do we sell or monetize uploaded university documents.
+          </p>
+        </article>
+
+        <!-- Section 9 -->
+        <article id="section-9" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">09</span>
+            <h2 class="text-2xl font-medium text-dark">Account Removal & Session Revocation</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            In accordance with campus security protocols, when an account is removed or deactivated by a college administrator:
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-xs sm:text-sm text-[#555]">
+            <li>All active sessions across web and mobile browsers are instantly terminated.</li>
+            <li>All 30-day trusted device tokens are permanently revoked on the server.</li>
+            <li>Access to academic chats, personal ticket history, and college announcements is immediately disabled.</li>
+          </ul>
+        </article>
+
+        <!-- Section 10 -->
+        <article id="section-10" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">10</span>
+            <h2 class="text-2xl font-medium text-dark">Disclaimers & Limitation of Liability</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            The platform is provided on an "AS IS" and "AS AVAILABLE" basis. While DeskMate employs semantic caching, multi-stage reranking, and citation verification to maximize uptime and accuracy, we do not warrant uninterrupted operation during scheduled maintenance or third-party cloud outages.
+          </p>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            To the maximum extent permitted by applicable law, DeskMate and its developers shall not be liable for indirect, incidental, or consequential damages resulting from academic scheduling oversights or reliance on automated interpretations where official written notice was accessible.
+          </p>
+        </article>
+
+        <!-- Section 11 -->
+        <article id="section-11" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">11</span>
+            <h2 class="text-2xl font-medium text-dark">Governing Law & Modifications</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            These Terms shall be governed by and construed in accordance with the laws of India, with exclusive jurisdiction situated within the courts of Hyderabad, Telangana.
+          </p>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            We reserve the right to modify these Terms periodically to reflect evolving institutional policies or regulatory mandates. Continued use of DeskMate following published modifications constitutes full acceptance of the revised Terms.
+          </p>
+        </article>
+
+        <!-- Section 12 -->
+        <article id="section-12" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">12</span>
+            <h2 class="text-2xl font-medium text-dark">Contact & Grievance Officer</h2>
+          </div>
+          <div class="p-6 rounded-[24px] bg-[#f9fafb] border border-[#e5e7eb] space-y-2 text-xs sm:text-sm">
+            <p class="font-medium text-dark">DeskMate Legal & Compliance Department</p>
+            <p class="text-[#666]">Hyderabad, Telangana, India</p>
+            <p class="text-[#666]">Email: <a href="mailto:support@deskmate.edu" class="text-dark font-medium underline hover:text-green">support@deskmate.edu</a> | <a href="mailto:grievance@deskmate.edu" class="text-dark font-medium underline hover:text-green">grievance@deskmate.edu</a></p>
+            <p class="text-[#888] pt-2">Official response timeline for institutional legal inquiries is 48 business hours.</p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </Section>
+</MainLayout>

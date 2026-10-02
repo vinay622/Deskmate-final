@@ -1,0 +1,382 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import Section from "../components/sections/Section.astro";
+---
+
+<MainLayout
+  title="Privacy Policy — DeskMate"
+  description="Learn how DeskMate safeguards student, staff, and institutional data with campus-grade encryption and zero public AI model training."
+>
+  <!-- Hero Section -->
+  <Section id="privacy-hero">
+    <div class="pt-16 pb-12 text-center max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green/20 border border-dark text-dark text-xs font-medium uppercase tracking-wider mb-6">
+        <span class="w-2 h-2 rounded-full bg-dark animate-pulse"></span>
+        Data Protection & Student Privacy
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight text-dark leading-tight mb-6">
+        Privacy <span class="greenhead">Policy</span>
+      </h1>
+      <p class="text-base sm:text-lg text-[#555] max-w-2xl mx-auto leading-relaxed">
+        DeskMate is built on a foundation of trust. We protect student privacy, enforce strict institutional data boundaries, and ensure complete transparency.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-[#777]">
+        <span class="flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Effective Date: October 2, 2026
+        </span>
+        <span>&bull;</span>
+        <span>Version 2.4.0</span>
+        <span>&bull;</span>
+        <span class="text-dark font-medium">DPDP Act (India) & Academic Privacy Aligned</span>
+      </div>
+    </div>
+  </Section>
+
+  <!-- Privacy Pledge Banner -->
+  <Section id="privacy-pledge">
+    <div class="mb-14">
+      <div class="bg-dark text-white rounded-[32px] p-6 sm:p-10 border border-dark shadow-[0px_5px_0px_#191a23]">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div class="space-y-2">
+            <span class="text-green text-xs font-semibold uppercase tracking-widest block">Our Core Privacy Commitment</span>
+            <h2 class="text-2xl sm:text-3xl font-medium text-white">Zero Third-Party Advertising. Zero Unauthorized AI Training.</h2>
+            <p class="text-sm text-[#aaa] max-w-2xl">
+              Unlike consumer AI chatbots, DeskMate never sells student data to advertisers, never tracks your web activities, and never uses private academic documents to train public foundation models.
+            </p>
+          </div>
+          <a href="#privacy-body" class="btn-tertiary text-xs uppercase tracking-wider font-semibold px-6 py-3 whitespace-nowrap shrink-0">
+            View Details &darr;
+          </a>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#2d2e3a]">
+          <div class="bg-[#242531] p-5 rounded-[20px] border border-[#373949]">
+            <div class="text-green font-semibold text-sm mb-1.5 flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Isolated Institution Namespaces
+            </div>
+            <p class="text-xs text-[#bbb] leading-relaxed">
+              Every college's documents and embeddings are isolated in secure namespaces. Students and staff never cross institutional data boundaries.
+            </p>
+          </div>
+          <div class="bg-[#242531] p-5 rounded-[20px] border border-[#373949]">
+            <div class="text-green font-semibold text-sm mb-1.5 flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              Row-Level Security (RLS)
+            </div>
+            <p class="text-xs text-[#bbb] leading-relaxed">
+              Database operations are verified at the PostgreSQL kernel level using Supabase Row-Level Security, preventing cross-tenant leakage.
+            </p>
+          </div>
+          <div class="bg-[#242531] p-5 rounded-[20px] border border-[#373949]">
+            <div class="text-green font-semibold text-sm mb-1.5 flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Encrypted 2FA & Tokens
+            </div>
+            <p class="text-xs text-[#bbb] leading-relaxed">
+              Session state and 30-day trusted device tokens use HMAC-SHA256 signatures stored in secure, HttpOnly, SameSite cookies.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- Main Content Layout -->
+  <Section id="privacy-body">
+    <div class="grid lg:grid-cols-12 gap-10 pb-20 items-start">
+      
+      <!-- Table of Contents Sidebar -->
+      <aside class="hidden lg:block lg:col-span-4 sticky top-28 bg-[#f9fafb] p-6 rounded-[28px] border border-[#e5e7eb] shadow-sm">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-[#666] mb-4">Privacy Topics</h3>
+        <nav class="space-y-1 text-sm">
+          <a href="#topic-1" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">1. Scope & Campus Context</a>
+          <a href="#topic-2" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">2. Categories of Information Collected</a>
+          <a href="#topic-3" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">3. How We Use Academic Information</a>
+          <a href="#topic-4" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">4. AI Architecture & Vector Privacy</a>
+          <a href="#topic-5" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">5. Third-Party Infrastructure Processors</a>
+          <a href="#topic-6" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">6. Data Security & Storage Architecture</a>
+          <a href="#topic-7" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">7. Data Retention & Account Deletion</a>
+          <a href="#topic-8" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">8. Your Data Protection Rights</a>
+          <a href="#topic-9" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">9. Cookies & Device Authentication</a>
+          <a href="#topic-10" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">10. Children & Student Age Compliance</a>
+          <a href="#topic-11" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">11. Changes to this Privacy Policy</a>
+          <a href="#topic-12" class="block py-1.5 px-3 rounded-xl text-dark hover:bg-green/30 hover:font-medium transition-colors">12. Data Protection Officer (DPO)</a>
+        </nav>
+
+        <div class="mt-8 pt-6 border-t border-[#e5e7eb]">
+          <div class="flex items-center gap-3 text-xs text-[#777]">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Privacy inquiries: <a href="mailto:privacy@deskmate.edu" class="text-dark underline font-medium">privacy@deskmate.edu</a></span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Privacy Content -->
+      <div class="lg:col-span-8 space-y-12 text-[#2d2e3a]">
+        
+        <!-- Topic 1 -->
+        <article id="topic-1" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">01</span>
+            <h2 class="text-2xl font-medium text-dark">Scope & Campus Context</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            This Privacy Policy explains how DeskMate ("we", "us", or "our") collects, processes, stores, and protects personal information when you use our academic assistant platform, web interface, and administrative dashboards.
+          </p>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            This policy applies to all users: registered students, administrative personnel, teaching faculty, and institutional administrators accessing DeskMate across participating higher education institutions.
+          </p>
+        </article>
+
+        <!-- Topic 2 -->
+        <article id="topic-2" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">02</span>
+            <h2 class="text-2xl font-medium text-dark">Categories of Information Collected</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            We collect only the minimum information necessary to deliver accurate academic guidance and verify campus affiliation:
+          </p>
+          
+          <div class="space-y-3 text-xs sm:text-sm">
+            <div class="p-4 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
+              <h4 class="font-semibold text-dark text-sm mb-1 flex items-center justify-between">
+                <span>A. Student Profile Data</span>
+                <span class="text-[11px] font-mono bg-gray text-[#555] px-2 py-0.5 rounded">User-Provided</span>
+              </h4>
+              <p class="text-[#666] leading-relaxed">
+                Full name, institutional email address (e.g., student ID domain), affiliated college name, degree program (e.g., B.Tech, MBA), academic department, graduation year, and hostel residency status (day scholar vs. hosteller).
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
+              <h4 class="font-semibold text-dark text-sm mb-1 flex items-center justify-between">
+                <span>B. Authentication & Security Data</span>
+                <span class="text-[11px] font-mono bg-gray text-[#555] px-2 py-0.5 rounded">System-Generated</span>
+              </h4>
+              <p class="text-[#666] leading-relaxed">
+                Cryptographic password hash (managed securely via Supabase Auth), 2FA one-time verification tokens, HMAC-signed trusted device tokens, login timestamps, and account approval status.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
+              <h4 class="font-semibold text-dark text-sm mb-1 flex items-center justify-between">
+                <span>C. Interaction & Chat Records</span>
+                <span class="text-[11px] font-mono bg-gray text-[#555] px-2 py-0.5 rounded">Activity Data</span>
+              </h4>
+              <p class="text-[#666] leading-relaxed">
+                Chat prompts submitted to the AI assistant, synthesized responses, document citation references accessed, and support tickets submitted to college staff.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
+              <h4 class="font-semibold text-dark text-sm mb-1 flex items-center justify-between">
+                <span>D. Institutional Academic Documents</span>
+                <span class="text-[11px] font-mono bg-gray text-[#555] px-2 py-0.5 rounded">Admin-Uploaded</span>
+              </h4>
+              <p class="text-[#666] leading-relaxed">
+                Official syllabi, fee circulars, academic calendars, hostel policy PDFs, and examination schedules uploaded strictly by authorized campus administrators.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Topic 3 -->
+        <article id="topic-3" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">03</span>
+            <h2 class="text-2xl font-medium text-dark">How We Use Academic Information</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            Information collected by DeskMate is deployed exclusively for legitimate educational and campus operational purposes:
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-xs sm:text-sm text-[#555]">
+            <li><strong>Answering Academic Inquiries:</strong> Grounding student questions against institutional syllabus guidelines, fee schedules, and campus notices.</li>
+            <li><strong>Campus Verification:</strong> Confirming student status against authorized college email domains to safeguard campus knowledge bases.</li>
+            <li><strong>Ticket Routing:</strong> Directing unresolved inquiries directly to the responsible college department or staff member.</li>
+            <li><strong>Security Auditing:</strong> Detecting unauthorized login attempts, 2FA brute force, and maintaining trusted hardware tokens.</li>
+          </ul>
+        </article>
+
+        <!-- Topic 4 -->
+        <article id="topic-4" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">04</span>
+            <h2 class="text-2xl font-medium text-dark">AI Architecture & Vector Privacy</h2>
+          </div>
+          <div class="bg-gray p-6 rounded-[24px] border border-[#e0e0e0] space-y-3">
+            <h4 class="text-sm font-semibold text-dark flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Retrieval-Augmented Generation (RAG) Architecture
+            </h4>
+            <p class="text-xs sm:text-sm text-[#666] leading-relaxed">
+              When a student asks a question, DeskMate generates a vector embedding of the query and searches isolated vector namespaces in Pinecone. Relevant document chunks are retrieved and passed as context to the Gemini AI model.
+            </p>
+            <p class="text-xs sm:text-sm text-[#666] leading-relaxed">
+              <strong>Enterprise Zero-Training Guarantee:</strong> All LLM API calls are executed under enterprise privacy terms. Google Gemini does not retain, inspect, or train on prompts or college documents sent through DeskMate's private API.
+            </p>
+          </div>
+        </article>
+
+        <!-- Topic 5 -->
+        <article id="topic-5" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">05</span>
+            <h2 class="text-2xl font-medium text-dark">Third-Party Infrastructure Processors</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            We partner exclusively with tier-1 enterprise infrastructure providers under strict Data Protection Agreements:
+          </p>
+          <div class="grid sm:grid-cols-3 gap-3 text-xs">
+            <div class="p-4 rounded-xl border border-[#e5e7eb] bg-white">
+              <strong class="text-dark block mb-1">Supabase</strong>
+              <p class="text-[#666]">Managed PostgreSQL database, JWT authentication, 2FA OTP delivery, and Row-Level Security enforcement.</p>
+            </div>
+            <div class="p-4 rounded-xl border border-[#e5e7eb] bg-white">
+              <strong class="text-dark block mb-1">Pinecone</strong>
+              <p class="text-[#666]">High-performance vector database hosting partitioned academic document embeddings with strict namespace isolation.</p>
+            </div>
+            <div class="p-4 rounded-xl border border-[#e5e7eb] bg-white">
+              <strong class="text-dark block mb-1">Google Cloud / Gemini</strong>
+              <p class="text-[#666]">Enterprise-grade inference API for semantic reranking and grounded natural language synthesis with zero model training.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Topic 6 -->
+        <article id="topic-6" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">06</span>
+            <h2 class="text-2xl font-medium text-dark">Data Security & Storage Architecture</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            DeskMate implements multi-layered security controls to protect student data against unauthorized access:
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-xs sm:text-sm text-[#555]">
+            <li><strong>Row-Level Security (RLS):</strong> PostgreSQL RLS policies guarantee that users can only view their own chat records and profile data. College admins can only access records from their assigned college.</li>
+            <li><strong>Encryption Standards:</strong> Data in transit is protected via TLS 1.3 encryption. Passwords are salted and hashed using bcrypt. Sensitive session cookies are protected with <code class="font-mono bg-gray px-1 rounded text-dark">HttpOnly</code>, <code class="font-mono bg-gray px-1 rounded text-dark">SameSite=Lax</code>, and <code class="font-mono bg-gray px-1 rounded text-dark">Secure</code> attributes.</li>
+            <li><strong>Automated Purging:</strong> Stale 2FA pending sessions automatically expire after 10 minutes.</li>
+          </ul>
+        </article>
+
+        <!-- Topic 7 -->
+        <article id="topic-7" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">07</span>
+            <h2 class="text-2xl font-medium text-dark">Data Retention & Account Deletion</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            We retain personal data only for as long as your student or faculty affiliation remains active at your institution:
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-xs sm:text-sm text-[#555]">
+            <li><strong>Active Enrollment:</strong> Chat history and profile records are retained throughout your enrolled academic degree program.</li>
+            <li><strong>Account Deletion:</strong> When an account is permanently deleted by an institution administrator, Supabase foreign key cascades automatically and irreversibly delete your profile, chat messages, and ticket associations.</li>
+            <li><strong>Deactivated Accounts:</strong> Deactivated accounts immediately lose login access, have all trusted device cookies purged, and are blocked across all endpoints.</li>
+          </ul>
+        </article>
+
+        <!-- Topic 8 -->
+        <article id="topic-8" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">08</span>
+            <h2 class="text-2xl font-medium text-dark">Your Data Protection Rights</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            Under the Digital Personal Data Protection (DPDP) Act and recognized international standards, you have the following rights regarding your data:
+          </p>
+          <div class="grid sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3.5 rounded-xl border border-[#e5e7eb] bg-white">
+              <strong>Right to Access:</strong> View all stored personal information and past academic conversations through your account dashboard.
+            </div>
+            <div class="p-3.5 rounded-xl border border-[#e5e7eb] bg-white">
+              <strong>Right to Rectification:</strong> Request correction of inaccurate academic details (degree, year, hostel status) through your college admin.
+            </div>
+            <div class="p-3.5 rounded-xl border border-[#e5e7eb] bg-white">
+              <strong>Right to Erasure:</strong> Request permanent removal of your account upon graduation, transfer, or program completion.
+            </div>
+            <div class="p-3.5 rounded-xl border border-[#e5e7eb] bg-white">
+              <strong>Right to Grievance Redressal:</strong> Submit inquiries or complaints directly to our designated Grievance Officer.
+            </div>
+          </div>
+        </article>
+
+        <!-- Topic 9 -->
+        <article id="topic-9" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">09</span>
+            <h2 class="text-2xl font-medium text-dark">Cookies & Device Authentication</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            DeskMate uses strictly functional cookies necessary for authentication and platform security. We do not use third-party tracking or advertising cookies.
+          </p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border border-[#e5e7eb] rounded-xl overflow-hidden">
+              <thead class="bg-gray font-semibold text-dark">
+                <tr>
+                  <th class="p-3 border-b border-[#e5e7eb]">Cookie Name</th>
+                  <th class="p-3 border-b border-[#e5e7eb]">Purpose</th>
+                  <th class="p-3 border-b border-[#e5e7eb]">Duration</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#e5e7eb] text-[#666]">
+                <tr>
+                  <td class="p-3 font-mono text-dark">sb-access-token</td>
+                  <td class="p-3">Maintains authenticated Supabase session</td>
+                  <td class="p-3">Session / Refreshable</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono text-dark">deskmate_trusted_device</td>
+                  <td class="p-3">HMAC-signed token for 2FA bypass on trusted browser</td>
+                  <td class="p-3">30 Days</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-mono text-dark">deskmate_2fa_pending</td>
+                  <td class="p-3">Encrypted state for in-progress 2FA verification</td>
+                  <td class="p-3">10 Minutes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- Topic 10 -->
+        <article id="topic-10" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">10</span>
+            <h2 class="text-2xl font-medium text-dark">Children & Student Age Compliance</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            DeskMate is designed for higher education students enrolled in universities, colleges, and polytechnic institutes. We do not knowingly offer services to individuals under the age of 16 without institutional enrollment verification.
+          </p>
+        </article>
+
+        <!-- Topic 11 -->
+        <article id="topic-11" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">11</span>
+            <h2 class="text-2xl font-medium text-dark">Changes to this Privacy Policy</h2>
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed text-[#555]">
+            We may update this policy periodically to reflect evolving technology or privacy regulations. Notice of significant material changes will be displayed prominently within the DeskMate web portal.
+          </p>
+        </article>
+
+        <!-- Topic 12 -->
+        <article id="topic-12" class="scroll-mt-28 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="size-8 rounded-xl bg-dark text-white text-xs font-semibold flex items-center justify-center shrink-0">12</span>
+            <h2 class="text-2xl font-medium text-dark">Data Protection Officer (DPO)</h2>
+          </div>
+          <div class="p-6 rounded-[24px] bg-[#f9fafb] border border-[#e5e7eb] space-y-2 text-xs sm:text-sm">
+            <p class="font-medium text-dark">DeskMate Data Privacy & Security Office</p>
+            <p class="text-[#666]">Hyderabad, Telangana, India</p>
+            <p class="text-[#666]">Grievance & Privacy Email: <a href="mailto:privacy@deskmate.edu" class="text-dark font-medium underline hover:text-green">privacy@deskmate.edu</a></p>
+            <p class="text-[#888] pt-2">All privacy requests and data deletion requests are handled within 7 business days.</p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </Section>
+</MainLayout>
