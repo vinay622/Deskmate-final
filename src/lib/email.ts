@@ -60,46 +60,43 @@ function readConfigValue(key: string): string | undefined {
 
 /**
  * Creates a reusable Nodemailer transport for Gmail SMTP or custom SMTP.
+ * Configured with serverless-safe timeouts and IPv4 forcing for Vercel/AWS Lambda.
  */
-function getSmtpTransporter() {
+export function getSmtpTransporter() {
   const user = readConfigValue('SMTP_USER') || readConfigValue('GMAIL_USER');
   const pass = readConfigValue('SMTP_PASS') || readConfigValue('GMAIL_APP_PASSWORD');
-  const host = readConfigValue('SMTP_HOST');
+  const host = (readConfigValue('SMTP_HOST') || 'smtp.gmail.com').trim();
   const port = Number(readConfigValue('SMTP_PORT')) || 465;
 
   if (!user || !pass) {
+    console.warn('[email:smtp] Missing SMTP credentials. SMTP_USER set:', !!user, 'SMTP_PASS set:', !!pass);
     return null;
   }
 
   const cleanPass = pass.replace(/\s+/g, '');
+  const isSecure = port === 465;
 
-  // If host is custom and not Gmail, use custom host/port
-  if (host && !host.includes('gmail')) {
-    const customPort = port || 587;
-    return {
-      transporter: nodemailer.createTransport({
-        host,
-        port: customPort,
-        secure: customPort === 465,
-        auth: {
-          user,
-          pass: cleanPass,
-        },
-      }),
-      fromEmail: user,
-    };
-  }
+  // Serverless-optimized transport options:
+  // 1. Force IPv4 (family: 4) to avoid AWS Lambda/Vercel IPv6 DNS hanging
+  // 2. Explicit connection timeouts so serverless functions don't block
+  const transportOptions = {
+    host,
+    port,
+    secure: isSecure,
+    auth: {
+      user: user.trim(),
+      pass: cleanPass,
+    },
+    family: 4,
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 12000,
+    dnsTimeout: 4000,
+  };
 
-  // Gmail SMTP: Use dedicated 'gmail' service for seamless SSL/TLS connection
   return {
-    transporter: nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user,
-        pass: cleanPass,
-      },
-    }),
-    fromEmail: user,
+    transporter: nodemailer.createTransport(transportOptions as any),
+    fromEmail: user.trim(),
   };
 }
 

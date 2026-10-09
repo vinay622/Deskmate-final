@@ -65,6 +65,29 @@ const formatHostel = (h: boolean | null) => {
   pageTitle="Students"
   eyebrow="Access Control"
 >
+  <!-- Email Delivery Diagnostics Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-4 p-3 bg-white border border-[#e5e7eb] rounded-[14px]">
+    <div class="flex items-center gap-2 text-xs text-[#555]">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green shrink-0">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+      <span>Approval notifications are delivered automatically to students via Gmail SMTP.</span>
+    </div>
+    <button
+      type="button"
+      id="test-email-btn"
+      onclick="handleTestEmailSetup()"
+      class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[10px] bg-[#f4f5f7] hover:bg-[#eaecee] border border-[#d5d7da] text-dark text-xs font-medium transition-all shadow-2xs shrink-0 cursor-pointer"
+      title="Test live SMTP credentials and verify server email connectivity"
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Test Email Setup</span>
+    </button>
+  </div>
+
   <!-- Summary Header Stats -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
     <div class="app-card p-4">
@@ -826,6 +849,33 @@ const formatHostel = (h: boolean | null) => {
       }
     } catch (err) {
       showDomainFeedback("Network error. Please try again.", true);
+    }
+  }
+
+  // ═══ Email Setup Live Diagnostic ═══
+  async function handleTestEmailSetup() {
+    var btn = document.getElementById("test-email-btn");
+    if (!btn) return;
+    var origHtml = btn.innerHTML;
+    btn.textContent = "Testing connection...";
+    btn.disabled = true;
+
+    try {
+      var res = await fetch("/api/admin/test-email?send=true");
+      var data = await res.json();
+      if (data.ok) {
+        alert("🎉 Gmail SMTP Verified Successfully!\n\nServer: Connected to smtp.gmail.com\nTest message: Sent to " + (data.sentTo || "your address") + "\n\nYour deployment is ready to deliver student approval emails!");
+      } else {
+        var errText = data.error || "Unknown configuration error";
+        var diag = data.diagnostics || {};
+        var statusHint = "\n\nDiagnostic Summary:\n- SMTP_USER detected: " + (diag.hasSmtpUser ? "YES (" + diag.smtpUser + ")" : "NO") + "\n- SMTP_PASS detected: " + (diag.hasSmtpPass ? "YES (" + diag.smtpPassLength + " chars)" : "NO");
+        alert("❌ Email Delivery Setup Check Failed:\n\n" + errText + statusHint + "\n\nTroubleshooting for Vercel:\n1. Open your Vercel Project Dashboard\n2. Go to Settings > Environment Variables\n3. Add SMTP_USER and SMTP_PASS\n4. Trigger a Redeploy under the Deployments tab");
+      }
+    } catch (err) {
+      alert("Network error while connecting to test endpoint: " + (err.message || err));
+    } finally {
+      btn.innerHTML = origHtml;
+      btn.disabled = false;
     }
   }
 </script>
