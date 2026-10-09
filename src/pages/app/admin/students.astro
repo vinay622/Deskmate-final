@@ -667,6 +667,7 @@ const formatHostel = (h: boolean | null) => {
     if (!id) return;
     if (status === "rejected" && !confirm("Reject this student's access request?")) return;
 
+    var originalHtml = triggerBtn ? triggerBtn.innerHTML : null;
     if (triggerBtn) {
       triggerBtn.disabled = true;
       triggerBtn.textContent = "Updating...";
@@ -683,11 +684,17 @@ const formatHostel = (h: boolean | null) => {
         window.location.reload();
       } else {
         alert("Failed: " + (data.error || "unknown error"));
-        if (triggerBtn) triggerBtn.disabled = false;
+        if (triggerBtn) {
+          triggerBtn.disabled = false;
+          if (originalHtml) triggerBtn.innerHTML = originalHtml;
+        }
       }
     } catch (err) {
-      alert("Network error.");
-      if (triggerBtn) triggerBtn.disabled = false;
+      alert("Network error. Please try again.");
+      if (triggerBtn) {
+        triggerBtn.disabled = false;
+        if (originalHtml) triggerBtn.innerHTML = originalHtml;
+      }
     }
   }
 

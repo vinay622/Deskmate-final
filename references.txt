@@ -1,0 +1,50 @@
+[1] P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, H. Küttler, M. Lewis, W.-t. Yih, T. Rocktäschel, S. Riedel, and D. Kiela, "Retrieval-augmented generation for knowledge-intensive NLP tasks," in Proc. 34th Conf. Neural Information Processing Systems (NeurIPS 2020), vol. 33, pp. 9459–9474, 2020.
+https://doi.org/10.48550/arXiv.2005.11401
+
+[2] Y. Gao, Y. Xiong, X. Gao, K. Jia, J. Pan, Y. Bi, Y. Dai, J. Sun, and H. Wang, "Retrieval-augmented generation for large language models: A survey," arXiv:2312.10997, 2023.
+https://doi.org/10.48550/arXiv.2312.10997
+
+[3] L. Wang, N. Yang, X. Huang, B. Jiao, L. Yang, D. Jiang, R. Majumder, and F. Wei, "Multilingual E5 text embeddings: A technical report," arXiv:2402.05672, 2024.
+https://doi.org/10.48550/arXiv.2402.05672
+
+[4] Yu. A. Malkov and D. A. Yashunin, "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs," IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 42, no. 4, pp. 824–836, 2020.
+https://doi.org/10.1109/TPAMI.2018.2889473
+
+[5] J. Johnson, M. Douze, and H. Jégou, "Billion-scale similarity search with GPUs," IEEE Transactions on Big Data, vol. 7, no. 3, pp. 535–547, 2021.
+https://doi.org/10.1109/TBDATA.2019.2921572
+
+[6] B. Fu and D. Feng, "GPTCache: An open-source semantic cache for LLM applications: Enabling faster answers and cost savings," in Proc. 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS), 2023, pp. 200–205.
+https://doi.org/10.18653/v1/2023.nlposs-1.24
+
+[7] Gemini Team, Google, "Gemini: A family of highly capable multimodal models," arXiv:2312.11805, 2023.
+https://doi.org/10.48550/arXiv.2312.11805
+
+[8] T. Schick, J. Dwivedi-Yu, R. Dessì, R. Raileanu, M. Lomeli, L. Zettlemoyer, N. Cancedda, and T. Scialom, "Toolformer: Language models can teach themselves to use tools," in Proc. 37th Conf. Neural Information Processing Systems (NeurIPS 2023), vol. 36, pp. 68539–68551, 2023.
+https://doi.org/10.48550/arXiv.2302.04761
+
+[9] M. A. Kuhail, N. Alturki, S. Alramlawi, and K. Alhejori, "Interacting with educational chatbots: A systematic review," Education and Information Technologies, vol. 28, no. 1, pp. 973–1018, 2023.
+https://doi.org/10.1007/s10639-022-11177-3
+
+[10] N. Patel, D. Parikh, D. Patel, and R. Patel, "AI and web based human-like interactive university chatbot (UNIBOT)," in Proc. 3rd Int. Conf. Electronics, Communication and Aerospace Technology (ICECA), 2019, pp. 148–150.
+https://doi.org/10.1109/ICECA.2019.8822176
+
+[11] S. Es, J. James, L. Espinosa-Anke, and S. Schockaert, "RAGAS: Automated evaluation of retrieval augmented generation," in Proc. 18th Conf. European Chapter of the Association for Computational Linguistics (EACL 2024), 2024, pp. 150–158.
+https://doi.org/10.48550/arXiv.2309.15217
+
+[12] V. Karpukhin, B. Oğuz, S. Min, P. Lewis, L. Wu, S. Edunov, D. Chen, and W.-t. Yih, "Dense passage retrieval for open-domain question answering," in Proc. 2020 Conf. Empirical Methods in Natural Language Processing (EMNLP), 2020, pp. 6769–6781.
+https://doi.org/10.18653/v1/2020.emnlp-main.550
+
+[13] Y. Xu, M. Li, L. Cui, S. Huang, F. Wei, and M. Zhou, "LayoutLM: Pre-training of text and layout for document image understanding," in Proc. 26th ACM SIGKDD Int. Conf. Knowledge Discovery & Data Mining, 2020, pp. 1192–1200.
+https://doi.org/10.1145/3394486.3403172
+
+[14] D. M'Raihi, S. Machani, M. Pei, and J. Rydell, "TOTP: Time-Based One-Time Password Algorithm," Internet Engineering Task Force (IETF) RFC 6238, 2011.
+https://doi.org/10.17487/RFC6238
+
+[15] R. S. Sandhu, E. J. Coyne, H. L. Feinstein, and C. E. Youman, "Role-based access control models," IEEE Computer, vol. 29, no. 2, pp. 38–47, 1996.
+https://doi.org/10.1109/2.485845
+
+[16] C. D. Bezemer and A. Zaidman, "Multi-tenant SaaS applications: Maintenance issues and challenges," in Proc. 2010 IEEE Int. Conf. Software Maintenance (ICSM), 2010, pp. 1–4.
+https://doi.org/10.1109/ICSM.2010.5609735
+
+[17] T. B. Brown, B. Mann, N. Ryder, M. Subbiah, J. Kaplan, P. Dhariwal, A. Neelakantan, P. Shyam, G. Sastry, A. Askell, S. Agarwal, A. Herbert-Voss, G. Krueger, T. Henighan, R. Child, A. Ramesh, D. M. Ziegler, J. Wu, C. Winter, C. Hesse, M. Chen, E. Sigler, M. Litwin, S. Gray, B. Chess, J. Clark, C. Berner, S. McCandlish, A. Radford, I. Sutskever, and D. Amodei, "Language models are few-shot learners," in Proc. 34th Conf. Neural Information Processing Systems (NeurIPS 2020), vol. 33, pp. 1877–1901, 2020.
+https://doi.org/10.48550/arXiv.2005.14165
