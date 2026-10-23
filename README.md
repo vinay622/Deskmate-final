@@ -238,7 +238,7 @@ GEMINI_API_KEY="your-google-ai-studio-gemini-api-key"
 
 # Vector Database (Pinecone)
 PINECONE_API_KEY="your-pinecone-api-key"
-PINECONE_INDEX="deskmate-2"
+PINECONE_INDEX="your-pinecone-index-name"
 
 # Web Scraping Engine (Firecrawl)
 FIRECRAWL_API_KEY="your-firecrawl-api-key"
