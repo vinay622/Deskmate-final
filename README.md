@@ -24,7 +24,7 @@
 
 ## 🌟 Executive Overview
 
-**DeskMate 2.0** is an enterprise-grade academic AI assistant designed to eliminate bureaucratic bottlenecks across universities and higher education institutions. Rather than relying on static FAQs or generic chatbots that hallucinate, DeskMate ingests official college documentation (syllabi, examination schedules, fee circulars, hostel handbooks, regulatory notices) and serves strictly grounded, page-cited answers with sub-second latency.
+**DeskMate** is an enterprise-grade academic AI assistant designed to eliminate bureaucratic bottlenecks across universities and higher education institutions. Rather than relying on static FAQs or generic chatbots that hallucinate, DeskMate ingests official college documentation (syllabi, examination schedules, fee circulars, hostel handbooks, regulatory notices) and serves strictly grounded, page-cited answers with sub-second latency.
 
 Equipped with **multi-agent orchestration**, **autonomous support ticketing**, **multilingual fluency (English, Hindi, Telugu)**, and an **executive administrative command center**, DeskMate unifies students, faculty, and campus administrators into a single high-security ecosystem.
 
