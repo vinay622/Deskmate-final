@@ -126,7 +126,7 @@ flowchart TB
 | **Two-Factor Authentication (2FA)** | ✅ Enforced | ✅ Enforced | ✅ Enforced |
 | **30-Day Device Trust Bypass** | ✅ Optional | ✅ Optional | ✅ Optional |
 | **Departmental Ticket Resolution** | ❌ | ✅ Assigned Only | ✅ Full Control |
-| **Document Ingestion & Web Scraping** | ❌ | ❌ | ✅ Full Control |
+| **Document Ingestion & Web Scraping** | ❌ | ✅ Full Control | ✅ Full Control |
 | **Staff & Student Account Moderation** | ❌ | ❌ | ✅ Instant Toggle |
 | **Access Code Management** | ❌ | ❌ | ✅ Generate & Revoke |
 | **Campus Analytics & Announcement Publishing** | ❌ | ❌ | ✅ Full Access |
