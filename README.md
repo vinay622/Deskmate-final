@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎓 DeskMate 2.0
+# 🎓 DeskMate
 ### *Every answer. Every source. Every time.*
 
 **The Autonomous Campus Intelligence & Knowledge Operations Platform**  
